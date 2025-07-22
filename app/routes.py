@@ -75,7 +75,9 @@ def register():
                 else:
                     cursor.execute('INSERT INTO usuarios (usuario, contrasena) VALUES (%s, %s)', (usuario, contrasena))
                     mysql.connection.commit()
-                    flash('Usuario registrado exitosamente.', 'success')
+                    flash('Usuario registrado exitosamente. Ahora puedes iniciar sesión.', 'success')
+                    cursor.close()
+                    return redirect(url_for('login'))
                 cursor.close()
             except Exception as e:
                 flash('Error de conexión a la base de datos', 'danger')
