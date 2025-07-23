@@ -4,6 +4,16 @@ from app import app
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
 
+# Ruta para mostrar el template de registro de leche
+@app.route('/registro/leche')
+def registro_leche():
+    return render_template('registro_leche.html')
+
+from flask import render_template, request, redirect, url_for, flash, session
+from app import app
+from flask_mysqldb import MySQL
+import MySQLdb.cursors
+
 # Configuración MySQL
 app.config.from_object('app.config')
 app.secret_key = 'softgan_secret_key'  # Necesario para flash y sesiones
