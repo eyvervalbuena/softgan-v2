@@ -5,10 +5,14 @@ from flask_mysqldb import MySQL
 import MySQLdb.cursors
 
 # Configuración MySQL
-
 app.config.from_object('app.config')
 app.secret_key = 'softgan_secret_key'  # Necesario para flash y sesiones
 mysql = MySQL(app)
+
+# Ruta para mostrar el template de registro de hembras
+@app.route('/registro/hembras')
+def registro_hembras():
+    return render_template('registro_hembras.html')
 
 # Crear tabla de usuarios si no existe
 with app.app_context():
