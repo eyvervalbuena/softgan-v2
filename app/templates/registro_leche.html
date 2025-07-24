@@ -1,209 +1,141 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Registro de Producción de Leche</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link href="{{ url_for('static', filename='stilos.css') }}" rel="stylesheet">
-</head>
-<body>
-    <header class="top-bar d-flex align-items-center justify-content-between px-3" style="background:#1BBD25; min-height:56px;">
-        <div class="logo-slogan d-flex align-items-center">
-            <a href="{{ url_for('main.dashboard') }}" class="d-flex align-items-center text-decoration-none">
-                <img src="{{ url_for('static', filename='imagenes/logo software.png') }}" alt="Logo" style="height:40px; border-radius:50%; background:#fff; margin-right:8px;">
-                <p class="mb-0 text-white fw-bold" style="font-size:1.1rem;">Su aliado en el campo</p>
-            </a>
-        </div>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-transparent top-menu p-0">
-            <div class="container-fluid p-0">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav">
-                        <li class="nav-item"><a class="nav-link" href="#">Usuarios</a></li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="registroDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Registro</a>
-                            <ul class="dropdown-menu" aria-labelledby="registroDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_hembras') }}">Hembras</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_machos') }}">Machos</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="sanitarioDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Sanitario</a>
-                            <ul class="dropdown-menu" aria-labelledby="sanitarioDropdown">
-                                <li><a class="dropdown-item" href="#">General</a></li>
-                                <li><a class="dropdown-item" href="#">Individual</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="produccionDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Producción</a>
-                            <ul class="dropdown-menu" aria-labelledby="produccionDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_leche') }}">Leche</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_carne') }}">Carne</a></li>
-                                <li><a class="dropdown-item" href="#">Partos</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="almacenDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Almacén</a>
-                            <ul class="dropdown-menu" aria-labelledby="almacenDropdown">
-                                <li><a class="dropdown-item" href="#">Almacén</a></li>
-                                <li><a class="dropdown-item" href="#">Maquinaria</a></li>
-                                <li><a class="dropdown-item" href="#">Agroquímicos</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item"><a class="nav-link" href="#">Informes</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Crear Alerta</a></li>
-                    </ul>
+{% extends 'base.html' %}
+{% block title %}Registro de Producción de Leche{% endblock %}
+{% block content %}
+<div class="container-fluid mt-2">
+    <div class="row">
+        <div class="col-md-4 ps-0">
+            <div class="login-box p-0" style="border:2px solid #1BBD25;">
+                <div class="bg-success text-white text-center py-2 rounded-top">
+                    <h5 class="mb-0">Registro de Leche</h5>
                 </div>
-            </div>
-        </nav>
-        <div class="logout-button">
-            <a href="{{ url_for('main.login') }}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
-        </div>
-    </header>
-    <div class="container-fluid mt-2">
-        <div class="row">
-            <!-- Formulario de Registro -->
-            <div class="col-md-4 ps-0">
-                <div class="login-box p-0" style="border:2px solid #1BBD25;">
-                    <div class="bg-success text-white text-center py-2 rounded-top">
-                        <h5 class="mb-0">Registro de Leche</h5>
+                <div class="p-3 bg-light">
+                    <div class="text-center mb-3">
+                        <div style="width:100%; max-width:220px; height:120px; margin:auto; border:1.5px dashed #1BBD25; display:flex; align-items:center; justify-content:center;">
+                            <span class="text-muted">Espacio Fotográfico</span>
+                        </div>
                     </div>
-                    <div class="p-3 bg-light">
-                        <div class="text-center mb-3">
-                            <div style="width:100%; max-width:220px; height:120px; margin:auto; border:1.5px dashed #1BBD25; display:flex; align-items:center; justify-content:center;">
-                                <span class="text-muted">Espacio Fotográfico</span>
+                    <div id="contadorParto" class="text-center mt-3">
+                        <h6 class="text-success">Tiempo hasta secado:</h6>
+                        <div id="tiempoRestante" style="font-size:1.2rem; font-weight:bold; color:#DF116F;">305 días</div>
+                    </div>
+                    <form>
+                        <div class="row g-2">
+                            <div class="col-4">
+                                <label for="numHembra" class="form-label">No. Hembra</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="numHembra" name="numHembra" required>
+                                    <button class="btn btn-outline-success" type="button" id="buscarHembra" title="Buscar Hembra">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-8">
+                                <label for="nombre" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required>
+                            </div>
+                            <div class="col-4">
+                                <label for="numCrias" class="form-label">No. Crías</label>
+                                <input type="number" class="form-control" id="numCrias" name="numCrias" required>
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label">Tipo</label><br>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="tipo" id="productiva" value="productiva">
+                                    <label class="form-check-label" for="productiva">Productiva</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="tipo" id="seca" value="seca" checked>
+                                    <label class="form-check-label" for="seca">Seca</label>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <label for="condicion" class="form-label">Condición</label>
+                                <select class="form-select" id="condicion" name="condicion">
+                                    <option value="2">2</option>
+                                    <option value="2.5">2.5</option>
+                                    <option value="3">3</option>
+                                    <option value="3.5">3.5</option>
+                                    <option value="4">4</option>
+                                </select>
+                            </div>
+                            <div class="col-4 mb-2">
+                                <label for="ordeñosDia" class="form-label" style="white-space:nowrap;">Ordeños/Día</label>
+                                <input type="number" class="form-control" id="ordeñosDia" name="ordeñosDia" required max="3">
+                            </div>
+                            <div class="col-6 mb-2">
+                                <label for="ultimoParto" class="form-label" style="white-space:nowrap;">Último Parto</label>
+                                <input type="date" class="form-control" id="ultimoParto" name="ultimoParto">
+                            </div>
+                            <div class="col-4"></div>
+                            <div class="col-4"></div>
+                            <div class="w-100"></div>
+                            <div class="col-4">
+                                <label for="promedioLactancia" class="form-label">Promedio Lactancia</label>
+                                <input type="number" class="form-control" id="promedioLactancia" name="promedioLactancia" readonly>
+                            </div>
+                            <div class="col-4">
+                                <label for="promedioMes" class="form-label">Promedio Mes</label>
+                                <input type="number" class="form-control" id="promedioMes" name="promedioMes" readonly>
+                            </div>
+                            <div class="col-4">
+                                <label for="promedioSemana" class="form-label">Promedio Semana</label>
+                                <input type="number" class="form-control" id="promedioSemana" name="promedioSemana" readonly>
+                            </div>
+                            <div class="col-12">
+                                <div class="bg-success text-white text-center my-2 rounded">
+                                    <h6 class="mb-0 py-1">Registrar Producción</h6>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label for="produccionDia" class="form-label">Fecha</label>
+                                <input type="date" class="form-control" id="produccionDia" name="produccionDia">
+                            </div>
+                            <div class="col-6">
+                                <label for="medicion" class="form-label">Lts</label>
+                                <input type="number" class="form-control" id="medicion" name="medicion" required>
                             </div>
                         </div>
-                        <div id="contadorParto" class="text-center mt-3">
-                            <h6 class="text-success">Tiempo hasta secado:</h6>
-                            <div id="tiempoRestante" style="font-size:1.2rem; font-weight:bold; color:#DF116F;">305 días</div>
+                        <div class="d-flex justify-content-end gap-2 mt-3">
+                            <button type="submit" class="btn btn-success"><i class="bi bi-save me-1"></i>Guardar</button>
+                            <button type="reset" class="btn btn-secondary"><i class="bi bi-x-circle me-1"></i>Cancelar</button>
                         </div>
-                        <form>
-                            <div class="row g-2">
-                                <div class="col-4">
-                                    <label for="numHembra" class="form-label">No. Hembra</label>
-                                    <div class="input-group">
-                                        <input type="number" class="form-control" id="numHembra" name="numHembra" required>
-                                        <button class="btn btn-outline-success" type="button" id="buscarHembra" title="Buscar Hembra">
-                                            <i class="bi bi-search"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="col-8">
-                                    <label for="nombre" class="form-label">Nombre</label>
-                                    <input type="text" class="form-control" id="nombre" name="nombre" required>
-                                </div>
-                                <div class="col-4">
-                                    <label for="numCrias" class="form-label">No. Crías</label>
-                                    <input type="number" class="form-control" id="numCrias" name="numCrias" required>
-                                </div>
-                                <div class="col-4">
-                                    <label class="form-label">Tipo</label><br>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="tipo" id="productiva" value="productiva">
-                                        <label class="form-check-label" for="productiva">Productiva</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="tipo" id="seca" value="seca" checked>
-                                        <label class="form-check-label" for="seca">Seca</label>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <label for="condicion" class="form-label">Condición</label>
-                                    <select class="form-select" id="condicion" name="condicion">
-                                        <option value="2">2</option>
-                                        <option value="2.5">2.5</option>
-                                        <option value="3">3</option>
-                                        <option value="3.5">3.5</option>
-                                        <option value="4">4</option>
-                                    </select>
-                                </div>
-                                <div class="col-4 mb-2">
-                                    <label for="ordeñosDia" class="form-label" style="white-space:nowrap;">Ordeños/Día</label>
-                                    <input type="number" class="form-control" id="ordeñosDia" name="ordeñosDia" required max="3">
-                                </div>
-                                <div class="col-6 mb-2">
-                                    <label for="ultimoParto" class="form-label" style="white-space:nowrap;">Último Parto</label>
-                                    <input type="date" class="form-control" id="ultimoParto" name="ultimoParto">
-                                </div>
-                                <!-- Fila de promedios -->
-                                <div class="col-4"></div>
-                                <div class="col-4"></div>
-                                <div class="w-100"></div>
-                                <div class="col-4">
-                                    <label for="promedioLactancia" class="form-label">Promedio Lactancia</label>
-                                    <input type="number" class="form-control" id="promedioLactancia" name="promedioLactancia" readonly>
-                                </div>
-                                <div class="col-4">
-                                    <label for="promedioMes" class="form-label">Promedio Mes</label>
-                                    <input type="number" class="form-control" id="promedioMes" name="promedioMes" readonly>
-                                </div>
-                                <div class="col-4">
-                                    <label for="promedioSemana" class="form-label">Promedio Semana</label>
-                                    <input type="number" class="form-control" id="promedioSemana" name="promedioSemana" readonly>
-                                </div>
-                                <div class="col-12">
-                                    <div class="bg-success text-white text-center my-2 rounded">
-                                        <h6 class="mb-0 py-1">Registrar Producción</h6>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <label for="produccionDia" class="form-label">Fecha</label>
-                                    <input type="date" class="form-control" id="produccionDia" name="produccionDia">
-                                </div>
-                                <div class="col-6">
-                                    <label for="medicion" class="form-label">Lts</label>
-                                    <input type="number" class="form-control" id="medicion" name="medicion" required>
-                                </div>
-                            </div>
-                            <div class="d-flex justify-content-end gap-2 mt-3">
-                                <button type="submit" class="btn btn-success"><i class="bi bi-save me-1"></i>Guardar</button>
-                                <button type="reset" class="btn btn-secondary"><i class="bi bi-x-circle me-1"></i>Cancelar</button>
-                            </div>
-                        </form>
-                    </div>
+                    </form>
                 </div>
             </div>
-            <!-- Tabla de Datos -->
-            <div class="col-md-8 pe-4">
-                <div class="mb-4">
-                    <div class="bg-success text-white text-center py-2" style="border-top-left-radius:8px; border-top-right-radius:8px;">
-                        <h5 class="mb-0">Datos de Producción de Leche</h5>
-                    </div>
-                    <div class="table-responsive" style="border:2px solid #1BBD25; border-top:0; border-bottom-left-radius:8px; border-bottom-right-radius:8px; background:#f8f9fa;">
-                        <table class="table table-bordered table-hover align-middle mb-0">
-                            <thead class="table-success text-center">
-                                <tr>
-                                    <th>No / ID</th>
-                                    <th>Nombre</th>
-                                    <th>Tipo</th>
-                                    <th>Condición</th>
-                                    <th>Promedio Semana</th>
-                                    <th>Promedio Mes</th>
-                                    <th>Promedio Lactancia</th>
-                                    <th>Días para el Secado</th>
-                                    <th>Último Pesaje</th>
-                                    <th>Observaciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Aquí irán los registros de producción de leche -->
-                            </tbody>
-                        </table>
-                    </div>
+        </div>
+        <div class="col-md-8 pe-4">
+            <div class="mb-4">
+                <div class="bg-success text-white text-center py-2" style="border-top-left-radius:8px; border-top-right-radius:8px;">
+                    <h5 class="mb-0">Datos de Producción de Leche</h5>
+                </div>
+                <div class="table-responsive" style="border:2px solid #1BBD25; border-top:0; border-bottom-left-radius:8px; border-bottom-right-radius:8px; background:#f8f9fa;">
+                    <table class="table table-bordered table-hover align-middle mb-0">
+                        <thead class="table-success text-center">
+                            <tr>
+                                <th>No / ID</th>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Condición</th>
+                                <th>Promedio Semana</th>
+                                <th>Promedio Mes</th>
+                                <th>Promedio Lactancia</th>
+                                <th>Días para el Secado</th>
+                                <th>Último Pesaje</th>
+                                <th>Observaciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Aquí irán los registros de producción de leche -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
-    <footer class="footer mt-4">
-        <p>&copy; 2025 SoFTgan - Todos los derechos reservados</p>
-    </footer>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
     // Contador regresivo desde 305 días
     let diasRestantes = 305;
     const tiempoRestante = document.getElementById('tiempoRestante');
@@ -215,8 +147,6 @@
             tiempoRestante.textContent = '¡Secado!';
         }
     }
-    // Disminuye cada 24 horas (86400000 ms)
     setInterval(actualizarContador, 86400000);
-    </script>
-</body>
-</html>
+</script>
+{% endblock %}

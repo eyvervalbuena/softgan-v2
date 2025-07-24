@@ -1,202 +1,54 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Producción Carne</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link href="{{ url_for('static', filename='stilos.css') }}" rel="stylesheet">
-</head>
-<body>
-    <header class="top-bar d-flex align-items-center justify-content-between px-3" style="background:#1BBD25; min-height:56px;">
-        <div class="logo-slogan d-flex align-items-center">
-            <a href="{{ url_for('main.dashboard') }}" class="d-flex align-items-center text-decoration-none">
-                <img src="{{ url_for('static', filename='imagenes/logo software.png') }}" alt="Logo" style="height:40px; border-radius:50%; background:#fff; margin-right:8px;">
-                <p class="mb-0 text-white fw-bold" style="font-size:1.1rem;">Su aliado en el campo</p>
-            </a>
-        </div>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-transparent top-menu p-0">
-            <div class="container-fluid p-0">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav">
-                        <li class="nav-item"><a class="nav-link" href="#">Usuarios</a></li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="registroDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Registro</a>
-                            <ul class="dropdown-menu" aria-labelledby="registroDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_hembras') }}">Hembras</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_machos') }}">Machos</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="sanitarioDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Sanitario</a>
-                            <ul class="dropdown-menu" aria-labelledby="sanitarioDropdown">
-                                <li><a class="dropdown-item" href="#">General</a></li>
-                                <li><a class="dropdown-item" href="#">Individual</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="produccionDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Producción</a>
-                            <ul class="dropdown-menu" aria-labelledby="produccionDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_leche') }}">Leche</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_carne') }}">Carne</a></li>
-                                <li><a class="dropdown-item" href="#">Partos</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="almacenDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Almacén</a>
-                            <ul class="dropdown-menu" aria-labelledby="almacenDropdown">
-                                <li><a class="dropdown-item" href="#">Almacén</a></li>
-                                <li><a class="dropdown-item" href="#">Maquinaria</a></li>
-                                <li><a class="dropdown-item" href="#">Agroquímicos</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item"><a class="nav-link" href="#">Informes</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Crear Alerta</a></li>
-                    </ul>
+{% extends 'base.html' %}
+{% block title %}Producción Carne{% endblock %}
+{% block content %}
+<div class="container-fluid mt-2">
+    <div class="row g-0 align-items-start">
+        <div class="col-md-4 ps-0" style="margin-right:-10px;">
+            <div class="login-box p-0" style="border:2px solid #1BBD25;">
+                <div class="bg-success text-white text-center py-2 rounded-top">
+                    <h5 class="mb-0">Registro de Carne</h5>
                 </div>
-            </div>
-        </nav>
-        <div class="logout-button">
-            <a href="{{ url_for('main.login') }}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
-        </div>
-    </header>
-    <div class="container-fluid mt-2">
-        <div class="row g-0 align-items-start">
-            <!-- Formulario de Registro -->
-            <div class="col-md-4 ps-0" style="margin-right:-10px;">
-                <div class="login-box p-0" style="border:2px solid #1BBD25;">
-                    <div class="bg-success text-white text-center py-2 rounded-top">
-                        <h5 class="mb-0">Registro de Carne</h5>
-                    </div>
-                    <div class="p-3 bg-light">
-                        <div class="text-center mb-2">
-                            <div style="width:100%; max-width:220px; height:120px; margin:auto; border:1.5px dashed #1BBD25; display:flex; align-items:center; justify-content:center;">
-                                <span class="text-muted">Espacio Fotográfico</span>
-                            </div>
+                <div class="p-3 bg-light">
+                    <div class="text-center mb-2">
+                        <div style="width:100%; max-width:220px; height:120px; margin:auto; border:1.5px dashed #1BBD25; display:flex; align-items:center; justify-content:center;">
+                            <span class="text-muted">Espacio Fotográfico</span>
                         </div>
-                        <form>
-                            <div class="row g-2">
-                                <div class="col-4">
-                                    <label for="numAnimal" class="form-label">No. Animal</label>
-                                    <div class="input-group">
-                                        <input type="number" class="form-control" id="numAnimal" name="numAnimal" required>
-                                        <button class="btn btn-outline-success" type="button" id="buscarAnimal" title="Buscar Animal">
-                                            <i class="bi bi-search"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="col-8">
-                                    <label for="nombre" class="form-label">Nombre</label>
-                                    <input type="text" class="form-control" id="nombre" name="nombre" required>
-                                </div>
-                                <div class="col-3">
-                                    <label for="pesoNacer" class="form-label">Peso al Nacer</label>
-                                    <input type="number" class="form-control" id="pesoNacer" name="pesoNacer" required>
-                                </div>
-                                <div class="col-3">
-                                    <label for="pesoDestete" class="form-label">Peso al Destete</label>
-                                    <input type="number" class="form-control" id="pesoDestete" name="pesoDestete" required>
-                                </div>
-                                <div class="col-6">
-                                    <label for="fechaDestete" class="form-label">Fecha Destete</label>
-                                    <input type="date" class="form-control" id="fechaDestete" name="fechaDestete">
-                                </div>
-                                <div class="col-4">
-                                    <label for="condicion" class="form-label">Condición</label>
-                                    <select class="form-select" id="condicion" name="condicion">
-                                        <option value="2">2</option>
-                                        <option value="2">2.5</option>
-                                        <option value="3">3</option>
-                                        <option value="2">3.5</option>
-                                        <option value="4">4</option>
-                                    </select>
-                                </div>
-                                <div class="col-4">
-                                    <label for="gpDestete" class="form-label">GP al Destete</label>
-                                    <input type="text" class="form-control" id="gpDestete" name="gpDestete" required>
-                                </div>
-                                <div class="col-4">
-                                    <label for="gpDia" class="form-label">GP Diario</label>
-                                    <input type="text" class="form-control" id="gpDia" name="gpDia" required>
-                                </div>
-                                <div class="col-6">
-                                    <label for="fechaCeba" class="form-label">Tiempo de Ceba</label>
-                                    <input type="date" class="form-control" id="fechaCeba" name="fechaCeba">
-                                </div>
-                                <div class="col-6">
-                                    <label for="pesoVenta" class="form-label">Peso de Venta</label>
-                                    <input type="number" class="form-control" id="pesoVenta" name="pesoVenta" required>
-                                </div>
-                                <div class="col-12">
-                                    <div class="bg-success text-white text-center my-2 rounded">
-                                        <h6 class="mb-0 py-1">Pesaje</h6>
-                                    </div>
-                                </div>
-                                <div class="col-3">
-                                    <label for="numPesaje" class="form-label"># Pesaje</label>
-                                    <input type="number" class="form-control" id="numPesaje" name="numPesaje" required>
-                                </div>
-                                <div class="col-6">
-                                    <label for="fechaPesaje" class="form-label">Fecha</label>
-                                    <input type="date" class="form-control" id="fechaPesaje" name="fechaPesaje">
-                                </div>
-                                <div class="col-3">
-                                    <label for="peso" class="form-label">Peso (Kg)</label>
-                                    <input type="number" class="form-control" id="peso" name="peso" required>
-                                </div>
-                            </div>
-                            <div class="d-flex justify-content-end gap-2 mt-3">
-                                <button type="submit" class="btn btn-success"><i class="bi bi-save me-1"></i>Guardar</button>
-                                <button type="reset" class="btn btn-secondary"><i class="bi bi-x-circle me-1"></i>Cancelar</button>
-                            </div>
-                        </form>
                     </div>
+                    <!-- Formulario -->
+                    <form>
+                        <!-- campos -->
+                    </form>
                 </div>
             </div>
-            <!-- Tabla de Datos -->
-            <div class="col-md-8 pe-4">
-                <div>
-                    <div class="bg-success text-white text-center py-2" style="border-top-left-radius:8px; border-top-right-radius:8px;">
-                        <h5 class="mb-0">Datos de Semovientes</h5>
-                    </div>
-                    <div class="table-responsive" style="border:2px solid #1BBD25; border-top:0; border-bottom-left-radius:8px; border-bottom-right-radius:8px; background:#f8f9fa; min-width:100%;">
-                        <table class="table table-bordered table-hover align-middle mb-0 w-100" style="min-width:1200px;">
-                            <thead class="table-success text-center">
-                                <tr>
-                                    <th style="min-width:90px;">No / ID</th>
-                                    <th style="min-width:140px;">Nombre</th>
-                                    <th style="min-width:120px;">Peso al Nacer</th>
-                                    <th style="min-width:120px;">Fecha Destete</th>
-                                    <th style="min-width:120px;">Peso Destete</th>
-                                    <th style="min-width:120px;">GP Destete</th>
-                                    <th style="min-width:120px;">Condición</th>
-                                    <th style="min-width:140px;">GP Promedio / Día</th>
-                                    <th style="min-width:120px;">Último Pesaje</th>
-                                    <th style="min-width:140px;">GP entre Pesajes</th>
-                                    <th style="min-width:100px;">Pesaje 2</th>
-                                    <th style="min-width:100px;">Pesaje 3</th>
-                                    <th style="min-width:100px;">Pesaje 4</th>
-                                    <th style="min-width:100px;">Pesaje 5</th>
-                                    <th style="min-width:120px;">Fecha Venta</th>
-                                    <th style="min-width:120px;">Peso Venta</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Aquí se cargarán los datos dinámicamente -->
-                            </tbody>
-                        </table>
-                    </div>
+        </div>
+        <div class="col-md-8 pe-4">
+            <div class="mb-4">
+                <div class="bg-success text-white text-center py-2" style="border-top-left-radius:8px; border-top-right-radius:8px;">
+                    <h5 class="mb-0">Datos de Producción de Carne</h5>
+                </div>
+                <div class="table-responsive" style="border:2px solid #1BBD25; border-top:0; border-bottom-left-radius:8px; border-bottom-right-radius:8px; background:#f8f9fa;">
+                    <table class="table table-bordered table-hover align-middle mb-0">
+                        <thead class="table-success text-center">
+                            <tr>
+                                <th style="min-width:100px;">No / ID</th>
+                                <th style="min-width:100px;">Nombre</th>
+                                <th style="min-width:120px;">Peso Inicial</th>
+                                <th style="min-width:120px;">Pesaje 1</th>
+                                <th style="min-width:120px;">Pesaje 2</th>
+                                <th style="min-width:120px;">Pesaje 3</th>
+                                <th style="min-width:120px;">Pesaje 4</th>
+                                <th style="min-width:100px;">Pesaje 5</th>
+                                <th style="min-width:120px;">Fecha Venta</th>
+                                <th style="min-width:120px;">Peso Venta</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Aquí se cargarán los datos dinámicamente -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
-    <footer class="footer mt-4 text-center">
-        <p>&copy; 2025 SoFTgan - Todos los derechos reservados</p>
-    </footer>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+</div>
+{% endblock %}

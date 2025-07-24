@@ -1,178 +1,44 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Registro de Crías</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link href="{{ url_for('static', filename='stilos.css') }}" rel="stylesheet">
-</head>
-<body>
-    <header class="top-bar d-flex align-items-center justify-content-between px-3" style="background:#1BBD25; min-height:56px;">
-        <div class="logo-slogan d-flex align-items-center">
-            <a href="{{ url_for('main.dashboard') }}" class="d-flex align-items-center text-decoration-none">
-                <img src="{{ url_for('static', filename='imagenes/logo software.png') }}" alt="Logo" style="height:40px; border-radius:50%; background:#fff; margin-right:8px;">
-                <p class="mb-0 text-white fw-bold" style="font-size:1.1rem;">Su aliado en el campo</p>
-            </a>
-        </div>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-transparent top-menu p-0">
-            <div class="container-fluid p-0">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav">
-                        <li class="nav-item"><a class="nav-link" href="#">Usuarios</a></li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="registroDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Registro</a>
-                            <ul class="dropdown-menu" aria-labelledby="registroDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_hembras') }}">Hembras</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_machos') }}">Machos</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="sanitarioDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Sanitario</a>
-                            <ul class="dropdown-menu" aria-labelledby="sanitarioDropdown">
-                                <li><a class="dropdown-item" href="#">General</a></li>
-                                <li><a class="dropdown-item" href="#">Individual</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="produccionDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Producción</a>
-                            <ul class="dropdown-menu" aria-labelledby="produccionDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_leche') }}">Leche</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_carne') }}">Carne</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_partos') }}">Partos</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_crias') }}">Crías</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="almacenDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Almacén</a>
-                            <ul class="dropdown-menu" aria-labelledby="almacenDropdown">
-                                <li><a class="dropdown-item" href="#">Almacén</a></li>
-                                <li><a class="dropdown-item" href="#">Maquinaria</a></li>
-                                <li><a class="dropdown-item" href="#">Agroquímicos</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item"><a class="nav-link" href="#">Informes</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Crear Alerta</a></li>
-                    </ul>
+{% extends 'base.html' %}
+{% block title %}Registro de Crías{% endblock %}
+{% block content %}
+<div class="container-fluid mt-2">
+    <div class="row g-0 align-items-start">
+        <div class="col-md-4 ps-0" style="margin-right:-10px;">
+            <div class="login-box p-0" style="border:2px solid #1BBD25;">
+                <div class="bg-success text-white text-center py-2 rounded-top">
+                    <h5 class="mb-0">Registro de Cría</h5>
+                </div>
+                <div class="p-3 bg-light">
+                    <!-- Formulario de crías -->
                 </div>
             </div>
-        </nav>
-        <div class="logout-button">
-            <a href="{{ url_for('main.login') }}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
         </div>
-    </header>
-    <div class="container-fluid mt-2">
-        <div class="row g-0 align-items-start">
-            <!-- Formulario de Registro de Crías -->
-            <div class="col-md-4 ps-0" style="margin-right:-10px;">
-                <div class="login-box p-0" style="border:2px solid #1BBD25;">
-                    <div class="bg-success text-white text-center py-2 rounded-top">
-                        <h5 class="mb-0">Registro de Crías</h5>
-                    </div>
-                    <div class="p-3 bg-light">
-                        <div class="text-center mb-2">
-                            <div style="width:100%; max-width:220px; height:120px; margin:auto; border:1.5px dashed #1BBD25; display:flex; align-items:center; justify-content:center;">
-                                <span class="text-muted">Espacio Fotográfico</span>
-                            </div>
-                        </div>
-                        <form>
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <label for="numCria" class="form-label">No. Cría</label>
-                                    <input type="number" class="form-control" id="numCria" name="numCria" required>
-                                </div>
-                                <div class="col-6">
-                                    <label for="nombre" class="form-label">Nombre</label>
-                                    <input type="text" class="form-control" id="nombre" name="nombre" required>
-                                </div>
-                                <div class="col-6">
-                                    <label for="sexo" class="form-label">Sexo</label>
-                                    <select class="form-select" id="sexo" name="sexo" required>
-                                        <option value="">Seleccione...</option>
-                                        <option value="Macho">Macho</option>
-                                        <option value="Hembra">Hembra</option>
-                                    </select>
-                                </div>
-                                <div class="col-6">
-                                    <label for="fechaNacimiento" class="form-label">Fecha Nacimiento</label>
-                                    <input type="date" class="form-control" id="fechaNacimiento" name="fechaNacimiento" required>
-                                </div>
-                                <div class="col-6">
-                                    <label for="pesoNacer" class="form-label">Peso al Nacer (kg)</label>
-                                    <input type="number" step="0.01" class="form-control" id="pesoNacer" name="pesoNacer" required>
-                                </div>
-                                <div class="col-6">
-                                    <label for="madre" class="form-label">No. Madre</label>
-                                    <input type="number" class="form-control" id="madre" name="madre" required>
-                                </div>
-                                <div class="col-6">
-                                    <label for="padre" class="form-label">No. Padre</label>
-                                    <input type="number" class="form-control" id="padre" name="padre">
-                                </div>
-                                <div class="col-6">
-                                    <label for="tipoParto" class="form-label">Tipo de Parto</label>
-                                    <select class="form-select" id="tipoParto" name="tipoParto" required>
-                                        <option value="">Seleccione...</option>
-                                        <option value="Normal">Normal</option>
-                                        <option value="Asistido">Asistido</option>
-                                        <option value="Mortinato">Mortinato</option>
-                                    </select>
-                                </div>
-                                <div class="col-6">
-                                    <label for="pesoDestete" class="form-label">Peso al Destete (kg)</label>
-                                    <input type="number" step="0.01" class="form-control" id="pesoDestete" name="pesoDestete">
-                                </div>
-                                <div class="col-6">
-                                    <label for="fechaDestete" class="form-label">Fecha Destete</label>
-                                    <input type="date" class="form-control" id="fechaDestete" name="fechaDestete">
-                                </div>
-                            </div>
-                            <div class="d-flex justify-content-end gap-2 mt-3">
-                                <button type="submit" class="btn btn-success"><i class="bi bi-save me-1"></i>Guardar</button>
-                                <button type="reset" class="btn btn-secondary"><i class="bi bi-x-circle me-1"></i>Cancelar</button>
-                            </div>
-                        </form>
-                    </div>
+        <div class="col-md-8 pe-4">
+            <div class="mb-4">
+                <div class="bg-success text-white text-center py-2" style="border-top-left-radius:8px; border-top-right-radius:8px;">
+                    <h5 class="mb-0">Datos de Crías</h5>
                 </div>
-            </div>
-            <!-- Tabla de Datos -->
-            <div class="col-md-8 pe-4">
-                <div>
-                    <div class="bg-success text-white text-center py-2" style="border-top-left-radius:8px; border-top-right-radius:8px;">
-                        <h5 class="mb-0">Datos de Crías</h5>
-                    </div>
-                    <div class="table-responsive" style="border:2px solid #1BBD25; border-top:0; border-bottom-left-radius:8px; border-bottom-right-radius:8px; background:#f8f9fa; min-width:100%;">
-                        <table class="table table-bordered table-hover align-middle mb-0 w-100" style="min-width:1100px;">
-                            <thead class="table-success text-center">
-                                <tr>
-                                    <th style="min-width:90px;">No / ID</th>
-                                    <th style="min-width:120px;">Nombre</th>
-                                    <th style="min-width:90px;">Sexo</th>
-                                    <th style="min-width:120px;">Fecha Nacimiento</th>
-                                    <th style="min-width:120px;">Peso al Nacer</th>
-                                    <th style="min-width:120px;">No. Madre</th>
-                                    <th style="min-width:120px;">No. Padre</th>
-                                    <th style="min-width:120px;">Tipo de Parto</th>
-                                    <th style="min-width:120px;">Peso Destete</th>
-                                    <th style="min-width:120px;">Fecha Destete</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Aquí se agregarán dinámicamente los datos -->
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive" style="border:2px solid #1BBD25; border-top:0; border-bottom-left-radius:8px; border-bottom-right-radius:8px; background:#f8f9fa;">
+                    <table class="table table-bordered table-hover align-middle mb-0">
+                        <thead class="table-success text-center">
+                            <tr>
+                                <th style="min-width:100px;">No / ID</th>
+                                <th style="min-width:100px;">Nombre</th>
+                                <th style="min-width:100px;">Tipo</th>
+                                <th style="min-width:120px;">F. Nacimiento</th>
+                                <th style="min-width:100px;">Sexo</th>
+                                <th style="min-width:120px;">Tipo de Parto</th>
+                                <th style="min-width:120px;">Peso Destete</th>
+                                <th style="min-width:120px;">Fecha Destete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Aquí se agregarán dinámicamente los datos -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
-    <footer class="footer mt-4 text-center">
-        <p>&copy; 2025 SoFTgan - Todos los derechos reservados</p>
-    </footer>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+</div>
+{% endblock %}
