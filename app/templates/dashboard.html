@@ -27,7 +27,7 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="registroDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Registro</a>
                             <ul class="dropdown-menu" aria-labelledby="registroDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('registro_hembras') }}">Hembras</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.registro_hembras') }}">Hembras</a></li>
                                 <li><a class="dropdown-item" href="#">Machos</a></li>
                             </ul>
                         </li>
@@ -41,9 +41,9 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="produccionDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Producción</a>
                             <ul class="dropdown-menu" aria-labelledby="produccionDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('registro_leche') }}">Leche</a></li>
-                                <li><a class="dropdown-item" href="#">Carne</a></li>
-                                <li><a class="dropdown-item" href="#">Partos</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.registro_leche') }}">Leche</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.registro_carne') }}">Carne</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.registro_partos') }}">Partos</a></li>
                             </ul>
                         </li>
                         <li class="nav-item dropdown">
@@ -83,7 +83,7 @@
                         <div class="mb-2" style="font-size:2.5rem; color:#1BBD25;"><i class="bi bi-droplet-half"></i></div>
                         <h5 class="card-title">Producción</h5>
                         <p class="card-text">Acceso rápido a registros de leche</p>
-                        <a href="{{ url_for('registro_leche') }}" class="btn btn-success w-100">Registrar Leche</a>
+                        <a href="{{ url_for('main.registro_leche') }}" class="btn btn-success w-100">Registrar Leche</a>
                     </div>
                 </div>
             </div>

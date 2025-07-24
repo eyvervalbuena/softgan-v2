@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Registro de Producción de Leche</title>
+    <title>Producción Carne</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="{{ url_for('static', filename='stilos.css') }}" rel="stylesheet">
@@ -65,30 +65,26 @@
         </div>
     </header>
     <div class="container-fluid mt-2">
-        <div class="row">
+        <div class="row g-0 align-items-start">
             <!-- Formulario de Registro -->
-            <div class="col-md-4 ps-0">
+            <div class="col-md-4 ps-0" style="margin-right:-10px;">
                 <div class="login-box p-0" style="border:2px solid #1BBD25;">
                     <div class="bg-success text-white text-center py-2 rounded-top">
-                        <h5 class="mb-0">Registro de Leche</h5>
+                        <h5 class="mb-0">Registro de Carne</h5>
                     </div>
                     <div class="p-3 bg-light">
-                        <div class="text-center mb-3">
+                        <div class="text-center mb-2">
                             <div style="width:100%; max-width:220px; height:120px; margin:auto; border:1.5px dashed #1BBD25; display:flex; align-items:center; justify-content:center;">
                                 <span class="text-muted">Espacio Fotográfico</span>
                             </div>
                         </div>
-                        <div id="contadorParto" class="text-center mt-3">
-                            <h6 class="text-success">Tiempo hasta secado:</h6>
-                            <div id="tiempoRestante" style="font-size:1.2rem; font-weight:bold; color:#DF116F;">305 días</div>
-                        </div>
                         <form>
                             <div class="row g-2">
                                 <div class="col-4">
-                                    <label for="numHembra" class="form-label">No. Hembra</label>
+                                    <label for="numAnimal" class="form-label">No. Animal</label>
                                     <div class="input-group">
-                                        <input type="number" class="form-control" id="numHembra" name="numHembra" required>
-                                        <button class="btn btn-outline-success" type="button" id="buscarHembra" title="Buscar Hembra">
+                                        <input type="number" class="form-control" id="numAnimal" name="numAnimal" required>
+                                        <button class="btn btn-outline-success" type="button" id="buscarAnimal" title="Buscar Animal">
                                             <i class="bi bi-search"></i>
                                         </button>
                                     </div>
@@ -97,67 +93,60 @@
                                     <label for="nombre" class="form-label">Nombre</label>
                                     <input type="text" class="form-control" id="nombre" name="nombre" required>
                                 </div>
-                                <div class="col-4">
-                                    <label for="numCrias" class="form-label">No. Crías</label>
-                                    <input type="number" class="form-control" id="numCrias" name="numCrias" required>
+                                <div class="col-3">
+                                    <label for="pesoNacer" class="form-label">Peso al Nacer</label>
+                                    <input type="number" class="form-control" id="pesoNacer" name="pesoNacer" required>
                                 </div>
-                                <div class="col-4">
-                                    <label class="form-label">Tipo</label><br>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="tipo" id="productiva" value="productiva">
-                                        <label class="form-check-label" for="productiva">Productiva</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="tipo" id="seca" value="seca" checked>
-                                        <label class="form-check-label" for="seca">Seca</label>
-                                    </div>
+                                <div class="col-3">
+                                    <label for="pesoDestete" class="form-label">Peso al Destete</label>
+                                    <input type="number" class="form-control" id="pesoDestete" name="pesoDestete" required>
+                                </div>
+                                <div class="col-6">
+                                    <label for="fechaDestete" class="form-label">Fecha Destete</label>
+                                    <input type="date" class="form-control" id="fechaDestete" name="fechaDestete">
                                 </div>
                                 <div class="col-4">
                                     <label for="condicion" class="form-label">Condición</label>
                                     <select class="form-select" id="condicion" name="condicion">
                                         <option value="2">2</option>
-                                        <option value="2.5">2.5</option>
+                                        <option value="2">2.5</option>
                                         <option value="3">3</option>
-                                        <option value="3.5">3.5</option>
+                                        <option value="2">3.5</option>
                                         <option value="4">4</option>
                                     </select>
                                 </div>
-                                <div class="col-4 mb-2">
-                                    <label for="ordeñosDia" class="form-label" style="white-space:nowrap;">Ordeños/Día</label>
-                                    <input type="number" class="form-control" id="ordeñosDia" name="ordeñosDia" required max="3">
-                                </div>
-                                <div class="col-6 mb-2">
-                                    <label for="ultimoParto" class="form-label" style="white-space:nowrap;">Último Parto</label>
-                                    <input type="date" class="form-control" id="ultimoParto" name="ultimoParto">
-                                </div>
-                                <!-- Fila de promedios -->
-                                <div class="col-4"></div>
-                                <div class="col-4"></div>
-                                <div class="w-100"></div>
                                 <div class="col-4">
-                                    <label for="promedioLactancia" class="form-label">Promedio Lactancia</label>
-                                    <input type="number" class="form-control" id="promedioLactancia" name="promedioLactancia" readonly>
+                                    <label for="gpDestete" class="form-label">GP al Destete</label>
+                                    <input type="text" class="form-control" id="gpDestete" name="gpDestete" required>
                                 </div>
                                 <div class="col-4">
-                                    <label for="promedioMes" class="form-label">Promedio Mes</label>
-                                    <input type="number" class="form-control" id="promedioMes" name="promedioMes" readonly>
+                                    <label for="gpDia" class="form-label">GP Diario</label>
+                                    <input type="text" class="form-control" id="gpDia" name="gpDia" required>
                                 </div>
-                                <div class="col-4">
-                                    <label for="promedioSemana" class="form-label">Promedio Semana</label>
-                                    <input type="number" class="form-control" id="promedioSemana" name="promedioSemana" readonly>
+                                <div class="col-6">
+                                    <label for="fechaCeba" class="form-label">Tiempo de Ceba</label>
+                                    <input type="date" class="form-control" id="fechaCeba" name="fechaCeba">
+                                </div>
+                                <div class="col-6">
+                                    <label for="pesoVenta" class="form-label">Peso de Venta</label>
+                                    <input type="number" class="form-control" id="pesoVenta" name="pesoVenta" required>
                                 </div>
                                 <div class="col-12">
                                     <div class="bg-success text-white text-center my-2 rounded">
-                                        <h6 class="mb-0 py-1">Registrar Producción</h6>
+                                        <h6 class="mb-0 py-1">Pesaje</h6>
                                     </div>
                                 </div>
-                                <div class="col-6">
-                                    <label for="produccionDia" class="form-label">Fecha</label>
-                                    <input type="date" class="form-control" id="produccionDia" name="produccionDia">
+                                <div class="col-3">
+                                    <label for="numPesaje" class="form-label"># Pesaje</label>
+                                    <input type="number" class="form-control" id="numPesaje" name="numPesaje" required>
                                 </div>
                                 <div class="col-6">
-                                    <label for="medicion" class="form-label">Lts</label>
-                                    <input type="number" class="form-control" id="medicion" name="medicion" required>
+                                    <label for="fechaPesaje" class="form-label">Fecha</label>
+                                    <input type="date" class="form-control" id="fechaPesaje" name="fechaPesaje">
+                                </div>
+                                <div class="col-3">
+                                    <label for="peso" class="form-label">Peso (Kg)</label>
+                                    <input type="number" class="form-control" id="peso" name="peso" required>
                                 </div>
                             </div>
                             <div class="d-flex justify-content-end gap-2 mt-3">
@@ -170,28 +159,34 @@
             </div>
             <!-- Tabla de Datos -->
             <div class="col-md-8 pe-4">
-                <div class="mb-4">
+                <div>
                     <div class="bg-success text-white text-center py-2" style="border-top-left-radius:8px; border-top-right-radius:8px;">
-                        <h5 class="mb-0">Datos de Producción de Leche</h5>
+                        <h5 class="mb-0">Datos de Semovientes</h5>
                     </div>
-                    <div class="table-responsive" style="border:2px solid #1BBD25; border-top:0; border-bottom-left-radius:8px; border-bottom-right-radius:8px; background:#f8f9fa;">
-                        <table class="table table-bordered table-hover align-middle mb-0">
+                    <div class="table-responsive" style="border:2px solid #1BBD25; border-top:0; border-bottom-left-radius:8px; border-bottom-right-radius:8px; background:#f8f9fa; min-width:100%;">
+                        <table class="table table-bordered table-hover align-middle mb-0 w-100" style="min-width:1200px;">
                             <thead class="table-success text-center">
                                 <tr>
-                                    <th>No / ID</th>
-                                    <th>Nombre</th>
-                                    <th>Tipo</th>
-                                    <th>Condición</th>
-                                    <th>Promedio Semana</th>
-                                    <th>Promedio Mes</th>
-                                    <th>Promedio Lactancia</th>
-                                    <th>Días para el Secado</th>
-                                    <th>Último Pesaje</th>
-                                    <th>Observaciones</th>
+                                    <th style="min-width:90px;">No / ID</th>
+                                    <th style="min-width:140px;">Nombre</th>
+                                    <th style="min-width:120px;">Peso al Nacer</th>
+                                    <th style="min-width:120px;">Fecha Destete</th>
+                                    <th style="min-width:120px;">Peso Destete</th>
+                                    <th style="min-width:120px;">GP Destete</th>
+                                    <th style="min-width:120px;">Condición</th>
+                                    <th style="min-width:140px;">GP Promedio / Día</th>
+                                    <th style="min-width:120px;">Último Pesaje</th>
+                                    <th style="min-width:140px;">GP entre Pesajes</th>
+                                    <th style="min-width:100px;">Pesaje 2</th>
+                                    <th style="min-width:100px;">Pesaje 3</th>
+                                    <th style="min-width:100px;">Pesaje 4</th>
+                                    <th style="min-width:100px;">Pesaje 5</th>
+                                    <th style="min-width:120px;">Fecha Venta</th>
+                                    <th style="min-width:120px;">Peso Venta</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Aquí irán los registros de producción de leche -->
+                                <!-- Aquí se cargarán los datos dinámicamente -->
                             </tbody>
                         </table>
                     </div>
@@ -199,24 +194,9 @@
             </div>
         </div>
     </div>
-    <footer class="footer mt-4">
+    <footer class="footer mt-4 text-center">
         <p>&copy; 2025 SoFTgan - Todos los derechos reservados</p>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-    // Contador regresivo desde 305 días
-    let diasRestantes = 305;
-    const tiempoRestante = document.getElementById('tiempoRestante');
-    function actualizarContador() {
-        if (diasRestantes > 0) {
-            diasRestantes--;
-            tiempoRestante.textContent = diasRestantes + ' días';
-        } else {
-            tiempoRestante.textContent = '¡Secado!';
-        }
-    }
-    // Disminuye cada 24 horas (86400000 ms)
-    setInterval(actualizarContador, 86400000);
-    </script>
 </body>
 </html>

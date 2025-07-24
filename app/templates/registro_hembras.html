@@ -12,7 +12,7 @@
 <body>
     <header class="top-bar d-flex align-items-center justify-content-between px-3" style="background:#1BBD25; min-height:56px;">
         <div class="logo-slogan d-flex align-items-center">
-            <a href="{{ url_for('dashboard') }}" class="d-flex align-items-center text-decoration-none">
+            <a href="{{ url_for('main.dashboard') }}" class="d-flex align-items-center text-decoration-none">
                 <img src="{{ url_for('static', filename='imagenes/logo software.png') }}" alt="Logo" style="height:40px; border-radius:50%; background:#fff; margin-right:8px;">
                 <p class="mb-0 text-white fw-bold" style="font-size:1.1rem;">Su aliado en el campo</p>
             </a>
@@ -28,8 +28,8 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="registroDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Registro</a>
                             <ul class="dropdown-menu" aria-labelledby="registroDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('registro_hembras') }}">Hembras</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('registro_machos') }}">Machos</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.registro_hembras') }}">Hembras</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.registro_machos') }}">Machos</a></li>
                             </ul>
                         </li>
                         <li class="nav-item dropdown">
@@ -42,8 +42,8 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="produccionDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Producción</a>
                             <ul class="dropdown-menu" aria-labelledby="produccionDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('registro_leche') }}">Leche</a></li>
-                                <li><a class="dropdown-item" href="#">Carne</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.registro_leche') }}">Leche</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.registro_carne') }}">Carne</a></li>
                                 <li><a class="dropdown-item" href="#">Partos</a></li>
                             </ul>
                         </li>
@@ -62,7 +62,7 @@
             </div>
         </nav>
         <div class="logout-button">
-            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
+            <a href="{{ url_for('main.login') }}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
         </div>
     </header>
     <div class="container-fluid" style="background:#f8f9fa; min-height:90vh;">
