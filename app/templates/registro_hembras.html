@@ -1,71 +1,10 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Registro de Hembras</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link href="{{ url_for('static', filename='stilos.css') }}" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-    <header class="top-bar d-flex align-items-center justify-content-between px-3" style="background:#1BBD25; min-height:56px;">
-        <div class="logo-slogan d-flex align-items-center">
-            <a href="{{ url_for('main.dashboard') }}" class="d-flex align-items-center text-decoration-none">
-                <img src="{{ url_for('static', filename='imagenes/logo software.png') }}" alt="Logo" style="height:40px; border-radius:50%; background:#fff; margin-right:8px;">
-                <p class="mb-0 text-white fw-bold" style="font-size:1.1rem;">Su aliado en el campo</p>
-            </a>
-        </div>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-transparent top-menu p-0">
-            <div class="container-fluid p-0">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav">
-                        <li class="nav-item"><a class="nav-link" href="#">Usuarios</a></li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="registroDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Registro</a>
-                            <ul class="dropdown-menu" aria-labelledby="registroDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_hembras') }}">Hembras</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_machos') }}">Machos</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="sanitarioDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Sanitario</a>
-                            <ul class="dropdown-menu" aria-labelledby="sanitarioDropdown">
-                                <li><a class="dropdown-item" href="#">General</a></li>
-                                <li><a class="dropdown-item" href="#">Individual</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="produccionDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Producción</a>
-                            <ul class="dropdown-menu" aria-labelledby="produccionDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_leche') }}">Leche</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_carne') }}">Carne</a></li>
-                                <li><a class="dropdown-item" href="#">Partos</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="almacenDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Almacén</a>
-                            <ul class="dropdown-menu" aria-labelledby="almacenDropdown">
-                                <li><a class="dropdown-item" href="#">Almacén</a></li>
-                                <li><a class="dropdown-item" href="#">Maquinaria</a></li>
-                                <li><a class="dropdown-item" href="#">Agroquímicos</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item"><a class="nav-link" href="#">Informes</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Crear Alerta</a></li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-        <div class="logout-button">
-            <a href="{{ url_for('main.login') }}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
-        </div>
-    </header>
-    <div class="container-fluid" style="background:#f8f9fa; min-height:90vh;">
+{% extends 'base.html' %}
+{% block title %}Registro de Hembras{% endblock %}
+{% block head_extra %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+{% endblock %}
+{% block content %}
+<div class="container-fluid" style="background:#f8f9fa; min-height:90vh;">
         <div class="row pt-3">
             <div class="col-md-3">
                 <div class="login-box p-0" style="border:2px solid #1BBD25;">
@@ -213,7 +152,9 @@
             </div>
         </div>
     </div>
-    <script>
+{% endblock %}
+{% block scripts %}
+<script>
     $(document).ready(function() {
         $('#no_hembra').on('blur', function() {
             var noHembra = $(this).val();
@@ -235,10 +176,5 @@
             }
         });
     });
-    </script>
-    <footer class="footer mt-4">
-        <p>&copy; 2025 SoFTgan - Todos los derechos reservados</p>
-    </footer>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-
+</script>
+{% endblock %}
