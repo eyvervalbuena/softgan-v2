@@ -15,7 +15,7 @@ body {
 
 /* Estilos para el Header */
 .top-bar {
-    background-color: #1BBD25; /* Verde principal del login */
+    background-color: var(--sg-green); /* Verde principal del login */
     color: white;
     padding: 10px 20px;
     display: flex;
@@ -80,7 +80,7 @@ body {
 }
 
 .top-menu .dropdown-menu {
-    background-color: #1BBD25;
+    background-color: var(--sg-green);
     border: none;
     border-radius: 0.25rem;
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
@@ -144,7 +144,7 @@ body {
 
 /* Estilos para el Login */
 .top-section {
-    background-color: #1BBD25; /* Verde principal del login */
+    background-color: var(--sg-green); /* Verde principal del login */
     padding: 40px 20px; /* Ajustar padding en lugar de altura fija */
     display: flex;
     justify-content: center;
@@ -245,3 +245,8 @@ body {
 
 /* Card borde */
 .card.border-4{border:2px solid var(--sg-green)}
+
+/* Utilidades de color SoftGan */
+.text-sg-green{color:var(--sg-green)!important}
+.border-sg-green{border-color:var(--sg-green)!important}
+.border-dashed-sg-green{border:1.5px dashed var(--sg-green)!important}
