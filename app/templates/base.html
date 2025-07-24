@@ -29,8 +29,8 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="registroDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Registro</a>
                             <ul class="dropdown-menu" aria-labelledby="registroDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_hembras') }}">Hembras</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_machos') }}">Machos</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('ganaderia.registro_hembras') }}">Hembras</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('ganaderia.registro_machos') }}">Machos</a></li>
                             </ul>
                         </li>
                         <li class="nav-item dropdown">
@@ -43,9 +43,9 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="produccionDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Producción</a>
                             <ul class="dropdown-menu" aria-labelledby="produccionDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_leche') }}">Leche</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_carne') }}">Carne</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('main.registro_partos') }}">Partos</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('ganaderia.registro_leche') }}">Leche</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('ganaderia.registro_carne') }}">Carne</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('ganaderia.registro_partos') }}">Partos</a></li>
                             </ul>
                         </li>
                         <li class="nav-item dropdown">
@@ -63,7 +63,7 @@
             </div>
         </nav>
         <div class="logout-button">
-            <a href="{{ url_for('main.login') }}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
         </div>
     </header>
     {% endblock %}
