@@ -14,9 +14,81 @@
                             <span class="text-muted">Espacio Fotográfico</span>
                         </div>
                     </div>
-                    <!-- Formulario -->
                     <form>
-                        <!-- campos -->
+                        <div class="row g-2">
+                            <div class="col-4">
+                                <label for="numAnimal" class="form-label">No. Animal</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="numAnimal" name="numAnimal" required>
+                                    <button class="btn btn-outline-success" type="button" id="buscarAnimal" title="Buscar Animal">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-8">
+                                <label for="nombre" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required>
+                            </div>
+                            <div class="col-3">
+                                <label for="pesoNacer" class="form-label">Peso al Nacer</label>
+                                <input type="number" class="form-control" id="pesoNacer" name="pesoNacer" required>
+                            </div>
+                            <div class="col-3">
+                                <label for="pesoDestete" class="form-label">Peso al Destete</label>
+                                <input type="number" class="form-control" id="pesoDestete" name="pesoDestete" required>
+                            </div>
+                            <div class="col-6">
+                                <label for="fechaDestete" class="form-label">Fecha Destete</label>
+                                <input type="date" class="form-control" id="fechaDestete" name="fechaDestete">
+                            </div>
+                            <div class="col-4">
+                                <label for="condicion" class="form-label">Condición</label>
+                                <select class="form-select" id="condicion" name="condicion">
+                                    <option value="2">2</option>
+                                    <option value="2.5">2.5</option>
+                                    <option value="3">3</option>
+                                    <option value="3.5">3.5</option>
+                                    <option value="4">4</option>
+                                </select>
+                            </div>
+                            <div class="col-4">
+                                <label for="gpDestete" class="form-label">GP al Destete</label>
+                                <input type="text" class="form-control" id="gpDestete" name="gpDestete" required>
+                            </div>
+                            <div class="col-4">
+                                <label for="gpDia" class="form-label">GP Diario</label>
+                                <input type="text" class="form-control" id="gpDia" name="gpDia" required>
+                            </div>
+                            <div class="col-6">
+                                <label for="fechaCeba" class="form-label">Tiempo de Ceba</label>
+                                <input type="date" class="form-control" id="fechaCeba" name="fechaCeba">
+                            </div>
+                            <div class="col-6">
+                                <label for="pesoVenta" class="form-label">Peso de Venta</label>
+                                <input type="number" class="form-control" id="pesoVenta" name="pesoVenta" required>
+                            </div>
+                            <div class="col-12">
+                                <div class="bg-success text-white text-center my-2 rounded">
+                                    <h6 class="mb-0 py-1">Pesaje</h6>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <label for="numPesaje" class="form-label"># Pesaje</label>
+                                <input type="number" class="form-control" id="numPesaje" name="numPesaje" required>
+                            </div>
+                            <div class="col-6">
+                                <label for="fechaPesaje" class="form-label">Fecha</label>
+                                <input type="date" class="form-control" id="fechaPesaje" name="fechaPesaje">
+                            </div>
+                            <div class="col-3">
+                                <label for="peso" class="form-label">Peso (Kg)</label>
+                                <input type="number" class="form-control" id="peso" name="peso" required>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-3">
+                            <button type="submit" class="btn btn-success"><i class="bi bi-save me-1"></i>Guardar</button>
+                            <button type="reset" class="btn btn-secondary"><i class="bi bi-x-circle me-1"></i>Cancelar</button>
+                        </div>
                     </form>
                 </div>
             </div>
