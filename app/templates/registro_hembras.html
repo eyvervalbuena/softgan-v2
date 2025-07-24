@@ -4,7 +4,7 @@
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 {% endblock %}
 {% block content %}
-<div class="container-fluid" style="background:#f8f9fa; min-height:90vh;">
+<div class="container-fluid bg-light min-vh-90">
         <div class="row pt-3">
             <div class="col-md-3">
                 <div class="login-box p-0 border border-2 border-sg-green">
@@ -13,8 +13,8 @@
                     </div>
                     <form class="p-3">
                         <div class="mb-3 text-center">
-                            <div class="d-flex flex-column align-items-center justify-content-center border-dashed-sg-green" style="border-radius:6px; height:120px; color:#888; background:#f8f9fa;">
-                                <i class="bi bi-camera" style="font-size:2.5rem;"></i>
+                            <div class="d-flex flex-column align-items-center justify-content-center border-dashed-sg-green photo-placeholder text-muted bg-light rounded">
+                                <i class="bi bi-camera fs-1"></i>
                                 <span>Espacio Fotográfico</span>
                             </div>
                         </div>
@@ -75,9 +75,9 @@
                                     <option>Compra</option>
                                 </select>
                             </div>
-                            <div class="col-6" style="max-width:170px;">
+                            <div class="col-6 max-w-170">
                                 <label class="form-label">F. Incorporación</label>
-                                <input type="date" class="form-control" style="min-width:0;" id="fecha_incorporacion" />
+                                <input type="date" class="form-control min-w-0" id="fecha_incorporacion" />
                             </div>
                         </div>
                         <div class="row g-2 mb-2">
@@ -95,15 +95,15 @@
                             </div>
                         </div>
                         <div class="row g-2 mb-2">
-                            <div class="col-6" style="max-width:170px;">
+                            <div class="col-6 max-w-170">
                                 <label class="form-label">Fecha de Nacimiento</label>
-                                <input type="date" class="form-control" style="min-width:0;" id="fecha_nacimiento" />
+                                <input type="date" class="form-control min-w-0" id="fecha_nacimiento" />
                             </div>
                         </div>
                         <div class="row g-2 mb-2">
-                            <div class="col-6" style="max-width:170px;">
+                            <div class="col-6 max-w-170">
                                 <label class="form-label">Fecha de Desincorporación</label>
-                                <input type="date" class="form-control" style="min-width:0;" id="fecha_desincorporacion" />
+                                <input type="date" class="form-control min-w-0" id="fecha_desincorporacion" />
                             </div>
                             <div class="col-6">
                                 <label class="form-label">Causa de Desincorporación</label>
@@ -123,7 +123,7 @@
             </div>
             <div class="col-md-9">
                 <div class="mb-4">
-                    <div class="bg-success text-white text-center py-2" style="border-top-left-radius:8px; border-top-right-radius:8px;">
+                    <div class="bg-success text-white text-center py-2 rounded-top">
                         <h5 class="mb-0">Datos de Registro de Hembras</h5>
                     </div>
                     <div class="table-responsive border border-2 border-sg-green border-top-0 rounded-bottom bg-light">

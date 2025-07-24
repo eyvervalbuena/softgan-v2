@@ -11,11 +11,11 @@
 </head>
 <body>
     {% block header %}
-    <header class="top-bar d-flex align-items-center justify-content-between px-3" style="min-height:56px;">
+    <header class="top-bar d-flex align-items-center justify-content-between px-3">
         <div class="logo-slogan d-flex align-items-center">
             <a href="{{ url_for('main.dashboard') }}" class="d-flex align-items-center text-decoration-none">
-                <img src="{{ url_for('static', filename='imagenes/logo software.png') }}" alt="Logo" style="height:40px; border-radius:50%; background:#fff; margin-right:8px;">
-                <p class="mb-0 text-white fw-bold" style="font-size:1.1rem;">Su aliado en el campo</p>
+                <img src="{{ url_for('static', filename='imagenes/logo software.png') }}" alt="Logo" class="logo-img rounded-circle bg-white me-2">
+                <p class="mb-0 text-white fw-bold">Su aliado en el campo</p>
             </a>
         </div>
         <nav class="navbar navbar-expand-lg navbar-dark bg-transparent top-menu p-0">

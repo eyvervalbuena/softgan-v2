@@ -229,6 +229,7 @@ body {
 .top-bar{
   display:flex;align-items:center;justify-content:space-between;
   background:var(--sg-green);padding:0.4rem 1rem;color:#fff;
+  min-height:56px;
 }
 .logo-slogan a{display:flex;align-items:center;text-decoration:none;color:#fff}
 .logo-slogan img{height:42px;margin-right:0.5rem}
@@ -250,3 +251,16 @@ body {
 .text-sg-green{color:var(--sg-green)!important}
 .border-sg-green{border-color:var(--sg-green)!important}
 .border-dashed-sg-green{border:1.5px dashed var(--sg-green)!important}
+
+/* Utilidades adicionales */
+.min-vh-90{min-height:90vh}
+.logo-img{height:40px}
+.photo-placeholder{width:100%;max-width:220px;height:120px;margin:auto;display:flex;align-items:center;justify-content:center}
+.max-w-80{max-width:80px}
+.max-w-105{max-width:105px}
+.max-w-120{max-width:120px}
+.max-w-170{max-width:170px}
+.min-w-0{min-width:0}
+.min-w-100{min-width:100px}
+.min-w-120{min-width:120px}
+.text-pink{color:#DF116F!important}
