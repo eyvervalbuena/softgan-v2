@@ -36,8 +36,9 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="sanitarioDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Sanitario</a>
                             <ul class="dropdown-menu" aria-labelledby="sanitarioDropdown">
-                                <li><a class="dropdown-item" href="#">General</a></li>
-                                <li><a class="dropdown-item" href="#">Individual</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('sanitario.registro_ciclo') }}">General</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('sanitario.registro_individual') }}">Individual</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('sanitario.registro_patologia') }}">Patología</a></li>
                             </ul>
                         </li>
                         <li class="nav-item dropdown">

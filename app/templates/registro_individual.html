@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% block title %}Registro Sanitario Individual{% endblock %}
+{% block content %}
+<div class="container-fluid mt-2">
+  <div class="row">
+    <div class="col-md-4 ps-0">
+      <div class="card shadow-lg border-4 mb-4">
+        <div class="card-header bg-success text-white text-center">
+          <h5 class="mb-0">Registro Sanitario Individual</h5>
+        </div>
+        <div class="card-body bg-light">
+          <div class="text-center mb-3">
+            <div style="width: 100%; max-width: 250px; height: 200px; margin: auto; border: 2px dashed #4C8822; display: flex; align-items: center; justify-content: center;">
+              <span class="text-muted">Espacio Fotográfico</span>
+            </div>
+          </div>
+          <form>
+            <div class="row">
+              <div class="col-sm-3 mb-3">
+                <label for="idRegistro" class="form-label">ID Registro</label>
+                <input type="text" class="form-control" id="idRegistro" placeholder="Ej: RS001">
+              </div>
+              <div class="col-sm-3 mb-3">
+                <label for="fechaRegistro" class="form-label">F Registro</label>
+                <input type="date" class="form-control" id="fechaRegistro">
+              </div>
+              <div class="col-sm-3 mb-3">
+                <label for="accion" class="form-label">Sanitario</label>
+                <select class="form-select" id="accion" name="accion">
+                  <option value="2">General</option>
+                  <option value="3">Individual</option>
+                  <option value="4">Patología</option>
+                </select>
+              </div>
+              <div class="col-sm-3 mb-3">
+                <label for="num" class="form-label">Número</label>
+                <input type="number" class="form-control" id="num" name="num" required>
+              </div>
+              <div class="col-md-8 mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" required>
+              </div>
+              <div class="col-sm-3 mb-3">
+                <label for="condicion" class="form-label">Condición</label>
+                <select class="form-select" id="condicion" name="condicion">
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Acciones Sanitarias</label>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-check"><input class="form-check-input" type="checkbox" id="brucelosis"><label class="form-check-label" for="brucelosis">Brucelosis</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" id="rabia"><label class="form-check-label" for="rabia">Rabia</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" id="aftosa"><label class="form-check-label" for="aftosa">Aftosa</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" id="carbon"><label class="form-check-label" for="carbon">Carbón</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" id="desparasitacion"><label class="form-check-label" for="desparasitacion">Desparasitación</label></div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-check"><input class="form-check-input" type="checkbox" id="vitaminas"><label class="form-check-label" for="vitaminas">Vitaminas</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" id="modificador"><label class="form-check-label" for="modificador">Modificador Orgánico</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" id="baño"><label class="form-check-label" for="baño">Baño</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" id="castracion"><label class="form-check-label" for="castracion">Castración</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" id="marcaje"><label class="form-check-label" for="marcaje">Marcaje</label></div>
+                </div>
+              </div>
+              <div class="form-check d-flex align-items-center mt-2">
+                <input class="form-check-input me-2" type="checkbox" id="otro">
+                <label class="form-check-label me-2" for="otro">Otro:</label>
+                <input type="text" class="form-control w-50" id="otroTexto" placeholder="Especifique">
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label">Detalles de Productos Aplicados</label>
+              <div class="table-responsive">
+                <table class="table table-bordered table-sm text-center">
+                  <thead class="table-success">
+                    <tr>
+                      <th>Producto</th>
+                      <th>Lote</th>
+                      <th>Vencimiento</th>
+                      <th>Observaciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><input type="text" class="form-control" placeholder="Nombre del producto"></td>
+                      <td><input type="text" class="form-control" placeholder="Lote"></td>
+                      <td><input type="date" class="form-control"></td>
+                      <td><input type="text" class="form-control" placeholder="Observaciones"></td>
+                    </tr>
+                    <tr>
+                      <td><input type="text" class="form-control" placeholder="Nombre del producto"></td>
+                      <td><input type="text" class="form-control" placeholder="Lote"></td>
+                      <td><input type="date" class="form-control"></td>
+                      <td><input type="text" class="form-control" placeholder="Observaciones"></td>
+                    </tr>
+                    <tr>
+                      <td><input type="text" class="form-control" placeholder="Nombre del producto"></td>
+                      <td><input type="text" class="form-control" placeholder="Lote"></td>
+                      <td><input type="date" class="form-control"></td>
+                      <td><input type="text" class="form-control" placeholder="Observaciones"></td>
+                    </tr>
+                    <tr>
+                      <td><input type="text" class="form-control" placeholder="Nombre del producto"></td>
+                      <td><input type="text" class="form-control" placeholder="Lote"></td>
+                      <td><input type="date" class="form-control"></td>
+                      <td><input type="text" class="form-control" placeholder="Observaciones"></td>
+                    </tr>
+                    <tr>
+                      <td><input type="text" class="form-control" placeholder="Nombre del producto"></td>
+                      <td><input type="text" class="form-control" placeholder="Lote"></td>
+                      <td><input type="date" class="form-control"></td>
+                      <td><input type="text" class="form-control" placeholder="Observaciones"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="mt-4">
+              <button type="submit" class="btn btn-success me-2">Guardar</button>
+              <button type="button" class="btn btn-primary me-2">Buscar</button>
+              <button type="button" class="btn btn-secondary">Salir</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-8 pe-4">
+      <h5 class="text-success text-center mb-3">Datos de Semovientes</h5>
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+          <thead class="table-success text-center">
+            <tr>
+              <th>No / ID</th>
+              <th>Nombre</th>
+              <th>Sexo</th>
+              <th>Tipo</th>
+              <th>Condición</th>
+              <th>F. Nacimiento</th>
+              <th>Edad</th>
+              <th>Origen</th>
+              <th>Patologías</th>
+              <th>Último R. Sanitario</th>
+              <th>R. Sanitario 2</th>
+              <th>R. Sanitario 3</th>
+              <th>Observaciones</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
