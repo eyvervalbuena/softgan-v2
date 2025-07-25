@@ -22,11 +22,13 @@ def create_app():
 
     mysql.init_app(app)
 
-    from .auth.routes import bp as auth_bp
-    from .ganaderia.routes import bp as ganaderia_bp
-    from .sanitario.routes import bp as sanitario_bp
-    from .almacen.routes import bp as almacen_bp
-    from .main.routes import bp as main_bp
+    from .ganaderia.routes import (
+        ganaderia_bp,
+        almacen_bp,
+        sanitario_bp,
+        main_bp,
+        auth_bp,
+    )
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(ganaderia_bp)
