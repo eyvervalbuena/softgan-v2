@@ -1,10 +1,4 @@
-"""Centralized route definitions for the application.
-
-This module now contains all Blueprints used in the project in order to keep
-the routing logic in a single place.  Each section is clearly separated so the
-original structure of the application is still recognisable.
-"""
-
+# app/ganaderia/routes.py
 from flask import (
     Blueprint,
     render_template,
@@ -16,9 +10,53 @@ from flask import (
 )
 import logging
 import MySQLdb.cursors
-from werkzeug.security import check_password_hash
-
+from werkzeug.security import check_password_hash, generate_password_hash
+import json
 from .. import mysql
+
+# ---------------------------------------------------------------------------
+# Setup routes for initial configuration
+# ---------------------------------------------------------------------------
+
+setup_bp = Blueprint("setup", __name__)
+
+
+@setup_bp.route("/finca")
+def crear_finca_form():
+    return render_template("crear_finca.html")
+
+
+@setup_bp.route("/api/finca", methods=["POST"])
+def crear_finca_api():
+    data = request.get_json() or {}
+    cursor = mysql.connection.cursor()
+    cursor.execute(
+        "INSERT INTO fincas (nombre, encargado, direccion, hectareas, num_potreros, marca1, marca2, marca3, nit, email, edades_hembras, edades_machos) "
+        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+        (
+            data.get("nombre"),
+            data.get("encargado"),
+            data.get("direccion"),
+            data.get("hectareas"),
+            data.get("num_potreros"),
+            data.get("marca1"),
+            data.get("marca2"),
+            data.get("marca3"),
+            data.get("nit"),
+            data.get("email"),
+            data.get("edades_hembras"),
+            data.get("edades_machos"),
+        ),
+    )
+    finca_id = cursor.lastrowid
+    password = generate_password_hash(data.get("admin_contrasena"))
+    cursor.execute(
+        "INSERT INTO usuarios (finca_id, usuario, contrasena, rol) VALUES (%s, %s, %s, 'admin')",
+        (finca_id, data.get("admin_usuario"), password),
+    )
+    mysql.connection.commit()
+    cursor.close()
+    return json.dumps({"message": "Registro exitoso"})
 
 # ---------------------------------------------------------------------------
 # Ganaderia routes
@@ -118,7 +156,13 @@ auth_bp = Blueprint("auth", __name__)
 
 @auth_bp.route("/", methods=["GET", "POST"])
 def login():
-    """Authenticate user and start a session."""
+    """autenticacion e inicio de sesion."""
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT COUNT(*) AS c FROM fincas")
+    count = cursor.fetchone()["c"] if cursor.description else cursor.fetchone()[0]
+    cursor.close()
+    if count == 0:
+        return redirect(url_for("setup.crear_finca_form"))
     if request.method == "POST":
         usuario = request.form.get("usuario")
         contrasena = request.form.get("contrasena")
@@ -153,6 +197,8 @@ def login():
                 flash("Contrase\u00f1a no v\u00e1lida", "danger")
             elif check_password_hash(stored_pass, contrasena) or stored_pass == contrasena:
                 session["usuario"] = usuario
+                session["finca_id"] = user.get("finca_id") if isinstance(user, dict) else user[1]
+                session["rol"] = user.get("rol") if isinstance(user, dict) else user[4]
                 flash("Bienvenido, " + usuario, "success")
                 return redirect(url_for("main.dashboard"))
             else:
@@ -163,9 +209,14 @@ def login():
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
+    if "usuario" not in session or session.get("rol") != "admin":
+        flash("Acceso no autorizado", "danger")
+        return redirect(url_for("auth.login"))
+    
     if request.method == "POST":
         usuario = request.form.get("usuario")
         contrasena = request.form.get("contrasena")
+        rol = request.form.get("rol") or "worker
         if not usuario or not contrasena:
             flash("Todos los campos son obligatorios.", "danger")
         elif len(usuario) < 4 or len(contrasena) < 6:
@@ -173,26 +224,21 @@ def register():
         elif not usuario.isalnum():
             flash("El usuario solo puede contener letras y n\u00fameros.", "warning")
         else:
-            try:
-                cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            except Exception:
-                cursor = mysql.connection.cursor()
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute("SELECT * FROM usuarios WHERE usuario = %s", (usuario,))
             user = cursor.fetchone()
             if user:
                 flash("El usuario ya existe.", "danger")
             else:
+                hashed = generate_password_hash(contrasena)
                 cursor.execute(
-                    "INSERT INTO usuarios (usuario, contrasena) VALUES (%s, %s)",
-                    (usuario, contrasena),
+                    "INSERT INTO usuarios (finca_id, usuario, contrasena, rol) VALUES (%s, %s, %s, %s)",
+                    (session.get("finca_id"), usuario, hashed, rol),
                 )
                 mysql.connection.commit()
-                flash(
-                    "Usuario registrado exitosamente. Ahora puedes iniciar sesi\u00f3n.",
-                    "success",
-                )
+                flash("Usuario registrado exitosamente.", "success")
                 cursor.close()
-                return redirect(url_for("auth.login"))
+                return redirect(url_for("main.dashboard"))
             cursor.close()
     return render_template("register.html")
 
