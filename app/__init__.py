@@ -14,6 +14,14 @@ def crear_tablas():
                 contrasena VARCHAR(100) NOT NULL
             )"""
         )
+        cursor.execute(
+            """CREATE TABLE IF NOT EXISTS finca (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                nombre VARCHAR(100) NOT NULL,
+                ubicacion VARCHAR(255),
+                tamano DECIMAL(10,2)
+            )"""
+        )
         mysql.connection.commit()
 
 
