@@ -52,9 +52,9 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="almacenDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Almacén</a>
                             <ul class="dropdown-menu" aria-labelledby="almacenDropdown">
-                                <li><a class="dropdown-item" href="#">Almacén</a></li>
-                                <li><a class="dropdown-item" href="#">Maquinaria</a></li>
-                                <li><a class="dropdown-item" href="#">Agroquímicos</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('almacen.almacen_insumos') }}">Almacén</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('almacen.almacen_maquinaria') }}">Maquinaria</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('almacen.almacen_agroquimicos') }}">Agroquímicos</a></li>
                             </ul>
                         </li>
                         <li class="nav-item"><a class="nav-link" href="#">Informes</a></li>
