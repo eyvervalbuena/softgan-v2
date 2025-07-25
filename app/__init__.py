@@ -11,7 +11,7 @@ def crear_tablas():
             """CREATE TABLE IF NOT EXISTS usuarios (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 usuario VARCHAR(50) NOT NULL UNIQUE,
-                contrasena VARCHAR(100) NOT NULL
+                contrasena VARCHAR(255) NOT NULL
             )"""
         )
         cursor.execute(
@@ -22,6 +22,7 @@ def crear_tablas():
                 tamano DECIMAL(10,2)
             )"""
         )
+        cursor.execute("ALTER TABLE usuarios MODIFY contrasena VARCHAR(255)")
         mysql.connection.commit()
 
 
