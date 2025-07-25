@@ -27,7 +27,7 @@ def login():
             user = cursor.fetchone()
         logger.debug('User fetched from DB: %s', user)
 
-        if not user or not (check_password_hash(user['contrasena'], contrasena) or user['contrasena'] == contrasena):
+        if not user or not check_password_hash(user['contrasena'], contrasena):
             flash('Usuario o contraseña no válidos', 'danger')
         else:
             session['usuario'] = usuario
