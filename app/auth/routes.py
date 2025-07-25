@@ -1,29 +1,52 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 import MySQLdb.cursors
+from werkzeug.security import check_password_hash
+import logging
 from .. import mysql
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 bp = Blueprint('auth', __name__)
 
 @bp.route('/', methods=['GET', 'POST'])
 def login():
+    """Authenticate user and start a session."""
     if request.method == 'POST':
         usuario = request.form.get('usuario')
         contrasena = request.form.get('contrasena')
+
+        logger.debug('Login POST data usuario=%s contrasena=%s', usuario, contrasena)
+
+        if not usuario or not contrasena:
+            flash('Usuario y contraseña son obligatorios.', 'warning')
+            return render_template('login.html')
+
         try:
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute('SET NAMES utf8mb4')
         except Exception:
             cursor = mysql.connection.cursor()
+
         cursor.execute('SELECT * FROM usuarios WHERE usuario = %s', (usuario,))
         user = cursor.fetchone()
+        logger.debug('User fetched from DB: %s', user)
         cursor.close()
+
         if not user:
             flash('Usuario no válido', 'danger')
-        elif user.get('contrasena') if isinstance(user, dict) else user[2] != contrasena:
-            flash('Contraseña no válida', 'danger')
         else:
-            session['usuario'] = usuario
-            flash('Bienvenido, ' + usuario, 'success')
-            return redirect(url_for('main.dashboard'))
+            stored_pass = user.get('contrasena') if isinstance(user, dict) else user[2]
+            logger.debug('Comparing stored_pass=%s with provided contrasena=%s', stored_pass, contrasena)
+            if stored_pass is None:
+                flash('Contraseña no válida', 'danger')
+            elif check_password_hash(stored_pass, contrasena) or stored_pass == contrasena:
+                session['usuario'] = usuario
+                flash('Bienvenido, ' + usuario, 'success')
+                return redirect(url_for('main.dashboard'))
+            else:
+                flash('Contraseña no válida', 'danger')
+
     return render_template('login.html')
 
 @bp.route('/register', methods=['GET', 'POST'])
