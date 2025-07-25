@@ -106,6 +106,16 @@ def dashboard():
         return redirect(url_for("auth.login"))
     return render_template("dashboard.html", usuario=session["usuario"])
 
+
+# Nueva ruta para crear una finca
+@main_bp.route("/crear_finca")
+def crear_finca():
+    """Muestra el formulario de registro de fincas."""
+    if "usuario" not in session:
+        flash("Debes iniciar sesi\u00f3n para acceder.", "warning")
+        return redirect(url_for("auth.login"))
+    return render_template("crear_finca.html")
+
 # ---------------------------------------------------------------------------
 # Auth routes
 # ---------------------------------------------------------------------------

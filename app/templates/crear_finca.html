@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Crear Finca{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="mb-4 text-center">Registro de Finca</h2>
+            <form method="post">
+                <div class="mb-3">
+                    <label for="nombre" class="form-label">Nombre de la Finca</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingrese el nombre" />
+                </div>
+                <div class="mb-3">
+                    <label for="ubicacion" class="form-label">Ubicación</label>
+                    <input type="text" class="form-control" id="ubicacion" name="ubicacion" placeholder="Ubicación de la finca" />
+                </div>
+                <div class="mb-3">
+                    <label for="tamano" class="form-label">Tamaño (ha)</label>
+                    <input type="number" class="form-control" id="tamano" name="tamano" placeholder="Superficie en hectáreas" />
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
