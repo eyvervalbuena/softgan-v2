@@ -25,11 +25,13 @@ def create_app():
     from .auth.routes import bp as auth_bp
     from .ganaderia.routes import bp as ganaderia_bp
     from .sanitario.routes import bp as sanitario_bp
+    from .almacen.routes import bp as almacen_bp
     from .main.routes import bp as main_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(ganaderia_bp)
     app.register_blueprint(sanitario_bp)
+    app.register_blueprint(almacen_bp)
     app.register_blueprint(main_bp)
 
     with app.app_context():
