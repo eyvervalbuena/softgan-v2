@@ -264,3 +264,34 @@ body {
 .min-w-100{min-width:100px}
 .min-w-120{min-width:120px}
 .text-pink{color:#DF116F!important}
+/* Utilidad: Contenedor de foto en formularios */
+.photo-box{
+    width:100%;
+    max-width:250px;
+    height:200px;
+    border:2px dashed #4C8822;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:auto;
+    background:#f8f9fa;
+}
+
+/* Encabezado de tablas en verde uniforme */
+.table-header-green{
+    background-color:#198754;
+    color:#fff;
+}
+.table-header-green th{
+    text-align:center;
+    font-weight:bold;
+    padding:0.5rem;
+    font-size:0.9rem;
+}
+
+/* Secciones de formularios */
+.form-section{
+    background:#fff;
+    border-radius:10px;
+    box-shadow:0 0.5rem 1rem rgba(0,0,0,0.15);
+}
