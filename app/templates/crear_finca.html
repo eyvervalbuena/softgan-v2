@@ -8,19 +8,19 @@
             <form method="post">
                 <div class="mb-3">
                     <label for="nombre" class="form-label">Nombre de la Finca</label>
-                    <input type="text" class="form-control" id="nombre" name="nombre" />
+                    <input type="text" class="form-control" id="nombre" name="nombre" required />
                 </div>
                 <div class="mb-3">
                     <label for="direccion" class="form-label">Ubicación</label>
-                    <input type="text" class="form-control" id="direccion" name="direccion" />
+                    <input type="text" class="form-control" id="direccion" name="direccion" required />
                 </div>
                 <div class="mb-3">
                     <label for="hectareas" class="form-label">Hectáreas</label>
-                    <input type="number" class="form-control" id="hectareas" name="hectareas" />
+                    <input type="number" class="form-control" id="hectareas" name="hectareas" required />
                 </div>
                 <div class="mb-3">
                     <label for="num_potreros" class="form-label">Número de potreros</label>
-                    <input type="number" class="form-control" id="num_potreros" name="num_potreros" />
+                    <input type="number" class="form-control" id="num_potreros" name="num_potreros" required />
                 </div>
                 <div class="mb-3">
                     <label for="marca1" class="form-label">Marca de hierro 1</label>
@@ -52,11 +52,11 @@
                 </div>
                 <div class="mb-3">
                     <label for="admin_usuario" class="form-label">Usuario Administrador</label>
-                    <input type="text" class="form-control" id="admin_usuario" name="admin_usuario" />
+                    <input type="text" class="form-control" id="admin_usuario" name="admin_usuario" required />
                 </div>
                 <div class="mb-3">
                     <label for="admin_contrasena" class="form-label">Contraseña</label>
-                    <input type="password" class="form-control" id="admin_contrasena" name="admin_contrasena" />
+                    <input type="password" class="form-control" id="admin_contrasena" name="admin_contrasena" required />
                 </div>
                 <div class="d-flex justify-content-end">
                     <button type="submit" class="btn btn-success">Guardar</button>
@@ -71,6 +71,7 @@
 <script>
     document.querySelector('form').addEventListener('submit', async function(e) {
         e.preventDefault();
+
         const data = {
             nombre: document.getElementById('nombre').value,
             direccion: document.getElementById('direccion').value,
@@ -86,6 +87,7 @@
             admin_usuario: document.getElementById('admin_usuario').value,
             admin_contrasena: document.getElementById('admin_contrasena').value,
         };
+
         try {
             const resp = await fetch('/api/finca', {
                 method: 'POST',
@@ -104,3 +106,4 @@
     });
 </script>
 {% endblock %}
+
