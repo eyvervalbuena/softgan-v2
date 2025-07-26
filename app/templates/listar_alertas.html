@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Alertas{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h4 class="mb-3">Alertas</h4>
+  <form method="get" class="row g-2 mb-3">
+    <div class="col-md-3">
+      <input type="text" name="filtro" value="{{ filtro }}" class="form-control" placeholder="Título">
+    </div>
+    <div class="col-md-3">
+      <input type="date" name="fecha" value="{{ fecha }}" class="form-control">
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-primary w-100" type="submit">Filtrar</button>
+    </div>
+  </form>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Título</th>
+        <th>Descripción</th>
+        <th>Creada por</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in alertas %}
+      <tr>
+        <td>{{ a.fecha }}</td>
+        <td>{{ a.nombre }}</td>
+        <td>{{ a.descripcion }}</td>
+        <td>{{ a.usuario or 'N/A' }}</td>
+        <td>
+          {% if session.get('rol') in ['admin','supervisor'] %}
+          <a class="btn btn-sm btn-primary" href="{{ url_for('alertas.editar_alerta', alerta_id=a.id) }}">Editar</a>
+          {% endif %}
+          {% if session.get('rol') == 'admin' %}
+          <a class="btn btn-sm btn-danger" href="{{ url_for('alertas.eliminar_alerta', alerta_id=a.id) }}">Eliminar</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <a href="{{ url_for('alertas.crear_alerta') }}" class="btn btn-success">Crear Alerta</a>
+  <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Volver</a>
+</div>
+{% endblock %}

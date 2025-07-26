@@ -67,11 +67,26 @@
                             </ul>
                         </li>
                         <li class="nav-item"><a class="nav-link" href="#">Informes</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Crear Alerta</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('alertas.crear_alerta') }}">Crear Alerta</a></li>
                     </ul>
                 </div>
             </div>
         </nav>
+        <div class="dropdown me-3">
+            <a class="nav-link position-relative" href="#" id="alertDropdown" role="button" data-bs-toggle="dropdown">
+                <i class="bi bi-bell text-white"></i>
+                {% if alertas_count %}
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ alertas_count }}</span>
+                {% endif %}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="alertDropdown">
+                {% for a in alertas_recientes %}
+                <li><a class="dropdown-item" href="{{ url_for('alertas.lista_alertas') }}">{{ a.nombre }} - {{ a.fecha }}</a></li>
+                {% else %}
+                <li><span class="dropdown-item-text text-muted">Sin alertas</span></li>
+                {% endfor %}
+            </ul>
+        </div>
         <div class="logout-button">
             <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
         </div>

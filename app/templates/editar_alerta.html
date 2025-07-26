@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Editar Alerta{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-center mt-4">
+  <div class="login-box">
+    <h4 class="mb-3">Editar Alerta</h4>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label">Fecha</label>
+        <input type="date" name="fecha" value="{{ alerta.fecha }}" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Título</label>
+        <input type="text" name="nombre" value="{{ alerta.nombre }}" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Descripción</label>
+        <textarea class="form-control" name="descripcion" rows="3">{{ alerta.descripcion }}</textarea>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Actualizar</button>
+    </form>
+    <a href="{{ url_for('alertas.lista_alertas') }}" class="btn btn-secondary w-100 mt-2">Volver</a>
+  </div>
+</div>
+{% endblock %}
