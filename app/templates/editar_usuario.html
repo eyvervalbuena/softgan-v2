@@ -18,13 +18,13 @@
       </div>
       <div class="mb-3 input-group">
         <span class="input-group-text"><i class="bi bi-lock"></i></span>
-        <input type="password" name="contrasena" class="form-control" placeholder="Nueva Contrase\u00f1a" required>
+        <input type="password" name="contrasena" class="form-control" placeholder="Nueva Contrase\u00f1a">
       </div>
       <div class="mb-3">
         <select class="form-select" name="rol" required>
           <option value="admin" {% if rol=='admin' %}selected{% endif %}>Admin</option>
           <option value="supervisor" {% if rol=='supervisor' %}selected{% endif %}>Supervisor</option>
-          <option value="worker" {% if rol=='worker' or not rol %}selected{% endif %}>Worker</option>
+          <option value="worker" {% if rol=='worker' or not rol %}selected{% endif %}>Trabajador</option>
         </select>
       </div>
       <button type="submit" class="login-btn">Guardar Cambios</button>

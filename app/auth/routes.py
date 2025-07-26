@@ -50,6 +50,7 @@ def login():
             flash('Usuario o contraseña no válidos', 'danger')
         else:
             session['usuario'] = usuario
+            session['user_id'] = user.get('id')
             session['finca_id'] = user.get('finca_id')
             session['rol'] = user.get('rol')
             flash('Bienvenido, ' + usuario, 'success')
@@ -99,23 +100,97 @@ def register():
 
 @auth_bp.route('/logout')
 def logout():
+    """Terminate the current user session."""
     session.pop('usuario', None)
+    session.pop('user_id', None)
+    session.pop('finca_id', None)
     flash('Sesión finalizada.', 'info')
     return redirect(url_for('auth.login'))
 
-@auth_bp.route('/edit_user')
-def edit_user():
-    """Placeholder page for editing users."""
+
+@auth_bp.route('/usuarios')
+def list_users():
+    """Display all users belonging to the current finca."""
     if 'usuario' not in session or session.get('rol') != 'admin':
         flash('Acceso no autorizado', 'danger')
         return redirect(url_for('auth.login'))
-    return render_template('editar_usuario.html')
+
+    with mysql.connection.cursor(DictCursor) as cursor:
+        cursor.execute(
+            'SELECT id, usuario, rol FROM usuarios WHERE finca_id = %s',
+            (session.get('finca_id'),),
+        )
+        users = cursor.fetchall() or []
+
+    return render_template('listar_usuarios.html', users=users)
 
 
-@auth_bp.route('/delete_user')
-def delete_user():
-    """Placeholder page for deleting users."""
+@auth_bp.route('/usuarios/editar/<int:user_id>', methods=['GET', 'POST'])
+def edit_user(user_id):
+    """Edit an existing user."""
+
     if 'usuario' not in session or session.get('rol') != 'admin':
         flash('Acceso no autorizado', 'danger')
         return redirect(url_for('auth.login'))
-    return render_template('eliminar_usuario.html')
+    with mysql.connection.cursor(DictCursor) as cursor:
+        cursor.execute(
+            'SELECT id, usuario, rol FROM usuarios WHERE id=%s AND finca_id=%s',
+            (user_id, session.get('finca_id')),
+        )
+        user = cursor.fetchone()
+
+    if not user:
+        flash('Usuario no encontrado', 'warning')
+        return redirect(url_for('auth.list_users'))
+
+    if request.method == 'POST':
+        usuario = request.form.get('usuario')
+        rol = request.form.get('rol')
+        contrasena = request.form.get('contrasena')
+
+        if contrasena:
+            hashed = generate_password_hash(contrasena)
+            query = 'UPDATE usuarios SET usuario=%s, rol=%s, contrasena=%s WHERE id=%s'
+            params = (usuario, rol, hashed, user_id)
+        else:
+            query = 'UPDATE usuarios SET usuario=%s, rol=%s WHERE id=%s'
+            params = (usuario, rol, user_id)
+
+        with mysql.connection.cursor() as cursor:
+            cursor.execute(query, params)
+            mysql.connection.commit()
+
+        flash('Usuario actualizado exitosamente.', 'success')
+        return redirect(url_for('auth.list_users'))
+
+    return render_template(
+        'editar_usuario.html', usuario=user['usuario'], rol=user['rol']
+    )
+@auth_bp.route('/usuarios/eliminar/<int:user_id>', methods=['GET', 'POST'])
+def delete_user(user_id):
+    """Delete an existing user."""
+
+
+    if 'usuario' not in session or session.get('rol') != 'admin':
+        flash('Acceso no autorizado', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    with mysql.connection.cursor(DictCursor) as cursor:
+        cursor.execute(
+            'SELECT id, usuario FROM usuarios WHERE id=%s AND finca_id=%s',
+            (user_id, session.get('finca_id')),
+        )
+        user = cursor.fetchone()
+
+    if not user:
+        flash('Usuario no encontrado', 'warning')
+        return redirect(url_for('auth.list_users'))
+
+    if request.method == 'POST':
+        with mysql.connection.cursor() as cursor:
+            cursor.execute('DELETE FROM usuarios WHERE id=%s', (user_id,))
+            mysql.connection.commit()
+        flash('Usuario eliminado correctamente.', 'success')
+        return redirect(url_for('auth.list_users'))
+
+    return render_template('eliminar_usuario.html', usuario=user['usuario'])
