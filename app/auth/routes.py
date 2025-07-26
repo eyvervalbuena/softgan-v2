@@ -102,3 +102,20 @@ def logout():
     session.pop('usuario', None)
     flash('Sesión finalizada.', 'info')
     return redirect(url_for('auth.login'))
+
+@auth_bp.route('/edit_user')
+def edit_user():
+    """Placeholder page for editing users."""
+    if 'usuario' not in session or session.get('rol') != 'admin':
+        flash('Acceso no autorizado', 'danger')
+        return redirect(url_for('auth.login'))
+    return render_template('edit_user.html')
+
+
+@auth_bp.route('/delete_user')
+def delete_user():
+    """Placeholder page for deleting users."""
+    if 'usuario' not in session or session.get('rol') != 'admin':
+        flash('Acceso no autorizado', 'danger')
+        return redirect(url_for('auth.login'))
+    return render_template('delete_user.html')
