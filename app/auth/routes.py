@@ -94,7 +94,7 @@ def register():
                     flash('Usuario registrado exitosamente.', 'success')
                     return redirect(url_for('main.dashboard'))
 
-    return render_template('register.html')
+    return render_template('crear_usuario.html')
 
 
 @auth_bp.route('/logout')
@@ -109,7 +109,7 @@ def edit_user():
     if 'usuario' not in session or session.get('rol') != 'admin':
         flash('Acceso no autorizado', 'danger')
         return redirect(url_for('auth.login'))
-    return render_template('edit_user.html')
+    return render_template('editar_usuario.html')
 
 
 @auth_bp.route('/delete_user')
@@ -118,4 +118,4 @@ def delete_user():
     if 'usuario' not in session or session.get('rol') != 'admin':
         flash('Acceso no autorizado', 'danger')
         return redirect(url_for('auth.login'))
-    return render_template('delete_user.html')
+    return render_template('eliminar_usuario.html')
