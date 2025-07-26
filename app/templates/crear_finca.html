@@ -19,12 +19,12 @@
                     <input type="number" class="form-control" id="tamano" name="tamano" placeholder="Superficie en hectáreas" />
                 </div>
                 <div class="mb-3">
-                    <label for="usuario" class="form-label">Usuario Administrador</label>
-                    <input type="text" class="form-control" id="usuario" name="usuario" placeholder="Nombre de usuario" />
+                    <label for="admin_usuario" class="form-label">Usuario Administrador</label>
+                    <input type="text" class="form-control" id="admin_usuario" name="admin_usuario" placeholder="Nombre de usuario" />
                 </div>
                 <div class="mb-3">
-                    <label for="contrasena" class="form-label">Contraseña</label>
-                    <input type="password" class="form-control" id="contrasena" name="contrasena" placeholder="Contraseña" />
+                    <label for="admin_contrasena" class="form-label">Contraseña</label>
+                    <input type="password" class="form-control" id="admin_contrasena" name="admin_contrasena" placeholder="Contraseña" />
                 </div>
                 <div class="d-flex justify-content-end">
                     <button type="submit" class="btn btn-success">Guardar</button>
@@ -43,8 +43,8 @@
             nombre: document.getElementById('nombre').value,
             ubicacion: document.getElementById('ubicacion').value,
             tamano: document.getElementById('tamano').value,
-            usuario: document.getElementById('usuario').value,
-            contrasena: document.getElementById('contrasena').value,
+            admin_usuario: document.getElementById('admin_usuario').value,
+            admin_contrasena: document.getElementById('admin_contrasena').value,
         };
         try {
             const resp = await fetch('/api/finca', {
