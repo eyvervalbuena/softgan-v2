@@ -7,11 +7,11 @@ from flask import (
     flash,
     session,
     request,
+    jsonify,
 )
 import logging
 import MySQLdb.cursors
 from werkzeug.security import check_password_hash, generate_password_hash
-import json
 from .. import mysql
 
 # ---------------------------------------------------------------------------
@@ -28,39 +28,45 @@ def crear_finca_form():
 
 @setup_bp.route("/api/finca", methods=["POST"])
 def crear_finca_api():
-    """Crea la finca inicial y el usuario administrador."""
-    data = request.get_json() or {}
-    cursor = mysql.connection.cursor()
-    cursor.execute(
-        "INSERT INTO fincas (nombre, encargado, direccion, hectareas, num_potreros, marca1, marca2, marca3, nit, email, edades_hembras, edades_machos) "
-        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-        (
-            data.get("nombre"),
-            data.get("encargado"),
-            data.get("direccion"),
-            data.get("hectareas"),
-            data.get("num_potreros"),
-            data.get("marca1"),
-            data.get("marca2"),
-            data.get("marca3"),
-            data.get("nit"),
-            data.get("email"),
-            data.get("edades_hembras"),
-            data.get("edades_machos"),
-        ),
-    )
-    finca_id = cursor.lastrowid
-    password = generate_password_hash(data.get("admin_contrasena"))
-    cursor.execute(
-        "INSERT INTO usuarios (finca_id, usuario, contrasena, rol) VALUES (%s, %s, %s, 'admin')",
-        (finca_id, data.get("admin_usuario"), password),
-    )
-    mysql.connection.commit()
-    cursor.close()
-    session["usuario"] = data.get("admin_usuario")
-    session["finca_id"] = finca_id
-    session["rol"] = "admin"
-    return json.dumps({"redirect": url_for("main.dashboard")})
+    """Crear la finca inicial y el usuario administrador."""
+    data = request.get_json() or request.form
+    try:
+        cursor = mysql.connection.cursor()
+        cursor.execute(
+            "INSERT INTO fincas (nombre, encargado, direccion, hectareas, num_potreros, marca1, marca2, marca3, nit, email, edades_hembras, edades_machos) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            (
+                data.get('nombre'),
+                data.get('encargado'),
+                data.get('direccion'),
+                data.get('hectareas'),
+                data.get('num_potreros'),
+                data.get('marca1'),
+                data.get('marca2'),
+                data.get('marca3'),
+                data.get('nit'),
+                data.get('email'),
+                data.get('edades_hembras'),
+                data.get('edades_machos'),
+            ),
+        )
+        finca_id = cursor.lastrowid
+        password = generate_password_hash(data.get('admin_contrasena'))
+        cursor.execute(
+            "INSERT INTO usuarios (finca_id, usuario, contrasena, rol) VALUES (%s, %s, %s, %s)",
+            (finca_id, data.get('admin_usuario'), password, 'admin'),
+        )
+        mysql.connection.commit()
+        cursor.close()
+    except Exception as e:
+        mysql.connection.rollback()
+        logging.exception("Error creating finca")
+        return jsonify(status="error", message=str(e)), 500
+
+    session['usuario'] = data.get('admin_usuario')
+    session['finca_id'] = finca_id
+    session['rol'] = 'admin'
+    return jsonify(status="success", redirect=url_for('main.dashboard'))
 
 # ---------------------------------------------------------------------------
 # Ganaderia routes
