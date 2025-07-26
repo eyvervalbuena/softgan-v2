@@ -1,6 +1,14 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, session, request
+from flask import (
+    Blueprint,
+    render_template,
+    redirect,
+    url_for,
+    flash,
+    session,
+    request,
+)
 import logging
-import MySQLdb.cursors
+from MySQLdb.cursors import DictCursor
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .. import mysql
@@ -22,7 +30,7 @@ def login():
             flash('Usuario y contraseña son obligatorios.', 'warning')
             return render_template('login.html')
 
-        with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+        with mysql.connection.cursor(DictCursor) as cursor:
             cursor.execute('SELECT * FROM usuarios WHERE usuario = %s', (usuario,))
             user = cursor.fetchone()
         logger.debug('User fetched from DB: %s', user)
@@ -49,7 +57,7 @@ def register():
         elif not usuario.isalnum():
             flash('El usuario solo puede contener letras y números.', 'warning')
         else:
-            with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+            with mysql.connection.cursor(DictCursor) as cursor:
                 cursor.execute('SELECT id FROM usuarios WHERE usuario = %s', (usuario,))
                 user = cursor.fetchone()
                 if user:
