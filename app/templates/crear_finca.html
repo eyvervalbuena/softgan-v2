@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Crear Finca{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="mb-4 text-center">Registro de Finca</h2>
+            <form method="post">
+                <div class="mb-3">
+                    <label for="nombre" class="form-label">Nombre de la Finca</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingrese el nombre" />
+                </div>
+                <div class="mb-3">
+                    <label for="ubicacion" class="form-label">Ubicación</label>
+                    <input type="text" class="form-control" id="ubicacion" name="ubicacion" placeholder="Ubicación de la finca" />
+                </div>
+                <div class="mb-3">
+                    <label for="tamano" class="form-label">Tamaño (ha)</label>
+                    <input type="number" class="form-control" id="tamano" name="tamano" placeholder="Superficie en hectáreas" />
+                </div>
+                <div class="mb-3">
+                    <label for="usuario" class="form-label">Usuario Administrador</label>
+                    <input type="text" class="form-control" id="usuario" name="usuario" placeholder="Nombre de usuario" />
+                </div>
+                <div class="mb-3">
+                    <label for="contrasena" class="form-label">Contraseña</label>
+                    <input type="password" class="form-control" id="contrasena" name="contrasena" placeholder="Contraseña" />
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.querySelector('form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const data = {
+            nombre: document.getElementById('nombre').value,
+            ubicacion: document.getElementById('ubicacion').value,
+            tamano: document.getElementById('tamano').value,
+            usuario: document.getElementById('usuario').value,
+            contrasena: document.getElementById('contrasena').value,
+        };
+        try {
+            const resp = await fetch('/api/finca', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+            const res = await resp.json();
+            if (res.status === 'success') {
+                window.location.href = res.redirect || '/dashboard';
+            } else {
+                alert(res.message || 'Error al registrar');
+            }
+        } catch (err) {
+            alert('Error al conectar con el servidor');
+        }
+    });
+</script>
+{% endblock %}
