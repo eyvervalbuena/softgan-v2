@@ -2,6 +2,7 @@ from flask import Flask, session
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
 import os
+from datetime import date, timedelta
 
 mysql = MySQL()
 
@@ -77,14 +78,19 @@ def create_app():
 
     @app.context_processor
     def inject_alertas():
+        """Expose tomorrow's alerts count and list for the logged in finca."""
         if 'finca_id' in session:
+            tomorrow = (date.today() + timedelta(days=1)).isoformat()
             with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
                 cursor.execute(
-                    'SELECT id, nombre, fecha FROM alertas WHERE finca_id=%s ORDER BY fecha DESC LIMIT 5',
-                    (session['finca_id'],),
+                    'SELECT id, nombre, fecha FROM alertas WHERE finca_id=%s AND fecha=%s ORDER BY fecha DESC LIMIT 5',
+                    (session['finca_id'], tomorrow),
                 )
                 recientes = cursor.fetchall() or []
-                cursor.execute('SELECT COUNT(*) AS c FROM alertas WHERE finca_id=%s', (session['finca_id'],))
+                cursor.execute(
+                    'SELECT COUNT(*) AS c FROM alertas WHERE finca_id=%s AND fecha=%s',
+                    (session['finca_id'], tomorrow),
+                )
                 count_row = cursor.fetchone() or {}
                 count = count_row.get('c', 0) if isinstance(count_row, dict) else count_row[0]
             return dict(alertas_recientes=recientes, alertas_count=count)
