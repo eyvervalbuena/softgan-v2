@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, session, request
+from datetime import date
 import MySQLdb.cursors
 
 from .. import mysql
@@ -12,19 +13,30 @@ def lista_alertas():
         return redirect(url_for('auth.login'))
     filtro = request.args.get('filtro', '').strip()
     fecha = request.args.get('fecha', '').strip()
-    query = "SELECT a.id, a.fecha, a.nombre, a.descripcion, a.tipo, u.usuario FROM alertas a LEFT JOIN usuarios u ON a.creada_por=u.id WHERE a.finca_id=%s"
+    query_base = (
+        "SELECT a.id, a.fecha, a.nombre, a.descripcion, a.tipo, a.estado, a.fecha_completada, u.usuario "
+        "FROM alertas a LEFT JOIN usuarios u ON a.creada_por=u.id WHERE a.finca_id=%s"
+    )
     params = [session.get('finca_id')]
     if filtro:
-        query += " AND a.nombre LIKE %s"
+        query_base += " AND a.nombre LIKE %s"
         params.append(f"%{filtro}%")
     if fecha:
-        query += " AND a.fecha=%s"
+        query_base += " AND a.fecha=%s"
         params.append(fecha)
-    query += " ORDER BY a.fecha DESC"
     with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
-        cursor.execute(query, tuple(params))
-        alertas = cursor.fetchall() or []
-    return render_template('listar_alertas.html', alertas=alertas, filtro=filtro, fecha=fecha)
+        cursor.execute(query_base + " AND a.estado='pendiente' ORDER BY a.fecha ASC", tuple(params))
+        pendientes = cursor.fetchall() or []
+        cursor.execute(query_base + " AND a.estado='completada' ORDER BY a.fecha_completada DESC", tuple(params))
+        completadas = cursor.fetchall() or []
+    return render_template(
+        'listar_alertas.html',
+        pendientes=pendientes,
+        completadas=completadas,
+        filtro=filtro,
+        fecha=fecha,
+        hoy=date.today(),
+    )
 
 
 @alertas_bp.route('/crear', methods=['GET', 'POST'])
@@ -38,8 +50,7 @@ def crear_alerta():
         descripcion = request.form.get('descripcion')
         with mysql.connection.cursor() as cursor:
             cursor.execute(
-                "INSERT INTO alertas (fecha, nombre, descripcion, tipo, creada_por, finca_id) VALUES (%s, %s, %s, 'manual', %s, %s)",
-                (fecha, nombre, descripcion, session.get('user_id'), session.get('finca_id')),
+                "INSERT INTO alertas (fecha, nombre, descripcion, tipo, creada_por, finca_id, estado) VALUES (%s, %s, %s, 'manual', %s, %s, 'pendiente')",
             )
             mysql.connection.commit()
         flash('Alerta creada correctamente.', 'success')
@@ -70,7 +81,23 @@ def editar_alerta(alerta_id):
             mysql.connection.commit()
         flash('Alerta actualizada correctamente.', 'success')
         return redirect(url_for('alertas.lista_alertas'))
-    return render_template('editar_alerta.html', alerta=alerta)
+    return render_template('eliminar_alerta.html', alerta=alerta)
+
+
+@alertas_bp.route('/completar/<int:alerta_id>', methods=['POST'])
+def completar_alerta(alerta_id):
+    """Mark an alert as completed."""
+    if 'usuario' not in session:
+        flash('Debes iniciar sesión para acceder.', 'warning')
+        return redirect(url_for('auth.login'))
+    with mysql.connection.cursor() as cursor:
+        cursor.execute(
+            "UPDATE alertas SET estado='completada', fecha_completada=%s WHERE id=%s AND finca_id=%s",
+            (date.today(), alerta_id, session.get('finca_id')),
+        )
+        mysql.connection.commit()
+    flash('Alerta marcada como completada.', 'success')
+    return redirect(url_for('alertas.lista_alertas'))
 
 
 @alertas_bp.route('/eliminar/<int:alerta_id>', methods=['GET', 'POST'])

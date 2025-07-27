@@ -48,12 +48,27 @@ def crear_tablas():
                 tipo ENUM('manual','automatica') DEFAULT 'manual',
                 creada_por INT,
                 finca_id INT,
+                estado ENUM('pendiente','completada') DEFAULT 'pendiente',
+                fecha_completada DATE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (creada_por) REFERENCES usuarios(id) ON DELETE SET NULL,
                 FOREIGN KEY (finca_id) REFERENCES fincas(id) ON DELETE CASCADE
             )"""
         )
-
+        cursor.execute(
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='alertas' AND COLUMN_NAME='estado'"
+        )
+        row = cursor.fetchone()
+        if row and list(row.values())[0] == 0:
+            cursor.execute(
+                "ALTER TABLE alertas ADD COLUMN estado ENUM('pendiente','completada') DEFAULT 'pendiente'"
+            )
+        cursor.execute(
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='alertas' AND COLUMN_NAME='fecha_completada'"
+        )
+        row = cursor.fetchone()
+        if row and list(row.values())[0] == 0:
+            cursor.execute("ALTER TABLE alertas ADD COLUMN fecha_completada DATE")
 def create_app():
     app = Flask(__name__)
     app.config.from_pyfile('config.py')
@@ -83,12 +98,12 @@ def create_app():
             tomorrow = (date.today() + timedelta(days=1)).isoformat()
             with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
                 cursor.execute(
-                    'SELECT id, nombre, fecha FROM alertas WHERE finca_id=%s AND fecha=%s ORDER BY fecha DESC LIMIT 5',
+                    'SELECT id, nombre, fecha FROM alertas WHERE finca_id=%s AND fecha=%s AND estado="pendiente" ORDER BY fecha ASC LIMIT 5',
                     (session['finca_id'], tomorrow),
                 )
                 recientes = cursor.fetchall() or []
                 cursor.execute(
-                    'SELECT COUNT(*) AS c FROM alertas WHERE finca_id=%s AND fecha=%s',
+                    'SELECT COUNT(*) AS c FROM alertas WHERE finca_id=%s AND fecha=%s AND estado="pendiente"',
                     (session['finca_id'], tomorrow),
                 )
                 count_row = cursor.fetchone() or {}

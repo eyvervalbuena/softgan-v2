@@ -25,13 +25,16 @@
       </tr>
     </thead>
     <tbody>
-      {% for a in alertas %}
-      <tr>
+      {% for a in pendientes %}
+      <tr class="{% if a.estado == 'pendiente' and a.fecha < hoy %}table-danger{% endif %}">
         <td>{{ a.fecha }}</td>
         <td>{{ a.nombre }}</td>
         <td>{{ a.descripcion }}</td>
         <td>{{ a.usuario or 'N/A' }}</td>
-        <td>
+        <td class="d-flex gap-1">
+          <form method="post" action="{{ url_for('alertas.completar_alerta', alerta_id=a.id) }}">
+            <button class="btn btn-sm btn-success" type="submit">Completar</button>
+          </form>
           {% if session.get('rol') in ['admin','supervisor'] %}
           <a class="btn btn-sm btn-primary" href="{{ url_for('alertas.editar_alerta', alerta_id=a.id) }}">Editar</a>
           {% endif %}
@@ -39,6 +42,28 @@
           <a class="btn btn-sm btn-danger" href="{{ url_for('alertas.eliminar_alerta', alerta_id=a.id) }}">Eliminar</a>
           {% endif %}
         </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  
+  <h5 class="mt-4">Alertas Completadas</h5>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Título</th>
+        <th>Descripción</th>
+        <th>Fecha Completada</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in completadas %}
+      <tr>
+        <td>{{ a.fecha }}</td>
+        <td>{{ a.nombre }}</td>
+        <td>{{ a.descripcion }}</td>
+        <td>{{ a.fecha_completada }}</td>
       </tr>
       {% endfor %}
     </tbody>
