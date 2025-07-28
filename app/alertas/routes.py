@@ -48,9 +48,19 @@ def crear_alerta():
         fecha = request.form.get('fecha')
         nombre = request.form.get('nombre')
         descripcion = request.form.get('descripcion')
+        estado = request.form.get('estado', 'pendiente')
         with mysql.connection.cursor() as cursor:
             cursor.execute(
-                "INSERT INTO alertas (fecha, nombre, descripcion, tipo, creada_por, finca_id, estado) VALUES (%s, %s, %s, 'manual', %s, %s, 'pendiente')",
+               "INSERT INTO alertas (fecha, nombre, descripcion, tipo, creada_por, finca_id, estado) "
+                "VALUES (%s, %s, %s, 'manual', %s, %s, %s)",
+                (
+                    fecha,
+                    nombre,
+                    descripcion,
+                    session.get('user_id'),
+                    session.get('finca_id'),
+                    estado,
+                ),
             )
             mysql.connection.commit()
         flash('Alerta creada correctamente.', 'success')
@@ -81,7 +91,7 @@ def editar_alerta(alerta_id):
             mysql.connection.commit()
         flash('Alerta actualizada correctamente.', 'success')
         return redirect(url_for('alertas.lista_alertas'))
-    return render_template('eliminar_alerta.html', alerta=alerta)
+    return render_template('editar_alerta.html', alerta=alerta)
 
 
 @alertas_bp.route('/completar/<int:alerta_id>', methods=['POST'])
