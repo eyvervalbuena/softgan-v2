@@ -9,7 +9,7 @@
                     <h5 class="mb-0">Registro de Insumos</h5>
                     </div>
                 <div class="card-body bg-light">
-                    <form>
+                    <form method="POST">
                         <div class="row">
                             <div class="col-md-12 mb-3">
                                 <label for="nombreInsumo" class="form-label">Nombre del Insumo</label>
@@ -61,24 +61,60 @@
         <!-- Tabla de Datos -->
         <div class="col-md-8 pe-4">
             <h5 class="text-success text-center mb-3">Datos de Insumos</h5>
+            <input id="searchBar" type="text" class="form-control mb-2" placeholder="Buscar...">
             <div class="table-responsive">
-              <table class="table table-bordered table-striped">
+              <table id="insumosTable" class="table table-bordered table-striped">>
                 <thead class="table-header-green text-center">
                         <tr>
                             <th>Nombre</th>
-                            <th>Codigo</th>
+                            <th>Código</th>
                             <th>Cantidad</th>
                             <th>Unidad</th>
                             <th>Fecha de Ingreso</th>
                             <th>Fecha de Vencimiento</th>
                             <th>Observaciones</th>
+                            {% if session.get('rol') in ['admin','supervisor'] %}<th>Acciones</th>{% endif %}
                         </tr>
                     </thead>
-                    <tbody></tbody>
+                    <tbody>
+                        {% for i in insumos %}
+                        <tr>
+                            <td>{{ i.nombre }}</td>
+                            <td>{{ i.codigo }}</td>
+                            <td>{{ i.cantidad }}</td>
+                            <td>{{ i.unidad }}</td>
+                            <td>{{ i.fecha_ingreso }}</td>
+                            <td>{{ i.fecha_vencimiento or '' }}</td>
+                            <td>{{ i.observaciones or '' }}</td>
+                            {% if session.get('rol') in ['admin','supervisor'] %}
+                            <td class="d-flex gap-1">
+                                <a class="btn btn-sm btn-primary" href="{{ url_for('almacen.editar_insumo', insumo_id=i.id) }}">Editar</a>
+                                {% if session.get('rol') == 'admin' %}
+                                <a class="btn btn-sm btn-danger" href="{{ url_for('almacen.eliminar_insumo', insumo_id=i.id) }}">Eliminar</a>
+                                {% endif %}
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  const search = document.getElementById('searchBar');
+  if (search) {
+    search.addEventListener('keyup', () => {
+      const value = search.value.toLowerCase();
+      document.querySelectorAll('#insumosTable tbody tr').forEach(tr => {
+        tr.style.display = tr.textContent.toLowerCase().includes(value) ? '' : 'none';
+      });
+    });
+  }
+</script>
 {% endblock %}

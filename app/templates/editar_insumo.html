@@ -1,0 +1,42 @@
+
+{% extends 'base.html' %}
+{% block title %}Editar Insumo{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-center mt-4">
+  <div class="login-box">
+    <h4 class="mb-3">Editar Insumo</h4>
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <input type="text" name="nombre" class="form-control" value="{{ insumo.nombre }}" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Código</label>
+        <input type="text" name="codigo" class="form-control" value="{{ insumo.codigo }}" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Cantidad</label>
+        <input type="number" name="cantidad" class="form-control" value="{{ insumo.cantidad }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Unidad</label>
+        <input type="text" name="unidad" class="form-control" value="{{ insumo.unidad }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Fecha Ingreso</label>
+        <input type="date" name="fecha_ingreso" class="form-control" value="{{ insumo.fecha_ingreso }}" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Fecha Vencimiento</label>
+        <input type="date" name="fecha_vencimiento" class="form-control" value="{{ insumo.fecha_vencimiento }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Observaciones</label>
+        <input type="text" name="observaciones" class="form-control" value="{{ insumo.observaciones }}">
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Actualizar</button>
+    </form>
+    <a href="{{ url_for('almacen.almacen_insumos') }}" class="btn btn-secondary w-100 mt-2">Volver</a>
+  </div>
+</div>
+{% endblock %}

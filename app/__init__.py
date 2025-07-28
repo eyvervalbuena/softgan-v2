@@ -69,6 +69,21 @@ def crear_tablas():
         row = cursor.fetchone()
         if row and list(row.values())[0] == 0:
             cursor.execute("ALTER TABLE alertas ADD COLUMN fecha_completada DATE")
+            
+        cursor.execute(
+            """CREATE TABLE IF NOT EXISTS insumos (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                nombre VARCHAR(100) NOT NULL,
+                codigo VARCHAR(50) NOT NULL UNIQUE,
+                cantidad DECIMAL(10,2),
+                unidad VARCHAR(20),
+                fecha_ingreso DATE NOT NULL,
+                fecha_vencimiento DATE,
+                observaciones TEXT,
+                creado_por INT,
+                FOREIGN KEY (creado_por) REFERENCES usuarios(id) ON DELETE SET NULL
+            )"""
+        )
 def create_app():
     app = Flask(__name__)
     app.config.from_pyfile('config.py')
