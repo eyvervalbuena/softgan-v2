@@ -3,13 +3,6 @@
 {% block content %}
 <div class="container mt-4">
   <h4 class="mb-3">Usuarios Registrados</h4>
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }}">{{ message }}</div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
   <table class="table table-bordered">
     <thead>
       <tr>

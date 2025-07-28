@@ -12,13 +12,6 @@
 <div class="d-flex justify-content-center mt-4">
   <div class="login-box">
     <h4 class="mb-3">Iniciar Sesión</h4>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category }} mt-2">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
     <form method="POST">
       <div class="mb-3 input-group">
         <span class="input-group-text"><i class="bi bi-person"></i></span>
