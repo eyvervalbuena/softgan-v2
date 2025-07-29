@@ -30,7 +30,7 @@
         <td>{{ a.fecha }}</td>
         <td>{{ a.nombre }}</td>
         <td>{{ a.descripcion }}</td>
-        <td>{{ a.usuario or 'N/A' }}</td>
+        <td>{{ a.usuario or ('Autom\u00e1tica' if a.tipo == 'automatica' else 'N/A') }}</td>
         <td class="d-flex gap-1">
           <form method="post" action="{{ url_for('alertas.completar_alerta', alerta_id=a.id) }}">
             <button class="btn btn-sm btn-success" type="submit">Completar</button>

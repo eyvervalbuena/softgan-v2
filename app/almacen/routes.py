@@ -8,7 +8,7 @@ from flask import (
     request,
 )
 import MySQLdb.cursors
-
+from datetime import date
 from .. import mysql
 
 almacen_bp = Blueprint('almacen', __name__, url_prefix='/almacen')
@@ -58,6 +58,25 @@ def almacen_insumos():
                         ),
                     )
                     mysql.connection.commit()
+                    if fecha_vencimiento:
+                        try:
+                            fv = date.fromisoformat(fecha_vencimiento)
+                            dias = (fv - date.today()).days
+                            if 0 <= dias <= 30:
+                                cursor.execute(
+                                    "SELECT id FROM alertas WHERE tipo='automatica' AND nombre=%s AND finca_id=%s AND estado='pendiente'",
+                                    (nombre, session.get('finca_id')),
+                                )
+                                existe = cursor.fetchone()
+                                if not existe:
+                                    cursor.execute(
+                                        "INSERT INTO alertas (fecha, nombre, descripcion, tipo, creada_por, finca_id, estado) "
+                                        "VALUES (%s, %s, 'Vencimiento pr\xc3\xb3ximo', 'automatica', NULL, %s, 'pendiente')",
+                                        (date.today(), nombre, session.get('finca_id')),
+                                    )
+                                    mysql.connection.commit()
+                        except ValueError:
+                            pass
                 flash('Insumo guardado correctamente.', 'success')
             except Exception:
                 mysql.connection.rollback()
@@ -67,9 +86,36 @@ def almacen_insumos():
         cursor.execute(
             'SELECT i.*, u.usuario FROM insumos i '
             'LEFT JOIN usuarios u ON i.creado_por=u.id '
-            'ORDER BY fecha_ingreso DESC'
+            'ORDER BY codigo ASC'
         )
         insumos = cursor.fetchall() or []
+        
+    hoy = date.today()
+    with mysql.connection.cursor() as cursor:
+        for ins in insumos:
+            clase = ''
+            fv = ins.get('fecha_vencimiento')
+            if fv:
+                dias = (fv - hoy).days
+                if dias < 0:
+                    clase = 'table-secondary'
+                elif dias <= 7:
+                    clase = 'table-danger'
+                elif dias <= 30:
+                    clase = 'table-warning'
+                if 0 <= dias <= 30:
+                    cursor.execute(
+                        "SELECT id FROM alertas WHERE tipo='automatica' AND nombre=%s AND finca_id=%s AND estado='pendiente'",
+                        (ins['nombre'], session.get('finca_id')),
+                    )
+                    if not cursor.fetchone():
+                        cursor.execute(
+                            "INSERT INTO alertas (fecha, nombre, descripcion, tipo, creada_por, finca_id, estado) "
+                            "VALUES (%s, %s, 'Vencimiento pr\xc3\xb3ximo', 'automatica', NULL, %s, 'pendiente')",
+                            (hoy, ins['nombre'], session.get('finca_id')),
+                        )
+            ins['row_class'] = clase
+        mysql.connection.commit()
 
     return render_template('almacen_insumos.html', insumos=insumos)
 
@@ -160,6 +206,25 @@ def editar_insumo(insumo_id):
                 ),
             )
             mysql.connection.commit()
+            if fecha_vencimiento:
+                try:
+                    fv = date.fromisoformat(fecha_vencimiento)
+                    dias = (fv - date.today()).days
+                    if 0 <= dias <= 30:
+                        cursor.execute(
+                            "SELECT id FROM alertas WHERE tipo='automatica' AND nombre=%s AND finca_id=%s AND estado='pendiente'",
+                            (nombre, session.get('finca_id')),
+                        )
+                        existe = cursor.fetchone()
+                        if not existe:
+                            cursor.execute(
+                                "INSERT INTO alertas (fecha, nombre, descripcion, tipo, creada_por, finca_id, estado) "
+                                "VALUES (%s, %s, 'Vencimiento pr\xc3\xb3ximo', 'automatica', NULL, %s, 'pendiente')",
+                                (date.today(), nombre, session.get('finca_id')),
+                            )
+                            mysql.connection.commit()
+                except ValueError:
+                    pass
         flash('Insumo actualizado correctamente.', 'success')
         return redirect(url_for('almacen.almacen_insumos'))
 

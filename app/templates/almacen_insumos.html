@@ -38,7 +38,7 @@
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label for="fechaVencimiento" class="form-label">Fecha de Vencimiento</label>
-                                <input type="date" class="form-control" id="fechaVencimiento" name="fechaVencimiento" required>
+                                <input type="date" class="form-control" id="fechaVencimiento" name="fechaVencimiento">
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label for="Observaciones" class="form-label">Observaciones</label>
@@ -78,13 +78,13 @@
                     </thead>
                     <tbody>
                         {% for i in insumos %}
-                        <tr>
+                        <tr class="{{ i.row_class }}">
                             <td>{{ i.nombre }}</td>
                             <td>{{ i.codigo }}</td>
                             <td>{{ i.cantidad }}</td>
                             <td>{{ i.unidad }}</td>
                             <td>{{ i.fecha_ingreso }}</td>
-                            <td>{{ i.fecha_vencimiento or '' }}</td>
+                            <td>{{ i.fecha_vencimiento or 'N/A' }}</td>
                             <td>{{ i.observaciones or '' }}</td>
                             {% if session.get('rol') in ['admin','supervisor'] %}
                             <td class="d-flex gap-1">
