@@ -26,7 +26,11 @@ def almacen_insumos():
 
         nombre = request.form.get('nombreInsumo')
         codigo = request.form.get('Codigo')
-        cantidad = request.form.get('cantidad') or 0
+        cantidad_raw = request.form.get('cantidad')
+        try:
+            cantidad = float(cantidad_raw)
+        except (TypeError, ValueError):
+            cantidad = 0
         unidad = request.form.get('unidad')
         fecha_ingreso = request.form.get('fechaIngreso')
         fecha_vencimiento = request.form.get('fechaVencimiento') or None
@@ -34,6 +38,8 @@ def almacen_insumos():
 
         if not nombre or not codigo or not fecha_ingreso:
             flash('Nombre, código y fecha de ingreso son obligatorios.', 'warning')
+        if cantidad <= 0:
+            flash('La cantidad debe ser mayor que cero.', 'warning')
         else:
             try:
                 with mysql.connection.cursor() as cursor:
@@ -85,7 +91,11 @@ def editar_insumo(insumo_id):
     if request.method == 'POST':
         nombre = request.form.get('nombre')
         codigo = request.form.get('codigo')
-        cantidad = request.form.get('cantidad') or 0
+        cantidad_raw = request.form.get('cantidad')
+        try:
+            cantidad = float(cantidad_raw)
+        except (TypeError, ValueError):
+            cantidad = 0
         unidad = request.form.get('unidad')
         fecha_ingreso = request.form.get('fecha_ingreso')
         fecha_vencimiento = request.form.get('fecha_vencimiento') or None
@@ -118,7 +128,22 @@ def editar_insumo(insumo_id):
                 )
             )
             return render_template('editar_insumo.html', insumo=insumo)
+        
 
+        elif cantidad <= 0:
+            flash('La cantidad debe ser mayor que cero.', 'warning')
+            insumo.update(
+                dict(
+                    nombre=nombre,
+                    codigo=codigo,
+                    cantidad=cantidad_raw,
+                    unidad=unidad,
+                    fecha_ingreso=fecha_ingreso,
+                    fecha_vencimiento=fecha_vencimiento,
+                    observaciones=observaciones,
+                )
+            )
+            return render_template('editar_insumo.html', insumo=insumo)
 
         with mysql.connection.cursor() as cursor:
             cursor.execute(
