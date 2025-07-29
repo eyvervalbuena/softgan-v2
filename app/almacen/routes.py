@@ -70,9 +70,9 @@ def almacen_insumos():
                                 existe = cursor.fetchone()
                                 if not existe:
                                     cursor.execute(
-                                        "INSERT INTO alertas (fecha, nombre, descripcion, tipo, creada_por, finca_id, estado) "
-                                        "VALUES (%s, %s, 'Vencimiento pr\xc3\xb3ximo', 'automatica', NULL, %s, 'pendiente')",
-                                        (date.today(), nombre, session.get('finca_id')),
+                                        "INSERT INTO alertas (fecha, nombre, descripcion, tipo, creada_por, finca_id, estado, visto) "
+                                        "VALUES (%s, %s, 'Vencimiento pr\xc3\xb3ximo', 'automatica', NULL, %s, 'pendiente', 0)",
+                                        (fecha_vencimiento, nombre, session.get('finca_id')),
                                     )
                                     mysql.connection.commit()
                         except ValueError:
@@ -110,9 +110,9 @@ def almacen_insumos():
                     )
                     if not cursor.fetchone():
                         cursor.execute(
-                            "INSERT INTO alertas (fecha, nombre, descripcion, tipo, creada_por, finca_id, estado) "
-                            "VALUES (%s, %s, 'Vencimiento pr\xc3\xb3ximo', 'automatica', NULL, %s, 'pendiente')",
-                            (hoy, ins['nombre'], session.get('finca_id')),
+                            "INSERT INTO alertas (fecha, nombre, descripcion, tipo, creada_por, finca_id, estado, visto) "
+                            "VALUES (%s, %s, 'Vencimiento pr\xc3\xb3ximo', 'automatica', NULL, %s, 'pendiente', 0)",
+                            (ins['fecha_vencimiento'], ins['nombre'], session.get('finca_id')),
                         )
             ins['row_class'] = clase
         mysql.connection.commit()
@@ -218,9 +218,9 @@ def editar_insumo(insumo_id):
                         existe = cursor.fetchone()
                         if not existe:
                             cursor.execute(
-                                "INSERT INTO alertas (fecha, nombre, descripcion, tipo, creada_por, finca_id, estado) "
-                                "VALUES (%s, %s, 'Vencimiento pr\xc3\xb3ximo', 'automatica', NULL, %s, 'pendiente')",
-                                (date.today(), nombre, session.get('finca_id')),
+                                "INSERT INTO alertas (fecha, nombre, descripcion, tipo, creada_por, finca_id, estado, visto) "
+                                "VALUES (%s, %s, 'Vencimiento pr\xc3\xb3ximo', 'automatica', NULL, %s, 'pendiente', 0)",
+                                (fecha_vencimiento, nombre, session.get('finca_id')),
                             )
                             mysql.connection.commit()
                 except ValueError:

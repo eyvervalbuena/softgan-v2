@@ -11,6 +11,12 @@ def lista_alertas():
     if 'usuario' not in session:
         flash('Debes iniciar sesión para acceder.', 'warning')
         return redirect(url_for('auth.login'))
+    with mysql.connection.cursor() as cursor:
+        cursor.execute(
+            "UPDATE alertas SET visto=1 WHERE finca_id=%s AND estado='pendiente' AND visto=0",
+            (session.get('finca_id'),),
+        )
+        mysql.connection.commit()
     filtro = request.args.get('filtro', '').strip()
     fecha = request.args.get('fecha', '').strip()
     query_base = (
@@ -51,8 +57,8 @@ def crear_alerta():
         estado = request.form.get('estado', 'pendiente')
         with mysql.connection.cursor() as cursor:
             cursor.execute(
-               "INSERT INTO alertas (fecha, nombre, descripcion, tipo, creada_por, finca_id, estado) "
-                "VALUES (%s, %s, %s, 'manual', %s, %s, %s)",
+               "INSERT INTO alertas (fecha, nombre, descripcion, tipo, creada_por, finca_id, estado, visto) "
+                "VALUES (%s, %s, %s, 'manual', %s, %s, %s, 0)",
                 (
                     fecha,
                     nombre,

@@ -50,6 +50,7 @@ def crear_tablas():
                 finca_id INT,
                 estado ENUM('pendiente','completada') DEFAULT 'pendiente',
                 fecha_completada DATE,
+                visto TINYINT(1) DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (creada_por) REFERENCES usuarios(id) ON DELETE SET NULL,
                 FOREIGN KEY (finca_id) REFERENCES fincas(id) ON DELETE CASCADE
@@ -69,6 +70,13 @@ def crear_tablas():
         row = cursor.fetchone()
         if row and list(row.values())[0] == 0:
             cursor.execute("ALTER TABLE alertas ADD COLUMN fecha_completada DATE")
+            
+        cursor.execute(
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='alertas' AND COLUMN_NAME='visto'"
+        )
+        row = cursor.fetchone()
+        if row and list(row.values())[0] == 0:
+            cursor.execute("ALTER TABLE alertas ADD COLUMN visto TINYINT(1) DEFAULT 0")
             
         cursor.execute(
             """CREATE TABLE IF NOT EXISTS insumos (
@@ -112,7 +120,7 @@ def create_app():
         if 'finca_id' in session:
             with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
                 cursor.execute(
-                    "SELECT COUNT(*) AS c FROM alertas WHERE finca_id=%s AND tipo='automatica' AND estado='pendiente'",
+                    "SELECT COUNT(*) AS c FROM alertas WHERE finca_id=%s AND estado='pendiente' AND visto=0",
                     (session['finca_id'],),
                 )
                 count_row = cursor.fetchone() or {}
