@@ -1,6 +1,9 @@
 
 {% extends 'base.html' %}
 {% block title %}Editar Insumo{% endblock %}
+{% block head_extra %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-center mt-4">
   <div class="login-box">
@@ -39,4 +42,21 @@
     <a href="{{ url_for('almacen.almacen_insumos') }}" class="btn btn-secondary w-100 mt-2">Volver</a>
   </div>
 </div>
+  {% endblock %}
+{% block scripts %}
+{{ super() }}
+<script>
+$(function(){
+  const codigoInput = $('input[name="codigo"]');
+  codigoInput.on('blur', function(){
+    const codigo = codigoInput.val().trim();
+    if(!codigo) return;
+    $.get('{{ url_for('almacen.validar_codigo_api') }}', {codigo: codigo, id: {{ insumo.id }}}, function(data){
+      if(data.exists){
+        alert('Este c\u00f3digo ya est\u00e1 en uso por otro insumo.');
+      }
+    });
+  });
+});
+</script>
 {% endblock %}

@@ -91,6 +91,35 @@ def editar_insumo(insumo_id):
         fecha_vencimiento = request.form.get('fecha_vencimiento') or None
         observaciones = request.form.get('observaciones')
 
+
+        with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+            cursor.execute(
+                'SELECT id FROM insumos WHERE codigo=%s AND id!=%s',
+                (codigo, insumo_id),
+            )
+            existente = cursor.fetchone()
+
+        if existente:
+            flash(
+                'Este c\xc3\xb3digo ya est\xc3\xa1 en uso por otro insumo. Por favor usa uno \xc3\xbAnico.',
+                'warning',
+            )
+
+            # Actualizamos el diccionario para mostrar los valores ingresados
+            insumo.update(
+                dict(
+                    nombre=nombre,
+                    codigo=codigo,
+                    cantidad=cantidad,
+                    unidad=unidad,
+                    fecha_ingreso=fecha_ingreso,
+                    fecha_vencimiento=fecha_vencimiento,
+                    observaciones=observaciones,
+                )
+            )
+            return render_template('editar_insumo.html', insumo=insumo)
+
+
         with mysql.connection.cursor() as cursor:
             cursor.execute(
                 'UPDATE insumos SET nombre=%s, codigo=%s, cantidad=%s, unidad=%s, fecha_ingreso=%s, fecha_vencimiento=%s, observaciones=%s WHERE id=%s',
@@ -144,3 +173,16 @@ def almacen_maquinaria():
 @almacen_bp.route('/agroquimicos')
 def almacen_agroquimicos():
     return render_template('almacen_agroquimicos.html')
+#API para validar c\xc3\xb3digo de insumo
+@almacen_bp.route('/api/validar-codigo')
+def validar_codigo_api():
+    """Devuelve si un c\xc3\xb3digo ya existe para otro insumo."""
+    codigo = request.args.get('codigo')
+    insumo_id = request.args.get('id', type=int) or 0
+    with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+        cursor.execute(
+            'SELECT id FROM insumos WHERE codigo=%s AND id!=%s',
+            (codigo, insumo_id),
+        )
+        existente = cursor.fetchone()
+    return {'exists': bool(existente)}
