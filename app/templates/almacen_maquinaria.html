@@ -9,7 +9,7 @@
                     <h5 class="mb-0">Registro de Maquinaria</h5>
                     </div>
                 <div class="card-body bg-light">
-                    <form>
+                    <form method="POST">
                         <div class="row">
                             <div class="col-md-12 mb-3">
                                 <label for="nombreInsumo" class="form-label">Nombre del Insumo</label>
@@ -29,12 +29,12 @@
                                 <input type="date" class="form-control" id="fechaIngreso" name="fechaIngreso" required>
                             </div>
                             <div class="col-md-8 mb-3">
-                                <label for="marca" class="form-label">marca</label>
-                                <input type="text" class="form-control" id="marca" name="marca" required>
+                                <label for="marca" class="form-label">Marca</label>
+                                <input type="text" class="form-control" id="marca" name="marca">
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label for="serie" class="form-label">serie</label>
-                                <input type="text" class="form-control" id="serie" name="serie" required>
+                                <label for="serie" class="form-label">Serie</label>
+                                <input type="text" class="form-control" id="serie" name="serie">
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label for="Observaciones" class="form-label">Observaciones</label>
@@ -57,23 +57,60 @@
         <!-- Tabla de Datos -->
         <div class="col-md-8 pe-4">
             <h5 class="text-success text-center mb-3">Datos de Maquinaria</h5>
+            <input id="searchBar" type="text" class="form-control mb-2" placeholder="Buscar...">
             <div class="table-responsive">
-              <table class="table table-bordered table-striped">
+              <table id="maquinariaTable" class="table table-bordered table-striped">
                 <thead class="table-header-green text-center">
                         <tr>
                             <th>Nombre</th>
-                            <th>Codigo</th>
+                            <th>Código</th>
                             <th>Cantidad</th>
-                            <th>Unidad</th>
                             <th>Fecha de Ingreso</th>
                             <th>Marca</th>
                             <th>Serie</th>
                             <th>Observaciones</th>
+                            {% if session.get('rol') in ['admin','supervisor'] %}<th>Acciones</th>{% endif %}
                         </tr>
                     </thead>
+                    <tbody>
+                        {% for m in maquinaria %}
+                        <tr>
+                            <td>{{ m.nombre }}</td>
+                            <td>{{ m.codigo }}</td>
+                            <td>{{ m.cantidad }}</td>
+                            <td>{{ m.fecha_ingreso }}</td>
+                            <td>{{ m.marca or '' }}</td>
+                            <td>{{ m.serie or '' }}</td>
+                            <td>{{ m.observaciones or '' }}</td>
+                            {% if session.get('rol') in ['admin','supervisor'] %}
+                            <td class="d-flex gap-1">
+                                <a class="btn btn-sm btn-primary" href="{{ url_for('almacen.editar_maquinaria', maq_id=m.id) }}">Editar</a>
+                                {% if session.get('rol') == 'admin' %}
+                                <a class="btn btn-sm btn-danger" href="{{ url_for('almacen.eliminar_maquinaria', maq_id=m.id) }}">Eliminar</a>
+                                {% endif %}
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  const search = document.getElementById('searchBar');
+  if (search) {
+    search.addEventListener('keyup', () => {
+      const value = search.value.toLowerCase();
+      document.querySelectorAll('#maquinariaTable tbody tr').forEach(tr => {
+        tr.style.display = tr.textContent.toLowerCase().includes(value) ? '' : 'none';
+      });
+    });
+  }
+</script>
 {% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Editar Maquinaria{% endblock %}
+{% block head_extra %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-center mt-4">
+  <div class="login-box">
+    <h4 class="mb-3">Editar Maquinaria</h4>
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <input type="text" name="nombre" class="form-control" value="{{ maquinaria.nombre }}" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Código</label>
+        <input type="number" name="codigo" class="form-control" value="{{ maquinaria.codigo }}" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Cantidad</label>
+        <input type="number" min="0" name="cantidad" class="form-control" value="{{ maquinaria.cantidad }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Fecha Ingreso</label>
+        <input type="date" name="fecha_ingreso" class="form-control" value="{{ maquinaria.fecha_ingreso }}" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Marca</label>
+        <input type="text" name="marca" class="form-control" value="{{ maquinaria.marca }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Serie</label>
+        <input type="text" name="serie" class="form-control" value="{{ maquinaria.serie }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Observaciones</label>
+        <input type="text" name="observaciones" class="form-control" value="{{ maquinaria.observaciones }}">
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Actualizar</button>
+    </form>
+    <a href="{{ url_for('almacen.almacen_maquinaria') }}" class="btn btn-secondary w-100 mt-2">Volver</a>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script>
+$(function(){
+  const codigoInput = $('input[name="codigo"]');
+  codigoInput.on('blur', function(){
+    const codigo = codigoInput.val().trim();
+    if(!codigo) return;
+    $.get('{{ url_for('almacen.validar_codigo_maquinaria_api') }}', {codigo: codigo, id: {{ maquinaria.id }}}, function(data){
+      if(data.exists){
+        alert('Este código ya está en uso por otra maquinaria.');
+      }
+    });
+  });
+});
+</script>
+{% endblock %}
