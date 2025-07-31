@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Eliminar Hembra{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-center mt-4">
+  <div class="login-box">
+    <h4 class="mb-3">Eliminar Hembra</h4>
+    <p>¿Desea eliminar la hembra "{{ hembra.nombre }}"?</p>
+    <form method="POST">
+      <button type="submit" class="btn btn-danger w-100">Eliminar</button>
+    </form>
+    <a href="{{ url_for('ganaderia.registro_hembras') }}" class="btn btn-secondary w-100 mt-2">Cancelar</a>
+  </div>
+</div>
+{% endblock %}

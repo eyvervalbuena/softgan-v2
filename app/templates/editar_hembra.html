@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Editar Hembra{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-center mt-4">
+  <div class="login-box">
+    <h4 class="mb-3">Editar Hembra</h4>
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label">No Hembra</label>
+        <input type="text" class="form-control" value="{{ hembra.numero }}" disabled>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <input type="text" name="nombre" class="form-control" value="{{ hembra.nombre }}" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Tipo</label>
+        <select name="tipo" class="form-select">
+          <option value="Leche" {% if hembra.tipo=='Leche' %}selected{% endif %}>Leche</option>
+          <option value="Carne" {% if hembra.tipo=='Carne' %}selected{% endif %}>Carne</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Condición</label>
+        <input type="number" step="0.1" name="condicion" class="form-control" value="{{ hembra.condicion }}" required>
+      </div>
+      <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="activo" name="activo" {% if hembra.activo %}checked{% endif %}>
+        <label class="form-check-label" for="activo">Activo</label>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Fecha de nacimiento</label>
+        <input type="date" name="fecha_nacimiento" class="form-control" value="{{ hembra.fecha_nacimiento }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Origen</label>
+        <select name="origen" class="form-select">
+          <option value="Cría" {% if hembra.origen=='Cría' %}selected{% endif %}>Cría</option>
+          <option value="Compra" {% if hembra.origen=='Compra' %}selected{% endif %}>Compra</option>
+          <option value="Otro" {% if hembra.origen=='Otro' %}selected{% endif %}>Otro</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Fecha de incorporación</label>
+        <input type="date" name="fecha_incorporacion" class="form-control" value="{{ hembra.fecha_incorporacion }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Padre</label>
+        <select name="padre_id" class="form-select">
+          <option value="">-- Selección --</option>
+          {% for p in machos %}
+          <option value="{{ p.id }}" {% if hembra.padre_id==p.id %}selected{% endif %}>{{ p.numero }} - {{ p.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Madre</label>
+        <select name="madre_id" class="form-select">
+          <option value="">-- Selección --</option>
+          {% for m in madres %}
+          <option value="{{ m.id }}" {% if hembra.madre_id==m.id %}selected{% endif %}>{{ m.numero }} - {{ m.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Fecha de desincorporación</label>
+        <input type="date" name="fecha_desincorporacion" class="form-control" value="{{ hembra.fecha_desincorporacion }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Causa de desincorporación</label>
+        <textarea name="causa_desincorporacion" class="form-control">{{ hembra.causa_desincorporacion }}</textarea>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Actualizar</button>
+    </form>
+    <a href="{{ url_for('ganaderia.registro_hembras') }}" class="btn btn-secondary w-100 mt-2">Volver</a>
+  </div>
+</div>
+{% endblock %}

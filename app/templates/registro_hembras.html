@@ -96,6 +96,9 @@
                             <th>Condición</th>
                             <th>Activo</th>
                             <th>Fecha de nacimiento</th>
+                            {% if session.get('rol') in ['admin','supervisor'] %}
+                            <th>Acciones</th>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
@@ -107,6 +110,14 @@
                             <td>{{ h.condicion }}</td>
                             <td>{{ 'Sí' if h.activo else 'No' }}</td>
                             <td>{{ h.fecha_nacimiento }}</td>
+                            {% if session.get('rol') in ['admin','supervisor'] %}
+                            <td class="d-flex gap-1">
+                                <a class="btn btn-sm btn-primary" href="{{ url_for('ganaderia.editar_hembra', hembra_id=h.id) }}">Editar</a>
+                                {% if session.get('rol') == 'admin' %}
+                                <a class="btn btn-sm btn-danger" href="{{ url_for('ganaderia.eliminar_hembra', hembra_id=h.id) }}">Eliminar</a>
+                                {% endif %}
+                            </td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>

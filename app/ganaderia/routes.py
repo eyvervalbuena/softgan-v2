@@ -91,7 +91,7 @@ def registro_hembras():
         tipo = request.form.get("tipo")
         cond_raw = request.form.get("condicion")
         try:
-            condicion = int(cond_raw)
+            condicion = float(cond_raw)
         except (TypeError, ValueError):
             condicion = None
         activo = 1 if request.form.get("activo") else 0
@@ -110,6 +110,25 @@ def registro_hembras():
             madre_id = None
         fecha_desincorporacion = request.form.get("fecha_desincorporacion") or None
         causa_desincorporacion = request.form.get("causa_desincorporacion") or None
+        
+        if not nombre or condicion is None:
+            flash("Nombre y condición son obligatorios.", "warning")
+            return redirect(url_for("ganaderia.registro_hembras"))
+
+        with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+            cursor.execute(
+                "SELECT id FROM hembras WHERE nombre=%s AND fecha_nacimiento=%s",
+                (nombre, fecha_nacimiento),
+            )
+            existente = cursor.fetchone()
+
+        if existente:
+            flash(
+                "Ya existe una hembra con ese nombre y fecha de nacimiento.",
+                "warning",
+            )
+            return redirect(url_for("ganaderia.registro_hembras"))
+
         with mysql.connection.cursor() as cursor:
             cursor.execute(
                 "INSERT INTO hembras (nombre, tipo, condicion, activo, fecha_nacimiento, origen, fecha_incorporacion, padre_id, madre_id, fecha_desincorporacion, causa_desincorporacion) "
@@ -154,6 +173,129 @@ def registro_hembras():
         machos=machos,
         madres=madres
     )
+@ganaderia_bp.route("/hembras/editar/<int:hembra_id>", methods=["GET", "POST"])
+def editar_hembra(hembra_id):
+    if "usuario" not in session or session.get("rol") not in ["admin", "supervisor"]:
+        flash("Acceso no autorizado", "danger")
+        return redirect(url_for("ganaderia.registro_hembras"))
+
+    with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+        cursor.execute("SELECT * FROM hembras WHERE id=%s", (hembra_id,))
+        hembra = cursor.fetchone()
+
+    if not hembra:
+        flash("Hembra no encontrada", "warning")
+        return redirect(url_for("ganaderia.registro_hembras"))
+
+    if request.method == "POST":
+        nombre = request.form.get("nombre")
+        tipo = request.form.get("tipo")
+        cond_raw = request.form.get("condicion")
+        try:
+            condicion = float(cond_raw)
+        except (TypeError, ValueError):
+            condicion = None
+        activo = 1 if request.form.get("activo") else 0
+        fecha_nacimiento = request.form.get("fecha_nacimiento") or None
+        origen = request.form.get("origen")
+        fecha_incorporacion = request.form.get("fecha_incorporacion") or None
+        padre_raw = request.form.get("padre_id")
+        madre_raw = request.form.get("madre_id")
+        padre_id = int(padre_raw) if padre_raw else None
+        madre_id = int(madre_raw) if madre_raw else None
+        fecha_desincorporacion = request.form.get("fecha_desincorporacion") or None
+        causa_desincorporacion = request.form.get("causa_desincorporacion") or None
+
+        if not nombre or condicion is None:
+            flash("Nombre y condición son obligatorios.", "warning")
+        else:
+            with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+                cursor.execute(
+                    "SELECT id FROM hembras WHERE nombre=%s AND fecha_nacimiento=%s AND id!=%s",
+                    (nombre, fecha_nacimiento, hembra_id),
+                )
+                existente = cursor.fetchone()
+            if existente:
+                flash(
+                    "Ya existe una hembra con ese nombre y fecha de nacimiento.",
+                    "warning",
+                )
+            else:
+                with mysql.connection.cursor() as cursor:
+                    cursor.execute(
+                        "UPDATE hembras SET nombre=%s, tipo=%s, condicion=%s, activo=%s, fecha_nacimiento=%s, origen=%s, fecha_incorporacion=%s, padre_id=%s, madre_id=%s, fecha_desincorporacion=%s, causa_desincorporacion=%s WHERE id=%s",
+                        (
+                            nombre,
+                            tipo,
+                            condicion,
+                            activo,
+                            fecha_nacimiento,
+                            origen,
+                            fecha_incorporacion,
+                            padre_id,
+                            madre_id,
+                            fecha_desincorporacion,
+                            causa_desincorporacion,
+                            hembra_id,
+                        ),
+                    )
+                    mysql.connection.commit()
+                flash("Hembra actualizada correctamente.", "success")
+                return redirect(url_for("ganaderia.registro_hembras"))
+
+        hembra.update(
+            dict(
+                nombre=nombre,
+                tipo=tipo,
+                condicion=cond_raw,
+                activo=bool(activo),
+                fecha_nacimiento=fecha_nacimiento,
+                origen=origen,
+                fecha_incorporacion=fecha_incorporacion,
+                padre_id=padre_id,
+                madre_id=madre_id,
+                fecha_desincorporacion=fecha_desincorporacion,
+                causa_desincorporacion=causa_desincorporacion,
+            )
+        )
+
+    with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+        cursor.execute("SELECT id, numero, nombre FROM machos ORDER BY id")
+        machos = cursor.fetchall() or []
+        cursor.execute("SELECT id, numero, nombre FROM hembras ORDER BY id")
+        madres = cursor.fetchall() or []
+
+    return render_template(
+        "editar_hembra.html",
+        hembra=hembra,
+        machos=machos,
+        madres=madres,
+    )
+
+
+@ganaderia_bp.route("/hembras/eliminar/<int:hembra_id>", methods=["GET", "POST"])
+def eliminar_hembra(hembra_id):
+    if "usuario" not in session or session.get("rol") != "admin":
+        flash("Acceso no autorizado", "danger")
+        return redirect(url_for("ganaderia.registro_hembras"))
+
+    with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+        cursor.execute("SELECT id, nombre FROM hembras WHERE id=%s", (hembra_id,))
+        hembra = cursor.fetchone()
+
+    if not hembra:
+        flash("Hembra no encontrada", "warning")
+        return redirect(url_for("ganaderia.registro_hembras"))
+
+    if request.method == "POST":
+        with mysql.connection.cursor() as cursor:
+            cursor.execute("DELETE FROM hembras WHERE id=%s", (hembra_id,))
+            mysql.connection.commit()
+        flash("Hembra eliminada correctamente.", "success")
+        return redirect(url_for("ganaderia.registro_hembras"))
+
+    return render_template("eliminar_hembra.html", hembra=hembra)
+
 
 @ganaderia_bp.route("/machos")
 def registro_machos():
