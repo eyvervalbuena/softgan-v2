@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Editar Agroquímico{% endblock %}
+{% block head_extra %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-center mt-4">
+  <div class="login-box">
+    <h4 class="mb-3">Editar Agroquímico</h4>
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <input type="text" name="nombre" class="form-control" value="{{ agroquimico.nombre }}" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Código</label>
+        <input type="text" name="codigo" class="form-control" value="{{ agroquimico.codigo }}" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Cantidad</label>
+        <input type="number" step="0.01" min="0" name="cantidad" class="form-control" value="{{ agroquimico.cantidad }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Unidad</label>
+        <input type="text" name="unidad" class="form-control" value="{{ agroquimico.unidad }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Fecha Ingreso</label>
+        <input type="date" name="fecha_ingreso" class="form-control" value="{{ agroquimico.fecha_ingreso }}" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Fecha Vencimiento</label>
+        <input type="date" name="fecha_vencimiento" class="form-control" value="{{ agroquimico.fecha_vencimiento or '' }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Observaciones</label>
+        <input type="text" name="observaciones" class="form-control" value="{{ agroquimico.observaciones }}">
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Actualizar</button>
+    </form>
+    <a href="{{ url_for('almacen.almacen_agroquimicos') }}" class="btn btn-secondary w-100 mt-2">Volver</a>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script>
+$(function(){
+  const codigoInput = $('input[name="codigo"]');
+  codigoInput.on('blur', function(){
+    const codigo = codigoInput.val().trim();
+    if(!codigo) return;
+    $.get('{{ url_for('almacen.validar_codigo_agroquimico_api') }}', {codigo: codigo, id: {{ agroquimico.id }}}, function(data){
+      if(data.exists){
+        alert('Este código ya está en uso por otro agroquímico.');
+      }
+    });
+  });
+});
+</script>
+{% endblock %}

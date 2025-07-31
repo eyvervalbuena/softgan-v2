@@ -93,6 +93,20 @@ def crear_tablas():
             )"""
         )
         cursor.execute(
+            """CREATE TABLE IF NOT EXISTS agroquimicos (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                nombre VARCHAR(100) NOT NULL,
+                codigo VARCHAR(50) NOT NULL UNIQUE,
+                cantidad DECIMAL(10,2),
+                unidad VARCHAR(20),
+                fecha_ingreso DATE NOT NULL,
+                fecha_vencimiento DATE,
+                observaciones TEXT,
+                creado_por INT,
+                FOREIGN KEY (creado_por) REFERENCES usuarios(id) ON DELETE SET NULL
+            )"""
+        )
+        cursor.execute(
             """CREATE TABLE IF NOT EXISTS maquinaria (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 nombre VARCHAR(100) NOT NULL,
@@ -106,6 +120,7 @@ def crear_tablas():
                 FOREIGN KEY (creado_por) REFERENCES usuarios(id) ON DELETE SET NULL
             )"""
         )
+        
 def create_app():
     app = Flask(__name__)
     app.config.from_pyfile('config.py')
