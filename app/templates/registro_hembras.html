@@ -37,6 +37,44 @@
                             <label for="fecha_nacimiento" class="form-label">Fecha de nacimiento</label>
                             <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento">
                         </div>
+                        <div class="mb-3">
+                            <label for="origen" class="form-label">Origen</label>
+                            <select class="form-select" id="origen" name="origen">
+                                <option value="Cría">Cría</option>
+                                <option value="Compra">Compra</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha_incorporacion" class="form-label">Fecha de incorporación</label>
+                            <input type="date" class="form-control" id="fecha_incorporacion" name="fecha_incorporacion">
+                        </div>
+                        <div class="mb-3">
+                            <label for="padre_id" class="form-label">Padre</label>
+                            <select class="form-select" id="padre_id" name="padre_id">
+                                <option value="">-- Selección --</option>
+                                {% for p in machos %}
+                                <option value="{{ p.id }}">{{ p.numero }} - {{ p.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="madre_id" class="form-label">Madre</label>
+                            <select class="form-select" id="madre_id" name="madre_id">
+                                <option value="">-- Selección --</option>
+                                {% for m in madres %}
+                                <option value="{{ m.id }}">{{ m.numero }} - {{ m.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha_desincorporacion" class="form-label">Fecha de desincorporación</label>
+                            <input type="date" class="form-control" id="fecha_desincorporacion" name="fecha_desincorporacion">
+                        </div>
+                        <div class="mb-3">
+                            <label for="causa_desincorporacion" class="form-label">Causa de desincorporación</label>
+                            <textarea class="form-control" id="causa_desincorporacion" name="causa_desincorporacion"></textarea>
+                        </div>
                         <div class="d-flex justify-content-end gap-2 mt-3">
                             <button type="submit" class="btn btn-success">
                                 <i class="bi bi-save"></i> Guardar

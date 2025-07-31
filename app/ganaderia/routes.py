@@ -96,12 +96,37 @@ def registro_hembras():
             condicion = None
         activo = 1 if request.form.get("activo") else 0
         fecha_nacimiento = request.form.get("fecha_nacimiento") or None
-
+        origen = request.form.get("origen")
+        fecha_incorporacion = request.form.get("fecha_incorporacion") or None
+        padre_raw = request.form.get("padre_id")
+        madre_raw = request.form.get("madre_id")
+        try:
+            padre_id = int(padre_raw) if padre_raw else None
+        except (TypeError, ValueError):
+            padre_id = None
+        try:
+            madre_id = int(madre_raw) if madre_raw else None
+        except (TypeError, ValueError):
+            madre_id = None
+        fecha_desincorporacion = request.form.get("fecha_desincorporacion") or None
+        causa_desincorporacion = request.form.get("causa_desincorporacion") or None
         with mysql.connection.cursor() as cursor:
             cursor.execute(
-                "INSERT INTO hembras (nombre, tipo, condicion, activo, fecha_nacimiento) "
-                "VALUES (%s, %s, %s, %s, %s)",
-                (nombre, tipo, condicion, activo, fecha_nacimiento),
+                "INSERT INTO hembras (nombre, tipo, condicion, activo, fecha_nacimiento, origen, fecha_incorporacion, padre_id, madre_id, fecha_desincorporacion, causa_desincorporacion) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                (
+                    nombre,
+                    tipo,
+                    condicion,
+                    activo,
+                    fecha_nacimiento,
+                    origen,
+                    fecha_incorporacion,
+                    padre_id,
+                    madre_id,
+                    fecha_desincorporacion,
+                    causa_desincorporacion,
+                ),
             )
             hembra_id = cursor.lastrowid
             cursor.execute(
@@ -115,11 +140,19 @@ def registro_hembras():
         cursor.execute("SELECT COALESCE(MAX(numero),0)+1 AS n FROM hembras")
         row = cursor.fetchone() or {}
         next_numero = row.get("n", 1)
+        cursor.execute("SELECT id, numero, nombre FROM machos ORDER BY id")
+        machos = cursor.fetchall() or []
+        cursor.execute("SELECT id, numero, nombre FROM hembras ORDER BY id")
+        madres = cursor.fetchall() or []
         cursor.execute("SELECT * FROM hembras ORDER BY id DESC")
         hembras = cursor.fetchall() or []
 
     return render_template(
-        "registro_hembras.html", hembras=hembras, next_numero=next_numero
+        "registro_hembras.html",
+        hembras=hembras,
+        next_numero=next_numero,
+        machos=machos,
+        madres=madres
     )
 
 @ganaderia_bp.route("/machos")

@@ -121,6 +121,13 @@ def crear_tablas():
             )"""
         )
         cursor.execute(
+            """CREATE TABLE IF NOT EXISTS machos (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                numero INT UNIQUE,
+                nombre VARCHAR(100)
+            )"""
+        )
+        cursor.execute(
             """CREATE TABLE IF NOT EXISTS hembras (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 numero INT UNIQUE,
@@ -128,9 +135,64 @@ def crear_tablas():
                 tipo VARCHAR(20),
                 condicion INT,
                 activo BOOLEAN,
-                fecha_nacimiento DATE
+                fecha_nacimiento DATE,
+                origen VARCHAR(50),
+                fecha_incorporacion DATE,
+                padre_id INT,
+                madre_id INT,
+                fecha_desincorporacion DATE,
+                causa_desincorporacion TEXT,
+                FOREIGN KEY (padre_id) REFERENCES machos(id) ON DELETE SET NULL,
+                FOREIGN KEY (madre_id) REFERENCES hembras(id) ON DELETE SET NULL
             )"""
         )
+
+        columnas = [
+            ("origen", "VARCHAR(50)"),
+            ("fecha_incorporacion", "DATE"),
+            ("padre_id", "INT"),
+            ("madre_id", "INT"),
+            ("fecha_desincorporacion", "DATE"),
+            ("causa_desincorporacion", "TEXT"),
+        ]
+        for col, tipo in columnas:
+            cursor.execute(
+                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS "
+                "WHERE TABLE_NAME='hembras' AND COLUMN_NAME=%s",
+                (col,),
+            )
+            row = cursor.fetchone()
+            if row and list(row.values())[0] == 0:
+                cursor.execute(f"ALTER TABLE hembras ADD COLUMN {col} {tipo}")
+
+        # Relaciones padre/madre
+        cursor.execute(
+            "SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE "
+            "WHERE TABLE_NAME='hembras' AND COLUMN_NAME='padre_id' "
+            "AND REFERENCED_TABLE_NAME='machos'"
+        )
+        if (cursor.fetchone() or {}).get("c", 0) == 0:
+            try:
+                cursor.execute(
+                    "ALTER TABLE hembras ADD CONSTRAINT fk_hembras_padre "
+                    "FOREIGN KEY (padre_id) REFERENCES machos(id) ON DELETE SET NULL"
+                )
+            except Exception:
+                pass
+
+        cursor.execute(
+            "SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE "
+            "WHERE TABLE_NAME='hembras' AND COLUMN_NAME='madre_id' "
+            "AND REFERENCED_TABLE_NAME='hembras' AND REFERENCED_COLUMN_NAME='id'"
+        )
+        if (cursor.fetchone() or {}).get("c", 0) == 0:
+            try:
+                cursor.execute(
+                    "ALTER TABLE hembras ADD CONSTRAINT fk_hembras_madre "
+                    "FOREIGN KEY (madre_id) REFERENCES hembras(id) ON DELETE SET NULL"
+                )
+            except Exception:
+                pass
 def create_app():
     app = Flask(__name__)
     app.config.from_pyfile('config.py')
