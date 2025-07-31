@@ -142,6 +142,7 @@ def crear_tablas():
                 madre_id INT,
                 fecha_desincorporacion DATE,
                 causa_desincorporacion TEXT,
+                foto VARCHAR(255),
                 FOREIGN KEY (padre_id) REFERENCES machos(id) ON DELETE SET NULL,
                 FOREIGN KEY (madre_id) REFERENCES hembras(id) ON DELETE SET NULL
             )"""
@@ -154,6 +155,7 @@ def crear_tablas():
             ("madre_id", "INT"),
             ("fecha_desincorporacion", "DATE"),
             ("causa_desincorporacion", "TEXT"),
+            ("foto", "VARCHAR(255)"),
         ]
         for col, tipo in columnas:
             cursor.execute(

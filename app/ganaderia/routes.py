@@ -7,10 +7,17 @@ from flask import (
     flash,
     session,
     request,
+    current_app,
 )
 import logging
 import MySQLdb.cursors
 from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.utils import secure_filename
+import os
+import time
+
+ALLOWED_EXTS = {"jpg", "jpeg", "png"}
+MAX_IMAGE_SIZE = 2 * 1024 * 1024  # 2MB
 import json
 from .. import mysql
 
@@ -110,6 +117,25 @@ def registro_hembras():
             madre_id = None
         fecha_desincorporacion = request.form.get("fecha_desincorporacion") or None
         causa_desincorporacion = request.form.get("causa_desincorporacion") or None
+        foto_file = request.files.get("foto")
+        foto_path = None
+        if foto_file and foto_file.filename:
+            filename = secure_filename(foto_file.filename)
+            ext = filename.rsplit(".", 1)[-1].lower()
+            if ext not in ALLOWED_EXTS:
+                flash("Formato de imagen no permitido.", "warning")
+                return redirect(url_for("ganaderia.registro_hembras"))
+            foto_file.seek(0, os.SEEK_END)
+            size = foto_file.tell()
+            foto_file.seek(0)
+            if size > MAX_IMAGE_SIZE:
+                flash("La imagen supera el tama\u00f1o m\u00e1ximo permitido.", "warning")
+                return redirect(url_for("ganaderia.registro_hembras"))
+            dir_path = os.path.join(current_app.root_path, "static", "imagenes", "hembras")
+            os.makedirs(dir_path, exist_ok=True)
+            unique_name = f"{int(time.time())}_{filename}"
+            foto_file.save(os.path.join(dir_path, unique_name))
+            foto_path = os.path.join("imagenes", "hembras", unique_name)
         
         if not nombre or condicion is None:
             flash("Nombre y condición son obligatorios.", "warning")
@@ -131,8 +157,8 @@ def registro_hembras():
 
         with mysql.connection.cursor() as cursor:
             cursor.execute(
-                "INSERT INTO hembras (nombre, tipo, condicion, activo, fecha_nacimiento, origen, fecha_incorporacion, padre_id, madre_id, fecha_desincorporacion, causa_desincorporacion) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                "INSERT INTO hembras (nombre, tipo, condicion, activo, fecha_nacimiento, origen, fecha_incorporacion, padre_id, madre_id, fecha_desincorporacion, causa_desincorporacion, foto) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                 (
                     nombre,
                     tipo,
@@ -145,6 +171,7 @@ def registro_hembras():
                     madre_id,
                     fecha_desincorporacion,
                     causa_desincorporacion,
+                    foto_path,
                 ),
             )
             hembra_id = cursor.lastrowid
@@ -205,6 +232,25 @@ def editar_hembra(hembra_id):
         madre_id = int(madre_raw) if madre_raw else None
         fecha_desincorporacion = request.form.get("fecha_desincorporacion") or None
         causa_desincorporacion = request.form.get("causa_desincorporacion") or None
+        foto_path = hembra.get("foto")
+        foto_file = request.files.get("foto")
+        if foto_file and foto_file.filename:
+            filename = secure_filename(foto_file.filename)
+            ext = filename.rsplit(".", 1)[-1].lower()
+            if ext not in ALLOWED_EXTS:
+                flash("Formato de imagen no permitido.", "warning")
+                return redirect(url_for("ganaderia.editar_hembra", hembra_id=hembra_id))
+            foto_file.seek(0, os.SEEK_END)
+            size = foto_file.tell()
+            foto_file.seek(0)
+            if size > MAX_IMAGE_SIZE:
+                flash("La imagen supera el tama\u00f1o m\u00e1ximo permitido.", "warning")
+                return redirect(url_for("ganaderia.editar_hembra", hembra_id=hembra_id))
+            dir_path = os.path.join(current_app.root_path, "static", "imagenes", "hembras")
+            os.makedirs(dir_path, exist_ok=True)
+            unique_name = f"{int(time.time())}_{filename}"
+            foto_file.save(os.path.join(dir_path, unique_name))
+            foto_path = os.path.join("imagenes", "hembras", unique_name)
 
         if not nombre or condicion is None:
             flash("Nombre y condición son obligatorios.", "warning")
@@ -223,7 +269,7 @@ def editar_hembra(hembra_id):
             else:
                 with mysql.connection.cursor() as cursor:
                     cursor.execute(
-                        "UPDATE hembras SET nombre=%s, tipo=%s, condicion=%s, activo=%s, fecha_nacimiento=%s, origen=%s, fecha_incorporacion=%s, padre_id=%s, madre_id=%s, fecha_desincorporacion=%s, causa_desincorporacion=%s WHERE id=%s",
+                        "UPDATE hembras SET nombre=%s, tipo=%s, condicion=%s, activo=%s, fecha_nacimiento=%s, origen=%s, fecha_incorporacion=%s, padre_id=%s, madre_id=%s, fecha_desincorporacion=%s, causa_desincorporacion=%s, foto=%s WHERE id=%s",
                         (
                             nombre,
                             tipo,
@@ -236,6 +282,7 @@ def editar_hembra(hembra_id):
                             madre_id,
                             fecha_desincorporacion,
                             causa_desincorporacion,
+                            foto_path,
                             hembra_id,
                         ),
                     )
@@ -256,6 +303,7 @@ def editar_hembra(hembra_id):
                 madre_id=madre_id,
                 fecha_desincorporacion=fecha_desincorporacion,
                 causa_desincorporacion=causa_desincorporacion,
+                foto=foto_path,
             )
         )
 

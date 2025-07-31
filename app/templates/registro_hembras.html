@@ -9,7 +9,7 @@
                     <h5 class="mb-0">Registro de Hembra</h5>
                 </div>
                 <div class="card-body bg-light">
-                    <form method="POST">
+                    <form method="POST" enctype="multipart/form-data">
                         <div class="mb-3">
                             <label for="numero" class="form-label">No Hembra</label>
                             <input type="text" class="form-control" id="numero" name="numero" value="{{ next_numero }}" disabled>
@@ -28,6 +28,10 @@
                         <div class="mb-3">
                             <label for="condicion" class="form-label">Condición</label>
                             <input type="number" step="0.1" class="form-control" id="condicion" name="condicion" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="foto" class="form-label">Foto</label>
+                            <input type="file" class="form-control" id="foto" name="foto" accept=".jpg,.jpeg,.png">
                         </div>
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="activo" name="activo" checked>
@@ -91,6 +95,7 @@
                     <thead class="table-header-green text-center">
                         <tr>
                             <th>ID</th>
+                            <th>Foto</th>
                             <th>Nombre</th>
                             <th>Tipo</th>
                             <th>Condición</th>
@@ -105,6 +110,11 @@
                         {% for h in hembras %}
                         <tr>
                             <td>{{ h.numero }}</td>
+                            <td>
+                                {% if h.foto %}
+                                <img src="{{ url_for('static', filename=h.foto) }}" class="img-thumbnail" style="max-width:80px">
+                                {% else %}-{% endif %}
+                            </td>
                             <td>{{ h.nombre }}</td>
                             <td>{{ h.tipo }}</td>
                             <td>{{ h.condicion }}</td>

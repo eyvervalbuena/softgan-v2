@@ -4,7 +4,7 @@
 <div class="d-flex justify-content-center mt-4">
   <div class="login-box">
     <h4 class="mb-3">Editar Hembra</h4>
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
       <div class="mb-3">
         <label class="form-label">No Hembra</label>
         <input type="text" class="form-control" value="{{ hembra.numero }}" disabled>
@@ -23,6 +23,15 @@
       <div class="mb-3">
         <label class="form-label">Condición</label>
         <input type="number" step="0.1" name="condicion" class="form-control" value="{{ hembra.condicion }}" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Foto</label>
+        {% if hembra.foto %}
+        <div class="mb-2">
+          <img src="{{ url_for('static', filename=hembra.foto) }}" class="img-thumbnail" style="max-width:150px">
+        </div>
+        {% endif %}
+        <input type="file" name="foto" class="form-control" accept=".jpg,.jpeg,.png">
       </div>
       <div class="mb-3 form-check">
         <input type="checkbox" class="form-check-input" id="activo" name="activo" {% if hembra.activo %}checked{% endif %}>
