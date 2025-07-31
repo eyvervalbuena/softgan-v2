@@ -80,9 +80,47 @@ def registro_carne():
 def registro_leche():
     return render_template('registro_leche.html')
 
-@ganaderia_bp.route("/hembras")
+@ganaderia_bp.route("/hembras", methods=["GET", "POST"])
 def registro_hembras():
-    return render_template('registro_hembras.html')
+    if "usuario" not in session:
+        flash("Debes iniciar sesi\u00f3n para acceder.", "warning")
+        return redirect(url_for("auth.login"))
+
+    if request.method == "POST":
+        nombre = request.form.get("nombre")
+        tipo = request.form.get("tipo")
+        cond_raw = request.form.get("condicion")
+        try:
+            condicion = int(cond_raw)
+        except (TypeError, ValueError):
+            condicion = None
+        activo = 1 if request.form.get("activo") else 0
+        fecha_nacimiento = request.form.get("fecha_nacimiento") or None
+
+        with mysql.connection.cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO hembras (nombre, tipo, condicion, activo, fecha_nacimiento) "
+                "VALUES (%s, %s, %s, %s, %s)",
+                (nombre, tipo, condicion, activo, fecha_nacimiento),
+            )
+            hembra_id = cursor.lastrowid
+            cursor.execute(
+                "UPDATE hembras SET numero=%s WHERE id=%s", (hembra_id, hembra_id)
+            )
+            mysql.connection.commit()
+        flash("Hembra registrada correctamente.", "success")
+        return redirect(url_for("ganaderia.registro_hembras"))
+
+    with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+        cursor.execute("SELECT COALESCE(MAX(numero),0)+1 AS n FROM hembras")
+        row = cursor.fetchone() or {}
+        next_numero = row.get("n", 1)
+        cursor.execute("SELECT * FROM hembras ORDER BY id DESC")
+        hembras = cursor.fetchall() or []
+
+    return render_template(
+        "registro_hembras.html", hembras=hembras, next_numero=next_numero
+    )
 
 @ganaderia_bp.route("/machos")
 def registro_machos():

@@ -120,7 +120,17 @@ def crear_tablas():
                 FOREIGN KEY (creado_por) REFERENCES usuarios(id) ON DELETE SET NULL
             )"""
         )
-        
+        cursor.execute(
+            """CREATE TABLE IF NOT EXISTS hembras (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                numero INT UNIQUE,
+                nombre VARCHAR(100),
+                tipo VARCHAR(20),
+                condicion INT,
+                activo BOOLEAN,
+                fecha_nacimiento DATE
+            )"""
+        )
 def create_app():
     app = Flask(__name__)
     app.config.from_pyfile('config.py')

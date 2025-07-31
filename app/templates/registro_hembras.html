@@ -1,180 +1,80 @@
 {% extends 'base.html' %}
 {% block title %}Registro de Hembras{% endblock %}
-{% block head_extra %}
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-{% endblock %}
 {% block content %}
-<div class="container-fluid bg-light min-vh-90">
-        <div class="row pt-3">
-            <div class="col-md-3">
-                <div class="form-section p-0 border border-2 border-sg-green">
-                    <div class="bg-success text-white text-center py-2 rounded-top">
-                        <h4 class="mb-0"><i class="bi bi-journal-plus me-2"></i>Registro de Hembra</h4>
-                    </div>
-                    <form class="p-3">
-                        <div class="mb-3 text-center">
-                            <div class="d-flex flex-column align-items-center justify-content-center border-dashed-sg-green photo-box text-muted bg-light rounded">
-                                <i class="bi bi-camera fs-1"></i>
-                                <span>Espacio Fotográfico</span>
-                            </div>
+<div class="container-fluid mt-2">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card shadow-lg border-4 mb-4">
+                <div class="card-header bg-success text-white text-center">
+                    <h5 class="mb-0">Registro de Hembra</h5>
+                </div>
+                <div class="card-body bg-light">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="numero" class="form-label">No Hembra</label>
+                            <input type="text" class="form-control" id="numero" name="numero" value="{{ next_numero }}" disabled>
                         </div>
-                        <div class="row g-2 mb-2">
-                            <div class="col-12 col-md-6">
-                                <label class="form-label">No Hembra</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="no_hembra" name="no_hembra" />
-                                    <button type="button" class="btn btn-outline-primary" id="btnBuscarHembra" title="Buscar">
-                                        <i class="bi bi-search"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-3 mt-2 mt-md-0">
-                                <label class="form-label">Tipo</label>
-                                <div class="d-flex flex-wrap gap-2 align-items-center">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="tipo" id="leche" value="leche">
-                                        <label class="form-check-label" for="leche"></i> Leche</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="tipo" id="carne" value="carne" checked>
-                                        <label class="form-check-label" for="carne"></i> Carne</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-3 mt-2 mt-md-0">
-                                <label class="form-label">Condición</label>
-                                <select class="form-select">
-                                    <option>2</option>
-                                    <option>2.5</option>
-                                    <option>3</option>
-                                    <option>3.5</option>
-                                    <option>4</option>
-                                </select>
-                            </div>
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" required>
                         </div>
-                        <div class="row g-2 mb-2">
-                            <div class="col-12 col-md-7">
-                                <label class="form-label">Nombre</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
-                                    <input type="text" class="form-control" />
-                                </div>
-                            </div>
-                            <div class="col-12 col-md-5 mt-2 mt-md-0 d-flex align-items-center justify-content-md-end">
-                                <div class="form-check form-switch ms-md-auto">
-                                    <input class="form-check-input" type="checkbox" id="estatus" checked>
-                                    <label class="form-check-label" for="estatus"><i class="bi bi-check-circle-fill text-success"></i> Activo</label>
-                                </div>
-                            </div>
+                      <div class="mb-3">
+                            <label for="tipo" class="form-label">Tipo</label>
+                            <select class="form-select" id="tipo" name="tipo">
+                                <option value="Leche">Leche</option>
+                                <option value="Carne">Carne</option>
+                            </select>
                         </div>
-                        <div class="row g-2 mb-2">
-                            <div class="col-6">
-                                <label class="form-label">Origen</label>
-                                <select class="form-select">
-                                    <option>Cría</option>
-                                    <option>Compra</option>
-                                </select>
-                            </div>
-                            <div class="col-6 max-w-170">
-                                <label class="form-label">F. Incorporación</label>
-                                <input type="date" class="form-control min-w-0" id="fecha_incorporacion" />
-                            </div>
+                        <div class="mb-3">
+                            <label for="condicion" class="form-label">Condición</label>
+                            <input type="number" step="0.1" class="form-control" id="condicion" name="condicion" required>
                         </div>
-                        <div class="row g-2 mb-2">
-                            <div class="col-6">
-                                <label class="form-label">Padre</label>
-                                <select class="form-select">
-                                    <option>-- St</option>
-                                </select>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label">Madre</label>
-                                <select class="form-select">
-                                    <option>-- St</option>
-                                </select>
-                            </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="activo" name="activo" checked>
+                            <label class="form-check-label" for="activo">Activo</label>
                         </div>
-                        <div class="row g-2 mb-2">
-                            <div class="col-6 max-w-170">
-                                <label class="form-label">Fecha de Nacimiento</label>
-                                <input type="date" class="form-control min-w-0" id="fecha_nacimiento" />
-                            </div>
-                        </div>
-                        <div class="row g-2 mb-2">
-                            <div class="col-6 max-w-170">
-                                <label class="form-label">Fecha de Desincorporación</label>
-                                <input type="date" class="form-control min-w-0" id="fecha_desincorporacion" />
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label">Causa de Desincorporación</label>
-                                <select class="form-select">
-                                    <option>Venta</option>
-                                    <option>Muerte</option>
-                                    <option>Perdida</option>
-                                </select>
-                            </div>
+                        <div class="mb-3">
+                            <label for="fecha_nacimiento" class="form-label">Fecha de nacimiento</label>
+                            <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento">
                         </div>
                         <div class="d-flex justify-content-end gap-2 mt-3">
-                            <button type="button" class="btn btn-success"><i class="bi bi-save me-1"></i>Guardar</button>
-                            <button type="button" class="btn btn-secondary"><i class="bi bi-x-circle me-1"></i>Cancelar</button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save"></i> Guardar
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
-            <div class="col-md-9">
-                <div class="mb-4">
-                    <div class="bg-success text-white text-center py-2 rounded-top">
-                        <h5 class="mb-0">Datos de Registro de Hembras</h5>
-                    </div>
-                    <div class="table-responsive border border-2 border-sg-green border-top-0 rounded-bottom bg-light">
-                        <table class="table table-bordered table-hover align-middle mb-0">
-                            <thead class="table-header-green text-center">
-                                <tr>
-                                    <th>No / ID</th>
-                                    <th>Nombre</th>
-                                    <th>Tipo</th>
-                                    <th>Estatus</th>
-                                    <th>Condición</th>
-                                    <th>F. Nacimiento</th>
-                                    <th>Edad</th>
-                                    <th>Incorporación</th>
-                                    <th>Origen</th>
-                                    <th># Partos</th>
-                                    <th>Último Parto</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Aquí irán los registros de hembras -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+             </div>
+        <div class="col-md-9">
+            <h5 class="text-success text-center mb-3">Datos de Hembras</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead class="table-header-green text-center">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Condición</th>
+                            <th>Activo</th>
+                            <th>Fecha de nacimiento</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for h in hembras %}
+                        <tr>
+                            <td>{{ h.numero }}</td>
+                            <td>{{ h.nombre }}</td>
+                            <td>{{ h.tipo }}</td>
+                            <td>{{ h.condicion }}</td>
+                            <td>{{ 'Sí' if h.activo else 'No' }}</td>
+                            <td>{{ h.fecha_nacimiento }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-{% endblock %}
-{% block scripts %}
-<script>
-    $(document).ready(function() {
-        $('#no_hembra').on('blur', function() {
-            var noHembra = $(this).val();
-            if (noHembra) {
-                $.get('/api/hembra/' + noHembra, function(data) {
-                    if (data.success && data.hembra) {
-                        $('#nombre').val(data.hembra.nombre);
-                        $('#ubicacion').val(data.hembra.ubicacion);
-                        $('#raza').val(data.hembra.raza);
-                        $('#fecha_nacimiento').val(data.hembra.fecha_nacimiento);
-                        $('#infoHembra').html('<div class="alert alert-info">Hembra encontrada en la base de datos. Ubicación: <b>' + data.hembra.ubicacion + '</b></div>');
-                    } else {
-                        $('#nombre, #ubicacion, #raza, #fecha_nacimiento').val('');
-                        $('#infoHembra').html('<div class="alert alert-warning">No existe una hembra con ese número. Puedes registrar una nueva.</div>');
-                    }
-                });
-            } else {
-                $('#infoHembra').html('');
-            }
-        });
-    });
-</script>
+</div>
 {% endblock %}
