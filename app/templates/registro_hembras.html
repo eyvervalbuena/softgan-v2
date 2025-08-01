@@ -14,57 +14,68 @@
                             <i class="bi bi-camera fs-1"></i>
                             <span>Espacio Fotográfico</span>
                         </div>
+                        <div class="mt-2">
+                            <input type="file" class="form-control" id="foto" name="foto" accept=".jpg,.jpeg,.png">
                         </div>
-                    <div class="mb-3">
-                        <label for="numero" class="form-label">No Hembra</label>
-                        <input type="text" class="form-control" id="numero" name="numero" value="{{ next_numero }}" disabled>
+                    
                     </div>
-                    <div class="mb-3">
-                        <label for="nombre" class="form-label">Nombre</label>
-                        <input type="text" class="form-control" id="nombre" name="nombre" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="tipo" class="form-label">Tipo</label>
-                        <select class="form-select" id="tipo" name="tipo">
-                            <option value="Leche">Leche</option>
-                            <option value="Carne">Carne</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="condicion" class="form-label">Condición</label>
-                        <select class="form-select" id="condicion" name="condicion" required>
-                            <option value="2">2</option>
-                            <option value="2.5">2.5</option>
-                            <option value="3">3</option>
-                            <option value="3.5">3.5</option>
-                            <option value="4">4</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="foto" class="form-label">Foto</label>
-                        <input type="file" class="form-control" id="foto" name="foto" accept=".jpg,.jpeg,.png">
-                    </div>
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="activo" name="activo" checked>
-                            <label class="form-check-label" for="activo">Activo</label>
+                    
+                    <div class="row g-2 mb-2">
+                        <div class="col-6 col-md-4 max-w-120">
+                            <label for="numero" class="form-label">No Hembra</label>
+                            <input type="text" class="form-control max-w-80" id="numero" name="numero" value="{{ next_numero }}" disabled>
                         </div>
-                        <div class="mb-3">
+                        <div class="col-6 col-md-8">
+                            <label for="nombre" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" required>
+                        </div>
+                    </div>
+                        <div class="row g-2 mb-2">
+                        <div class="col-6 col-md-4">
+                            <label for="tipo" class="form-label">Tipo</label>
+                            <select class="form-select" id="tipo" name="tipo">
+                                <option value="Leche">Leche</option>
+                                <option value="Carne">Carne</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <label for="condicion" class="form-label">Condición</label>
+                            <select class="form-select" id="condicion" name="condicion" required>
+                                <option value="2">2</option>
+                                <option value="2.5">2.5</option>
+                                <option value="3">3</option>
+                                <option value="3.5">3.5</option>
+                                <option value="4">4</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4 d-flex align-items-center justify-content-md-end mt-2 mt-md-0">
+                            <div class="form-check form-switch ms-md-auto">
+                                <input type="checkbox" class="form-check-input" id="activo" name="activo" checked>
+                                <label class="form-check-label" for="activo">Activo</label>
+                            </div>
+                        </div>
+                        </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-6 max-w-170">
                             <label for="fecha_nacimiento" class="form-label">Fecha de nacimiento</label>
-                            <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento">
+                            <input type="date" class="form-control min-w-0" id="fecha_nacimiento" name="fecha_nacimiento">
                         </div>
-                        <div class="mb-3">
+                        <div class="col-6">
                             <label for="origen" class="form-label">Origen</label>
                             <select class="form-select" id="origen" name="origen">
                                 <option value="Cría">Cría</option>
                                 <option value="Compra">Compra</option>
-                                <option value="Otro">Otro</option>
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label for="fecha_incorporacion" class="form-label">Fecha de incorporación</label>
-                            <input type="date" class="form-control" id="fecha_incorporacion" name="fecha_incorporacion">
+                         </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-6 max-w-170">
+                            <label for="fecha_incorporacion" class="form-label">F Incorporación</label>
+                            <input type="date" class="form-control min-w-0" id="fecha_incorporacion" name="fecha_incorporacion">
                         </div>
-                        <div class="mb-3">
+                        <div class="col-6">
                             <label for="padre_id" class="form-label">Padre</label>
                             <select class="form-select" id="padre_id" name="padre_id">
                                 <option value="">-- Selección --</option>
@@ -73,7 +84,10 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="mb-3">
+                        </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
                             <label for="madre_id" class="form-label">Madre</label>
                             <select class="form-select" id="madre_id" name="madre_id">
                                 <option value="">-- Selección --</option>
@@ -82,20 +96,25 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label for="fecha_desincorporacion" class="form-label">Fecha de desincorporación</label>
-                            <input type="date" class="form-control" id="fecha_desincorporacion" name="fecha_desincorporacion">
+                        <div class="col-6 max-w-170">
+                            <label for="fecha_desincorporacion" class="form-label">F Desincorporación</label>
+                            <input type="date" class="form-control min-w-0" id="fecha_desincorporacion" name="fecha_desincorporacion">
                         </div>
-                        <div class="mb-3">
+                        </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-12">
                             <label for="causa_desincorporacion" class="form-label">Causa de desincorporación</label>
                             <textarea class="form-control" id="causa_desincorporacion" name="causa_desincorporacion"></textarea>
                         </div>
-                        <div class="d-flex justify-content-end gap-2 mt-3">
-                            <button type="submit" class="btn btn-success">
-                                <i class="bi bi-save"></i> Guardar
-                            </button>
                         </div>
-                    </form>
+
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-save"></i> Guardar
+                        </button>
+                    </div>
+                </form>
                 </div>
             </div>
              </div>
@@ -147,20 +166,4 @@
             </div>
         </div>
 </div>
-</div>
-{% endblock %}
-
-{% block scripts %}
-{{ super() }}
-<script>
-  const search = document.getElementById('searchBar');
-  if (search) {
-    search.addEventListener('keyup', () => {
-      const value = search.value.toLowerCase();
-      document.querySelectorAll('#hembrasTable tbody tr').forEach(tr => {
-        tr.style.display = tr.textContent.toLowerCase().includes(value) ? '' : 'none';
-      });
-    });
-  }
-</script>
 {% endblock %}
