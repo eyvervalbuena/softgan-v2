@@ -102,9 +102,15 @@
                     <div class="row g-2 mb-2">
                         <div class="col-12">
                             <label for="causa_desincorporacion" class="form-label">Causa de desincorporación</label>
-                            <textarea class="form-control" id="causa_desincorporacion" name="causa_desincorporacion"></textarea>
+                            <select class="form-select" id="causa_desincorporacion" name="causa_desincorporacion">
+                                <option value="">-- Selecciona --</option>
+                                <option value="Venta">Venta</option>
+                                <option value="Muerte">Muerte</option>
+                                <option value="Pérdida">Pérdida</option>
+                                <option value="Otro">Otro</option>
+                            </select>
                         </div>
-                        </div>
+                    </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-3">
                         <button type="submit" class="btn btn-success">
@@ -114,8 +120,9 @@
                 </form>
                 </div>
             </div>
-             </div>
-        <div class="col-md-9">
+            </div>
+            <!-- Tabla de Datos -->
+    <div class="col-md-9">
             <h5 class="text-success text-center mb-3">Datos de Hembras</h5>
             <input id="searchBar" type="text" class="form-control mb-2" placeholder="Buscar...">
             <div class="table-responsive">
@@ -162,5 +169,6 @@
                 </table>
             </div>
         </div>
+    </div>
 </div>
 {% endblock %}
