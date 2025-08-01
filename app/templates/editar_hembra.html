@@ -8,11 +8,12 @@
       <div class="mb-3">
         <label class="form-label">No Hembra</label>
         <input type="text" class="form-control" value="{{ hembra.numero }}" disabled>
+        <label class="form-label">Nombre</label>
+        <input type="text" name="nombre" class="form-control" value="{{ hembra.nombre }}" required>
       </div>
       <div class="mb-3">
         <label class="form-label">Nombre</label>
         <input type="text" name="nombre" class="form-control" value="{{ hembra.nombre }}" required>
-      </div>
       <div class="mb-3">
         <label class="form-label">Tipo</label>
         <select name="tipo" class="form-select">
@@ -22,7 +23,6 @@
       </div>
       <div class="mb-3">
         <label class="form-label">Condición</label>
-        <input type="number" step="0.1" name="condicion" class="form-control" value="{{ hembra.condicion }}" required>
       </div>
       <div class="mb-3">
         <label class="form-label">Foto</label>
