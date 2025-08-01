@@ -8,6 +8,7 @@ from flask import (
     session,
     request,
     current_app,
+    jsonify,
 )
 import logging
 import MySQLdb.cursors
@@ -226,6 +227,112 @@ def registro_hembras():
         machos=machos,
         madres=madres
     )
+
+@ganaderia_bp.route('/registro_hembras/<int:hembra_id>')
+def obtener_hembra(hembra_id):
+    if 'usuario' not in session:
+        return jsonify({'error': 'unauthorized'}), 401
+    with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+        cursor.execute('SELECT * FROM hembras WHERE id=%s', (hembra_id,))
+        hembra = cursor.fetchone()
+    if not hembra:
+        return jsonify({'error': 'not found'}), 404
+    for campo in ['fecha_nacimiento', 'fecha_incorporacion', 'fecha_desincorporacion']:
+        if hembra.get(campo):
+            hembra[campo] = hembra[campo].isoformat()
+    return jsonify(hembra)
+
+@ganaderia_bp.route('/registro_hembras/actualizar', methods=['POST'])
+def actualizar_hembra():
+    if 'usuario' not in session or session.get('rol') not in ['admin', 'supervisor']:
+        flash('Acceso no autorizado', 'danger')
+        return redirect(url_for('ganaderia.registro_hembras'))
+
+    hembra_id = request.form.get('numero')
+    if not hembra_id:
+        flash('ID inválido', 'warning')
+        return redirect(url_for('ganaderia.registro_hembras'))
+
+    with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+        cursor.execute('SELECT * FROM hembras WHERE id=%s', (hembra_id,))
+        hembra = cursor.fetchone()
+    if not hembra:
+        flash('Hembra no encontrada', 'warning')
+        return redirect(url_for('ganaderia.registro_hembras'))
+
+    nombre = request.form.get('nombre')
+    tipo = request.form.get('tipo')
+    cond_raw = request.form.get('condicion')
+    try:
+        condicion = float(cond_raw)
+    except (TypeError, ValueError):
+        condicion = None
+    activo = 1 if request.form.get('activo') else 0
+    fecha_nacimiento = request.form.get('fecha_nacimiento') or None
+    origen = request.form.get('origen')
+    fecha_incorporacion = request.form.get('fecha_incorporacion') or None
+    padre_raw = request.form.get('padre_id')
+    madre_raw = request.form.get('madre_id')
+    padre_id = int(padre_raw) if padre_raw else None
+    madre_id = int(madre_raw) if madre_raw else None
+    fecha_desincorporacion = request.form.get('fecha_desincorporacion') or None
+    causa_desincorporacion = request.form.get('causa_desincorporacion') or None
+    foto_path = hembra.get('foto')
+    foto_file = request.files.get('foto')
+    if foto_file and foto_file.filename:
+        filename = secure_filename(foto_file.filename)
+        ext = filename.rsplit('.', 1)[-1].lower()
+        if ext not in ALLOWED_EXTS:
+            flash('Formato de imagen no permitido.', 'warning')
+            return redirect(url_for('ganaderia.registro_hembras'))
+        foto_file.seek(0, os.SEEK_END)
+        size = foto_file.tell()
+        foto_file.seek(0)
+        if size > MAX_IMAGE_SIZE:
+            flash('La imagen supera el tamaño máximo permitido.', 'warning')
+            return redirect(url_for('ganaderia.registro_hembras'))
+        dir_path = os.path.join(current_app.root_path, 'static', 'imagenes', 'hembras')
+        os.makedirs(dir_path, exist_ok=True)
+        unique_name = f"{int(time.time())}_{filename}"
+        foto_file.save(os.path.join(dir_path, unique_name))
+        foto_path = os.path.join('imagenes', 'hembras', unique_name)
+
+    if not nombre or condicion is None:
+        flash('Nombre y condición son obligatorios.', 'warning')
+        return redirect(url_for('ganaderia.registro_hembras'))
+
+    with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+        cursor.execute(
+            'SELECT id FROM hembras WHERE nombre=%s AND fecha_nacimiento=%s AND id!=%s',
+            (nombre, fecha_nacimiento, hembra_id),
+        )
+        existente = cursor.fetchone()
+    if existente:
+        flash('Ya existe una hembra con ese nombre y fecha de nacimiento.', 'warning')
+        return redirect(url_for('ganaderia.registro_hembras'))
+
+    with mysql.connection.cursor() as cursor:
+        cursor.execute(
+            'UPDATE hembras SET nombre=%s, tipo=%s, condicion=%s, activo=%s, fecha_nacimiento=%s, origen=%s, fecha_incorporacion=%s, padre_id=%s, madre_id=%s, fecha_desincorporacion=%s, causa_desincorporacion=%s, foto=%s WHERE id=%s',
+            (
+                nombre,
+                tipo,
+                condicion,
+                activo,
+                fecha_nacimiento,
+                origen,
+                fecha_incorporacion,
+                padre_id,
+                madre_id,
+                fecha_desincorporacion,
+                causa_desincorporacion,
+                foto_path,
+                hembra_id,
+            ),
+        )
+        mysql.connection.commit()
+    flash('Hembra actualizada correctamente.', 'success')
+    return redirect(url_for('ganaderia.registro_hembras'))
 @ganaderia_bp.route("/hembras/editar/<int:hembra_id>", methods=["GET", "POST"])
 def editar_hembra(hembra_id):
     if "usuario" not in session or session.get("rol") not in ["admin", "supervisor"]:

@@ -8,7 +8,7 @@
                 <div class="bg-success text-white text-center py-2 rounded-top">
                     <h4 class="mb-0"><i class="bi bi-journal-plus me-2"></i>Registro de Hembra</h4>
                 </div>
-                <form method="POST" enctype="multipart/form-data" class="p-3">
+                <form method="POST" enctype="multipart/form-data" class="p-3" action="{{ url_for('ganaderia.registro_hembras') }}" data-update-url="{{ url_for('ganaderia.actualizar_hembra') }}">
                     <div class="mb-3 text-center">
                         <div class="d-flex flex-column align-items-center justify-content-center border-dashed-sg-green photo-box text-muted bg-light rounded">
                             <i class="bi bi-camera fs-1"></i>
@@ -17,12 +17,20 @@
                         <input type="file" class="form-control d-none" id="foto" name="foto" accept=".jpg,.jpeg,.png">
                     </div>
                     
+                    <div id="searchAlert" class="alert alert-warning py-1 d-none" role="alert"></div>
                     <div class="row g-2 mb-2">
-                        <div class="col-6 col-md-4 max-w-120">
+                        <div class="col-6 col-md-3 max-w-120">
                             <label for="numero" class="form-label">No Hembra</label>
-                            <input type="text" class="form-control max-w-80" id="numero" name="numero" value="{{ next_numero }}" disabled>
+                            <input type="text" class="form-control max-w-80" id="numero" name="numero" value="{{ next_numero }}" readonly>
                         </div>
-                        <div class="col-6 col-md-8">
+                        <div class="col-6 col-md-4">
+                            <label for="buscar_id" class="form-label">Buscar ID</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="buscar_id" placeholder="ID">
+                                <button class="btn btn-outline-secondary" type="button" id="btnBuscar"><i class="bi bi-search"></i></button>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-5">
                             <label for="nombre" class="form-label">Nombre</label>
                             <input type="text" class="form-control" id="nombre" name="nombre" required>
                         </div>
@@ -113,7 +121,7 @@
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-3">
-                        <button type="submit" class="btn btn-success">
+                        <button type="submit" class="btn btn-success" id="submitBtn">
                             <i class="bi bi-save"></i> Guardar
                         </button>
                     </div>
@@ -144,9 +152,6 @@
                             <th>Causa de desincorporación</th>
                             <th># Partos</th>
                             <th>Último parto</th>
-                            {% if session.get('rol') in ['admin','supervisor'] %}
-                            <th>Acciones</th>
-                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
@@ -167,14 +172,6 @@
                             <td>{{ h.causa_desincorporacion or '' }}</td>
                             <td>{{ h.numero_partos }}</td>
                             <td>{{ h.fecha_ultimo_parto or 'N/A' }}</td>
-                            {% if session.get('rol') in ['admin','supervisor'] %}
-                            <td class="d-flex gap-1">
-                                <a class="btn btn-sm btn-primary" href="{{ url_for('ganaderia.editar_hembra', hembra_id=h.id) }}">Editar</a>
-                                {% if session.get('rol') == 'admin' %}
-                                <a class="btn btn-sm btn-danger" href="{{ url_for('ganaderia.eliminar_hembra', hembra_id=h.id) }}">Eliminar</a>
-                                {% endif %}
-                            </td>
-                            {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -189,19 +186,78 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('searchBar');
-    if (!input) return;
-    input.addEventListener('input', function () {
-        const term = this.value.toLowerCase();
-        document.querySelectorAll('#hembrasTable tbody tr').forEach(row => {
-            const cells = row.querySelectorAll('td');
-            const id = cells[0]?.textContent.toLowerCase() || '';
-            const nombre = cells[1]?.textContent.toLowerCase() || '';
-            if (id.includes(term) || nombre.includes(term)) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
+   if (input) {
+        input.addEventListener('input', function () {
+            const term = this.value.toLowerCase();
+            document.querySelectorAll('#hembrasTable tbody tr').forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const id = cells[0]?.textContent.toLowerCase() || '';
+                const nombre = cells[1]?.textContent.toLowerCase() || '';
+                row.style.display = (id.includes(term) || nombre.includes(term)) ? '' : 'none';
+            });
         });
+        }
+
+    const buscarId = document.getElementById('buscar_id');
+    const btnBuscar = document.getElementById('btnBuscar');
+    const form = document.querySelector('form');
+    const numero = document.getElementById('numero');
+    const nombre = document.getElementById('nombre');
+    const tipo = document.getElementById('tipo');
+    const condicion = document.getElementById('condicion');
+    const activo = document.getElementById('activo');
+    const fechaNacimiento = document.getElementById('fecha_nacimiento');
+    const origen = document.getElementById('origen');
+    const fechaIncorp = document.getElementById('fecha_incorporacion');
+    const padre = document.getElementById('padre_id');
+    const madre = document.getElementById('madre_id');
+    const fechaDesinc = document.getElementById('fecha_desincorporacion');
+    const causaDesinc = document.getElementById('causa_desincorporacion');
+    const submitBtn = document.getElementById('submitBtn');
+    const alertBox = document.getElementById('searchAlert');
+    const updateUrl = form.dataset.updateUrl;
+
+    function fillForm(data) {
+        numero.value = data.id;
+        nombre.value = data.nombre || '';
+        tipo.value = data.tipo || 'Leche';
+        condicion.value = data.condicion || '';
+        activo.checked = Boolean(data.activo);
+        fechaNacimiento.value = data.fecha_nacimiento || '';
+        origen.value = data.origen || 'Cría';
+        fechaIncorp.value = data.fecha_incorporacion || '';
+        padre.value = data.padre_id || '';
+        madre.value = data.madre_id || '';
+        fechaDesinc.value = data.fecha_desincorporacion || '';
+        causaDesinc.value = data.causa_desincorporacion || '';
+        form.action = updateUrl;
+        submitBtn.innerHTML = '<i class="bi bi-save"></i> Guardar cambios';
+    }
+
+    function buscar() {
+        const id = buscarId.value.trim();
+        if (!id) return;
+        fetch(`${updateUrl.replace('/actualizar','')}/${id}`)
+            .then(r => {
+                if (!r.ok) throw new Error('nf');
+                return r.json();
+            })
+            .then(data => {
+                fillForm(data);
+                alertBox.classList.add('d-none');
+            })
+            .catch(() => {
+                alertBox.textContent = 'ID no encontrado';
+                alertBox.classList.remove('d-none');
+            });
+    }
+
+    if (btnBuscar) btnBuscar.addEventListener('click', buscar);
+    if (buscarId) buscarId.addEventListener('keypress', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            buscar();
+        }
     });
 });
 </script>
