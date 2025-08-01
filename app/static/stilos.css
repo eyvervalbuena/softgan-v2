@@ -275,6 +275,14 @@ body {
     justify-content:center;
     margin:auto;
     background:#f8f9fa;
+     cursor:pointer;
+    overflow:hidden;
+}
+
+.photo-box img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
 }
 
 /* Encabezado de tablas en verde uniforme */
