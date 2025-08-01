@@ -15,14 +15,31 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 import os
 import time
+from datetime import date
 
 ALLOWED_EXTS = {"jpg", "jpeg", "png"}
 MAX_IMAGE_SIZE = 2 * 1024 * 1024  # 2MB
 import json
 from .. import mysql
 
+
+def calcular_edad(fecha_nacimiento):
+    """Devuelve la edad en formato 'X años Y meses'."""
+    if not fecha_nacimiento:
+        return ""
+    today = date.today()
+    years = today.year - fecha_nacimiento.year - (
+        (today.month, today.day) < (fecha_nacimiento.month, fecha_nacimiento.day)
+    )
+    months = today.month - fecha_nacimiento.month - (
+        today.day < fecha_nacimiento.day
+    )
+    if months < 0:
+        months += 12
+    return f"{years} años {months} meses"
+
 # ---------------------------------------------------------------------------
-# Setup routes for initial configuration
+# Setup de configuración inicial
 # ---------------------------------------------------------------------------
 
 setup_bp = Blueprint("setup", __name__)
@@ -190,9 +207,18 @@ def registro_hembras():
         machos = cursor.fetchall() or []
         cursor.execute("SELECT id, numero, nombre FROM hembras ORDER BY id")
         madres = cursor.fetchall() or []
-        cursor.execute("SELECT * FROM hembras ORDER BY id DESC")
+        cursor.execute(
+            "SELECT h.*, p.numero AS padre_numero, m.numero AS madre_numero "
+            "FROM hembras h "
+            "LEFT JOIN machos p ON h.padre_id = p.id "
+            "LEFT JOIN hembras m ON h.madre_id = m.id "
+            "ORDER BY h.id DESC"
+        )
         hembras = cursor.fetchall() or []
-
+        for h in hembras:
+            h["edad"] = calcular_edad(h.get("fecha_nacimiento"))
+            h["numero_partos"] = 0
+            h["fecha_ultimo_parto"] = None
     return render_template(
         "registro_hembras.html",
         hembras=hembras,
