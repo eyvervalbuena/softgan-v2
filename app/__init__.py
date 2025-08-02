@@ -133,7 +133,7 @@ def crear_tablas():
                 numero INT UNIQUE,
                 nombre VARCHAR(100),
                 tipo VARCHAR(20),
-                condicion INT,
+                condicion DECIMAL(2,1),
                 activo BOOLEAN,
                 fecha_nacimiento DATE,
                 origen VARCHAR(50),
@@ -147,6 +147,11 @@ def crear_tablas():
                 FOREIGN KEY (madre_id) REFERENCES hembras(id) ON DELETE SET NULL
             )"""
         )
+        
+        try:
+            cursor.execute("ALTER TABLE hembras MODIFY condicion DECIMAL(3,1)")
+        except Exception:
+            pass
 
         columnas = [
             ("origen", "VARCHAR(50)"),
