@@ -23,6 +23,9 @@
                             <label for="buscar" class="form-label">Buscar</label>
                             <div class="input-group">
                                 <input type="text" class="form-control" id="buscar" placeholder="ID o nombre">
+                                <button type="button" class="btn btn-primary mt-6w-60 id="resetFormBtn">
+                                <i class="bi bi-arrow-clockwise"></i> Clear
+                        </button>
                             </div>
                         </div>
                         </div>
@@ -213,9 +216,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const fechaDesinc = document.getElementById('fecha_desincorporacion');
     const causaDesinc = document.getElementById('causa_desincorporacion');
     const submitBtn = document.getElementById('submitBtn');
+    const resetBtn = document.getElementById('resetFormBtn');
+    const btnBuscar = document.getElementById('btnBuscar');
+    const buscarId = document.getElementById('buscarId');
     const alertBox = document.getElementById('searchAlert');
     const updateUrl = form.dataset.updateUrl;
     const searchUrl = form.dataset.searchUrl;
+    const originalAction = form.getAttribute('action');
     let searchTimeout;
 
     function fillForm(data) {
@@ -266,6 +273,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             searchTimeout = setTimeout(() => buscar(term), 300);
+        });
+    }
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            form.reset();
+            form.action = originalAction;
+            submitBtn.innerHTML = '<i class="bi bi-save"></i> Guardar';
+            alertBox.classList.add('d-none');
         });
     }
     if (btnBuscar) btnBuscar.addEventListener('click', buscar);
