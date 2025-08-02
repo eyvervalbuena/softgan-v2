@@ -8,7 +8,7 @@
                 <div class="bg-success text-white text-center py-2 rounded-top">
                     <h4 class="mb-0"><i class="bi bi-journal-plus me-2"></i>Registro de Hembra</h4>
                 </div>
-                <form method="POST" enctype="multipart/form-data" class="p-3" action="{{ url_for('ganaderia.registro_hembras') }}" data-update-url="{{ url_for('ganaderia.actualizar_hembra') }}">
+                <form method="POST" enctype="multipart/form-data" class="p-3" action="{{ url_for('ganaderia.registro_hembras') }}" data-update-url="{{ url_for('ganaderia.actualizar_hembra') }}" data-search-url="{{ url_for('ganaderia.buscar_hembra') }}">>
                     <div class="mb-3 text-center">
                         <div class="d-flex flex-column align-items-center justify-content-center border-dashed-sg-green photo-box text-muted bg-light rounded">
                             <i class="bi bi-camera fs-1"></i>
@@ -17,13 +17,12 @@
                         <input type="file" class="form-control d-none" id="foto" name="foto" accept=".jpg,.jpeg,.png">
                     </div>
                     
-                    <div class="row g-2 mb-2">
-                        <div class="col-3"></div>
-                        <div class="col-6 col-md-6 max-w-120">
-                            <label for="buscar_id" class="form-label">Buscar</label>
+                    <div class="row g-10 mb-2">
+                        <div class="col-10"></div>
+                        <div class="col-12 col-md-8 max-w-180">
+                            <label for="buscar" class="form-label">Buscar</label>
                             <div class="input-group">
-                                <input type="number" class="form-control" id="buscar_id" placeholder="ID">
-                                <button class="btn btn-outline-secondary" type="button" id="btnBuscar"><i class="bi bi-search"></i></button>
+                                <input type="text" class="form-control" id="buscar" placeholder="ID o nombre">
                             </div>
                         </div>
                         </div>
@@ -199,8 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         }
 
-    const buscarId = document.getElementById('buscar_id');
-    const btnBuscar = document.getElementById('btnBuscar');
+    const searchInput = document.getElementById('buscar');
     const form = document.querySelector('form');
     const numero = document.getElementById('numero');
     const nombre = document.getElementById('nombre');
@@ -217,6 +215,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitBtn = document.getElementById('submitBtn');
     const alertBox = document.getElementById('searchAlert');
     const updateUrl = form.dataset.updateUrl;
+    const searchUrl = form.dataset.searchUrl;
+    let searchTimeout;
 
     function fillForm(data) {
         numero.value = data.id;
@@ -235,31 +235,39 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.innerHTML = '<i class="bi bi-save"></i> Guardar cambios';
     }
 
-    function buscar() {
-        const id = buscarId.value.trim();
-        if (!id) return;
-        fetch(`${updateUrl.replace('/actualizar','')}/${id}`)
+    function buscar(term) {
+        if (!term) return;
+        fetch(`${searchUrl}?term=${encodeURIComponent(term)}`)
             .then(r => {
                 if (!r.ok) throw new Error('nf');
                 return r.json();
             })
             .then(data => {
                 fillForm(data);
-                alertBox.classList.add('d-none');
+                if (data.multiple) {
+                    alertBox.textContent = 'Se encontraron varias coincidencias, mostrando la primera';
+                    alertBox.classList.remove('d-none');
+                } else {
+                    alertBox.classList.add('d-none');
+                }
             })
             .catch(() => {
-                alertBox.textContent = 'ID no encontrado';
+                alertBox.textContent = 'No se encontraron resultados';
                 alertBox.classList.remove('d-none');
             });
     }
 
-    if (btnBuscar) btnBuscar.addEventListener('click', buscar);
-    if (buscarId) buscarId.addEventListener('keypress', e => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            buscar();
-        }
-    });
+    if (searchInput) {
+        searchInput.addEventListener('input', e => {
+            const term = e.target.value.trim();
+            clearTimeout(searchTimeout);
+            if (!term) {
+                alertBox.classList.add('d-none');
+                return;
+            }
+            searchTimeout = setTimeout(() => buscar(term), 300);
+        });
+    }
 });
 </script>
 {% endblock %}

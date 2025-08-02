@@ -228,6 +228,31 @@ def registro_hembras():
         madres=madres
     )
 
+@ganaderia_bp.route('/registro_hembras/buscar')
+def buscar_hembra():
+    if 'usuario' not in session:
+        return jsonify({'error': 'unauthorized'}), 401
+    term = request.args.get('term', '').strip()
+    if not term:
+        return jsonify({'error': 'not found'}), 404
+    if term.isdigit():
+        query = 'SELECT * FROM hembras WHERE id=%s'
+        params = (term,)
+    else:
+        query = 'SELECT * FROM hembras WHERE nombre LIKE %s ORDER BY id LIMIT 2'
+        params = (f"%{term}%",)
+    with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+        cursor.execute(query, params)
+        hembras = cursor.fetchall()
+    if not hembras:
+        return jsonify({'error': 'not found'}), 404
+    hembra = hembras[0]
+    for campo in ['fecha_nacimiento', 'fecha_incorporacion', 'fecha_desincorporacion']:
+        if hembra.get(campo):
+            hembra[campo] = hembra[campo].isoformat()
+    if len(hembras) > 1:
+        hembra['multiple'] = True
+    return jsonify(hembra)
 @ganaderia_bp.route('/registro_hembras/<int:hembra_id>')
 def obtener_hembra(hembra_id):
     if 'usuario' not in session:
