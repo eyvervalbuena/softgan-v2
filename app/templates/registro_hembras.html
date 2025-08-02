@@ -17,20 +17,23 @@
                         <input type="file" class="form-control d-none" id="foto" name="foto" accept=".jpg,.jpeg,.png">
                     </div>
                     
+                    <div class="row g-2 mb-2">
+                        <div class="col-3"></div>
+                        <div class="col-6 col-md-6 max-w-120">
+                            <label for="buscar_id" class="form-label">Buscar</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="buscar_id" placeholder="ID">
+                                <button class="btn btn-outline-secondary" type="button" id="btnBuscar"><i class="bi bi-search"></i></button>
+                            </div>
+                        </div>
+                        </div>
                     <div id="searchAlert" class="alert alert-warning py-1 d-none" role="alert"></div>
                     <div class="row g-2 mb-2">
                         <div class="col-6 col-md-3 max-w-120">
                             <label for="numero" class="form-label">No Hembra</label>
                             <input type="text" class="form-control max-w-80" id="numero" name="numero" value="{{ next_numero }}" readonly>
                         </div>
-                        <div class="col-6 col-md-4">
-                            <label for="buscar_id" class="form-label">Buscar ID</label>
-                            <div class="input-group">
-                                <input type="number" class="form-control" id="buscar_id" placeholder="ID">
-                                <button class="btn btn-outline-secondary" type="button" id="btnBuscar"><i class="bi bi-search"></i></button>
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-5">
+                        <div class="col-12 col-md-9">
                             <label for="nombre" class="form-label">Nombre</label>
                             <input type="text" class="form-control" id="nombre" name="nombre" required>
                         </div>
@@ -66,21 +69,21 @@
                             <label for="fecha_nacimiento" class="form-label">Fecha de nacimiento</label>
                             <input type="date" class="form-control min-w-0" id="fecha_nacimiento" name="fecha_nacimiento">
                         </div>
-                        <div class="col-6">
+                        <div class="col-6 max-w-190">
+                            <label for="fecha_incorporacion" class="form-label">Fecha de Incorporación</label>
+                            <input type="date" class="form-control min-w-0" id="fecha_incorporacion" name="fecha_incorporacion">
+                        </div>
+                         </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-4">
                             <label for="origen" class="form-label">Origen</label>
                             <select class="form-select" id="origen" name="origen">
                                 <option value="Cría">Cría</option>
                                 <option value="Compra">Compra</option>
                             </select>
                         </div>
-                         </div>
-
-                    <div class="row g-2 mb-2">
-                        <div class="col-6 max-w-170">
-                            <label for="fecha_incorporacion" class="form-label">F Incorporación</label>
-                            <input type="date" class="form-control min-w-0" id="fecha_incorporacion" name="fecha_incorporacion">
-                        </div>
-                        <div class="col-6">
+                        <div class="col-4">
                             <label for="padre_id" class="form-label">Padre</label>
                             <select class="form-select" id="padre_id" name="padre_id">
                                 <option value="">-- Selección --</option>
@@ -89,10 +92,7 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        </div>
-
-                    <div class="row g-2 mb-2">
-                        <div class="col-6">
+                        <div class="col-4">
                             <label for="madre_id" class="form-label">Madre</label>
                             <select class="form-select" id="madre_id" name="madre_id">
                                 <option value="">-- Selección --</option>
@@ -100,16 +100,16 @@
                                 <option value="{{ m.id }}">{{ m.numero }} - {{ m.nombre }}</option>
                                 {% endfor %}
                             </select>
-                        </div>
-                        <div class="col-6 max-w-170">
+                        </div>  
+                    </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-6 max-w-140 ">
                             <label for="fecha_desincorporacion" class="form-label">F Desincorporación</label>
                             <input type="date" class="form-control min-w-0" id="fecha_desincorporacion" name="fecha_desincorporacion">
                         </div>
-                        </div>
-
-                    <div class="row g-2 mb-2">
-                        <div class="col-12">
-                            <label for="causa_desincorporacion" class="form-label">Causa de desincorporación</label>
+                        <div class="col-6">
+                            <label for="causa_desincorporacion" class="form-label">Causa</label>
                             <select class="form-select" id="causa_desincorporacion" name="causa_desincorporacion">
                                 <option value="">-- Selecciona --</option>
                                 <option value="Venta">Venta</option>
@@ -128,13 +128,14 @@
                 </form>
                 </div>
             </div>
-            </div>
+
+
             <!-- Tabla de Datos -->
-        <div class="col-md-9">
+            <div class="col-md-9">
             <h5 class="text-success text-center mb-3">Datos de Hembras</h5>
-            <input id="searchBar" type="text" class="form-control mb-2" placeholder="Buscar...">
-            <div class="table-responsive">
-                <table id="hembrasTable" class="table table-bordered table-striped">
+                <input id="searchBar" type="text" class="form-control mb-2" placeholder="Buscar...">
+                    <div class="table-responsive">
+                    <table id="hembrasTable" class="table table-bordered table-striped">
                     <thead class="table-header-green text-center">
                         <tr>
                             <th> No ID</th>
@@ -142,14 +143,14 @@
                             <th>Tipo</th>
                             <th>Estatus</th>
                             <th>Condición</th>
-                            <th>Fecha de nacimiento</th>
+                            <th>F_Nacimiento</th>
                             <th>___Edad___ </th>
                             <th>Incorporación</th>
                             <th>Origen</th>
                             <th>No. Padre</th>
                             <th>No. Madre</th>
                             <th>Desincorporación</th>
-                            <th>Causa de desincorporación</th>
+                            <th>__Causa__</th>
                             <th># Partos</th>
                             <th>Último parto</th>
                         </tr>
