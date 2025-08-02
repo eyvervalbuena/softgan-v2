@@ -4,7 +4,7 @@
 <div class="d-flex justify-content-center mt-4">
   <div class="login-box">
     <h4 class="mb-3">Editar Hembra</h4>
-    <form method="POST" enctype="multipart/form-data">
+    <form id="hembraForm" method="POST" action="{{ url_for('ganaderia.editar_hembra', hembra_id=hembra.id) }}" enctype="multipart/form-data" data-create-url="{{ url_for('ganaderia.registro_hembras') }}">
       <div class="mb-3">
         <label class="form-label">No Hembra</label>
         <input type="text" class="form-control" value="{{ hembra.numero }}" disabled>
@@ -71,15 +71,69 @@
       </div>
       <div class="mb-3">
         <label class="form-label">Fecha de desincorporación</label>
-        <input type="date" name="fecha_desincorporacion" class="form-control" value="{{ hembra.fecha_desincorporacion }}">
+        <input type="date" id="fecha_desincorporacion" name="fecha_desincorporacion" class="form-control" value="{{ hembra.fecha_desincorporacion }}">>
       </div>
       <div class="mb-3">
         <label class="form-label">Causa de desincorporación</label>
-        <textarea name="causa_desincorporacion" class="form-control">{{ hembra.causa_desincorporacion }}</textarea>
+        <textarea id="causa_desincorporacion" name="causa_desincorporacion" class="form-control">{{ hembra.causa_desincorporacion }}</textarea>
       </div>
-      <button type="submit" class="btn btn-primary w-100">Actualizar</button>
+      <button type="submit" id="submitBtn" class="btn btn-primary w-100">Actualizar</button>
+      <button type="button" id="refreshBtn" class="btn btn-outline-secondary w-100 mt-2">Limpiar</button>
     </form>
     <a href="{{ url_for('ganaderia.registro_hembras') }}" class="btn btn-secondary w-100 mt-2">Volver</a>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.querySelector('form');
+  const activoSwitch = document.getElementById('activo');
+  const fechaDesinc = document.getElementById('fecha_desincorporacion');
+  const causaDesinc = document.getElementById('causa_desincorporacion');
+  const submitBtn = document.getElementById('submitBtn');
+  const refreshBtn = document.getElementById('refreshBtn');
+
+  const fields = Array.from(form.querySelectorAll('input[name], select[name], textarea[name]'));
+
+  function toggleFields(isActive) {
+    fields.forEach(field => {
+      if (field === activoSwitch) return; // keep switch enabled
+      if (field === fechaDesinc || field === causaDesinc) {
+        field.disabled = isActive; // disable when active
+      } else {
+        field.disabled = !isActive; // disable others when inactive
+      }
+    });
+  }
+
+  // Initial state on load
+  toggleFields(activoSwitch.checked);
+
+  // Toggle on switch change
+  activoSwitch.addEventListener('change', () => toggleFields(activoSwitch.checked));
+
+  // Refresh form
+  refreshBtn.addEventListener('click', function () {
+    fields.forEach(field => {
+      if (field.type === 'checkbox') {
+        field.checked = false;
+      } else if (field.tagName === 'SELECT') {
+        field.selectedIndex = 0;
+      } else {
+        field.value = '';
+      }
+      field.disabled = false;
+    });
+
+    activoSwitch.checked = true;
+    toggleFields(true);
+
+    submitBtn.textContent = 'Guardar';
+
+    document.querySelectorAll('.alert').forEach(a => a.remove());
+  });
+});
+</script>
 {% endblock %}
