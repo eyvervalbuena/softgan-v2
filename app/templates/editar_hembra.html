@@ -40,7 +40,8 @@
         <input type="file" name="foto" class="form-control" accept=".jpg,.jpeg,.png">
       </div>
       <div class="mb-3 form-check">
-        <input type="checkbox" class="form-check-input" id="activo" name="activo" {% if hembra.activo %}checked{% endif %}>
+        <input type="hidden" name="activo" value="0">
+        <input type="checkbox" class="form-check-input" id="activo" name="activo" value="1" {% if hembra.activo %}checked{% endif %}>
         <label class="form-check-label" for="activo">Activo</label>
       </div>
       <div class="mb-3">
@@ -103,7 +104,9 @@ document.addEventListener('DOMContentLoaded', function () {
   const submitBtn = document.getElementById('submitBtn');
   const refreshBtn = document.getElementById('refreshBtn');
 
-  const fields = Array.from(form.querySelectorAll('input[name], select[name], textarea[name]'));
+  const fields = Array.from(
+    form.querySelectorAll('input[name]:not([type="hidden"]), select[name], textarea[name]')
+  );
 
   function toggleFields(isActive) {
     fields.forEach(field => {
@@ -117,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function () {
     fechaDesinc.required = !isActive;
     causaDesinc.required = !isActive;
   }
-  }
+  
 
   // Initial state on load
   toggleFields(activoSwitch.checked);

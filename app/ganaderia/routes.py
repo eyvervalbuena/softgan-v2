@@ -119,7 +119,7 @@ def registro_hembras():
             condicion = float(cond_raw)
         except (TypeError, ValueError):
             condicion = None
-        activo = 1 if request.form.get("activo") else 0
+        activo = 1 if request.form.getlist("activo")[-1] == "1" else 0
         fecha_nacimiento = request.form.get("fecha_nacimiento") or None
         origen = request.form.get("origen")
         fecha_incorporacion = request.form.get("fecha_incorporacion") or None
@@ -135,6 +135,19 @@ def registro_hembras():
             madre_id = None
         fecha_desincorporacion = request.form.get("fecha_desincorporacion") or None
         causa_desincorporacion = request.form.get("causa_desincorporacion") or None
+        if activo:
+            fecha_desincorporacion = None
+            causa_desincorporacion = None
+            if not nombre or condicion is None:
+                flash("Nombre y condición son obligatorios.", "warning")
+                return redirect(url_for("ganaderia.registro_hembras"))
+        else:
+            if not fecha_desincorporacion or not causa_desincorporacion:
+                flash(
+                    "Fecha y causa de desincorporación son obligatorias al desactivar.",
+                    "warning",
+                )
+                return redirect(url_for("ganaderia.registro_hembras"))
         foto_file = request.files.get("foto")
         foto_path = None
         if foto_file and foto_file.filename:
@@ -155,9 +168,6 @@ def registro_hembras():
             foto_file.save(os.path.join(dir_path, unique_name))
             foto_path = os.path.join("imagenes", "hembras", unique_name)
         
-        if not nombre or condicion is None:
-            flash("Nombre y condición son obligatorios.", "warning")
-            return redirect(url_for("ganaderia.registro_hembras"))
 
         with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
             cursor.execute(
@@ -292,7 +302,7 @@ def actualizar_hembra():
         condicion = float(cond_raw)
     except (TypeError, ValueError):
         condicion = None
-    activo = 1 if request.form.get('activo') else 0
+    activo = 1 if request.form.getlist('activo')[-1] == '1' else 0
     fecha_nacimiento = request.form.get('fecha_nacimiento') or None
     origen = request.form.get('origen')
     fecha_incorporacion = request.form.get('fecha_incorporacion') or None
@@ -302,6 +312,16 @@ def actualizar_hembra():
     madre_id = int(madre_raw) if madre_raw else None
     fecha_desincorporacion = request.form.get('fecha_desincorporacion') or None
     causa_desincorporacion = request.form.get('causa_desincorporacion') or None
+    if activo:
+        fecha_desincorporacion = None
+        causa_desincorporacion = None
+        if not nombre or condicion is None:
+            flash('Nombre y condición son obligatorios.', 'warning')
+            return redirect(url_for('ganaderia.registro_hembras'))
+    else:
+        if not fecha_desincorporacion or not causa_desincorporacion:
+            flash('Fecha y causa de desincorporación son obligatorias al desactivar.', 'warning')
+            return redirect(url_for('ganaderia.registro_hembras'))
     foto_path = hembra.get('foto')
     foto_file = request.files.get('foto')
     if foto_file and foto_file.filename:
@@ -321,10 +341,6 @@ def actualizar_hembra():
         unique_name = f"{int(time.time())}_{filename}"
         foto_file.save(os.path.join(dir_path, unique_name))
         foto_path = os.path.join('imagenes', 'hembras', unique_name)
-
-    if not nombre or condicion is None:
-        flash('Nombre y condición son obligatorios.', 'warning')
-        return redirect(url_for('ganaderia.registro_hembras'))
 
     with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
         cursor.execute(
@@ -373,7 +389,7 @@ def editar_hembra(hembra_id):
         return redirect(url_for("ganaderia.registro_hembras"))
 
     if request.method == "POST":        
-        activo = 1 if request.form.get("activo") else 0
+        activo = 1 if request.form.getlist("activo")[-1] == "1" else 0
         nombre = request.form.get("nombre") or hembra.get("nombre")
         tipo = request.form.get("tipo") or hembra.get("tipo")
         cond_raw = request.form.get("condicion")
@@ -393,6 +409,9 @@ def editar_hembra(hembra_id):
         madre_id = int(madre_raw) if madre_raw else hembra.get("madre_id")
         fecha_desincorporacion = request.form.get("fecha_desincorporacion") or None
         causa_desincorporacion = request.form.get("causa_desincorporacion") or None
+        if activo:
+            fecha_desincorporacion = None
+            causa_desincorporacion = None
         foto_path = hembra.get("foto")
         foto_file = request.files.get("foto")
         if foto_file and foto_file.filename:
