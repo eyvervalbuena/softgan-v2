@@ -12,6 +12,7 @@
       <div class="mb-3">
         <label class="form-label">Nombre</label>
         <input type="text" name="nombre" class="form-control" value="{{ hembra.nombre }}" required>
+      </div>
       <div class="mb-3">
         <label class="form-label">Tipo</label>
         <select name="tipo" class="form-select">
@@ -21,6 +22,13 @@
       </div>
       <div class="mb-3">
         <label class="form-label">Condición</label>
+        <select name="condicion" class="form-select" required>
+          <option value="2" {% if hembra.condicion==2 %}selected{% endif %}>2</option>
+          <option value="2.5" {% if hembra.condicion==2.5 %}selected{% endif %}>2.5</option>
+          <option value="3" {% if hembra.condicion==3 %}selected{% endif %}>3</option>
+          <option value="3.5" {% if hembra.condicion==3.5 %}selected{% endif %}>3.5</option>
+          <option value="4" {% if hembra.condicion==4 %}selected{% endif %}>4</option>
+        </select>
       </div>
       <div class="mb-3">
         <label class="form-label">Foto</label>
@@ -71,7 +79,7 @@
       </div>
       <div class="mb-3">
         <label class="form-label">Fecha de desincorporación</label>
-        <input type="date" id="fecha_desincorporacion" name="fecha_desincorporacion" class="form-control" value="{{ hembra.fecha_desincorporacion }}">>
+        <input type="date" id="fecha_desincorporacion" name="fecha_desincorporacion" class="form-control" value="{{ hembra.fecha_desincorporacion }}">
       </div>
       <div class="mb-3">
         <label class="form-label">Causa de desincorporación</label>
@@ -106,6 +114,9 @@ document.addEventListener('DOMContentLoaded', function () {
         field.disabled = !isActive; // disable others when inactive
       }
     });
+    fechaDesinc.required = !isActive;
+    causaDesinc.required = !isActive;
+  }
   }
 
   // Initial state on load

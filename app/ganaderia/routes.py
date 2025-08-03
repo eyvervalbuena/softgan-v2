@@ -372,22 +372,25 @@ def editar_hembra(hembra_id):
         flash("Hembra no encontrada", "warning")
         return redirect(url_for("ganaderia.registro_hembras"))
 
-    if request.method == "POST":
-        nombre = request.form.get("nombre")
-        tipo = request.form.get("tipo")
-        cond_raw = request.form.get("condicion")
-        try:
-            condicion = float(cond_raw)
-        except (TypeError, ValueError):
-            condicion = None
+    if request.method == "POST":        
         activo = 1 if request.form.get("activo") else 0
-        fecha_nacimiento = request.form.get("fecha_nacimiento") or None
-        origen = request.form.get("origen")
-        fecha_incorporacion = request.form.get("fecha_incorporacion") or None
+        nombre = request.form.get("nombre") or hembra.get("nombre")
+        tipo = request.form.get("tipo") or hembra.get("tipo")
+        cond_raw = request.form.get("condicion")
+        if cond_raw is None:
+            condicion = hembra.get("condicion")
+        else:
+            try:
+                condicion = float(cond_raw)
+            except (TypeError, ValueError):
+                condicion = None
+        fecha_nacimiento = request.form.get("fecha_nacimiento") or hembra.get("fecha_nacimiento")
+        origen = request.form.get("origen") or hembra.get("origen")
+        fecha_incorporacion = request.form.get("fecha_incorporacion") or hembra.get("fecha_incorporacion")
         padre_raw = request.form.get("padre_id")
         madre_raw = request.form.get("madre_id")
-        padre_id = int(padre_raw) if padre_raw else None
-        madre_id = int(madre_raw) if madre_raw else None
+        padre_id = int(padre_raw) if padre_raw else hembra.get("padre_id")
+        madre_id = int(madre_raw) if madre_raw else hembra.get("madre_id")
         fecha_desincorporacion = request.form.get("fecha_desincorporacion") or None
         causa_desincorporacion = request.form.get("causa_desincorporacion") or None
         foto_path = hembra.get("foto")
@@ -410,8 +413,13 @@ def editar_hembra(hembra_id):
             foto_file.save(os.path.join(dir_path, unique_name))
             foto_path = os.path.join("imagenes", "hembras", unique_name)
 
-        if not nombre or condicion is None:
+        if activo and (not nombre or condicion is None):
             flash("Nombre y condición son obligatorios.", "warning")
+        elif not activo and (not fecha_desincorporacion or not causa_desincorporacion):
+            flash(
+                "Fecha y causa de desincorporación son obligatorias al desactivar.",
+                "warning",
+            )
         else:
             with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
                 cursor.execute(
@@ -452,7 +460,7 @@ def editar_hembra(hembra_id):
             dict(
                 nombre=nombre,
                 tipo=tipo,
-                condicion=cond_raw,
+                condicion=condicion,
                 activo=bool(activo),
                 fecha_nacimiento=fecha_nacimiento,
                 origen=origen,
