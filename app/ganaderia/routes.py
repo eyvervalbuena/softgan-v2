@@ -295,21 +295,26 @@ def actualizar_hembra():
         flash('Hembra no encontrada', 'warning')
         return redirect(url_for('ganaderia.registro_hembras'))
 
-    nombre = request.form.get('nombre')
-    tipo = request.form.get('tipo')
+    nombre = request.form.get('nombre') or hembra.get('nombre')
+    tipo = request.form.get('tipo') or hembra.get('tipo')
     cond_raw = request.form.get('condicion')
-    try:
-        condicion = float(cond_raw)
-    except (TypeError, ValueError):
-        condicion = None
+    if cond_raw is None:
+        condicion = hembra.get('condicion')
+    else:
+        try:
+            condicion = float(cond_raw)
+        except (TypeError, ValueError):
+            condicion = None
     activo = 1 if request.form.getlist('activo')[-1] == '1' else 0
-    fecha_nacimiento = request.form.get('fecha_nacimiento') or None
-    origen = request.form.get('origen')
-    fecha_incorporacion = request.form.get('fecha_incorporacion') or None
+    fecha_nacimiento = request.form.get('fecha_nacimiento') or hembra.get('fecha_nacimiento')
+    origen = request.form.get('origen') or hembra.get('origen')
+    fecha_incorporacion = request.form.get('fecha_incorporacion') or hembra.get('fecha_incorporacion')
     padre_raw = request.form.get('padre_id')
     madre_raw = request.form.get('madre_id')
-    padre_id = int(padre_raw) if padre_raw else None
-    madre_id = int(madre_raw) if madre_raw else None
+    padre_id = int(padre_raw) if padre_raw else hembra.get('padre_id')  
+    madre_id = int(madre_raw) if madre_raw else hembra.get('madre_id')
+    if padre_id == 0:
+        padre_id = None
     fecha_desincorporacion = request.form.get('fecha_desincorporacion') or None
     causa_desincorporacion = request.form.get('causa_desincorporacion') or None
     if activo:
@@ -407,8 +412,10 @@ def editar_hembra(hembra_id):
         madre_raw = request.form.get("madre_id")
         padre_id = int(padre_raw) if padre_raw else hembra.get("padre_id")
         madre_id = int(madre_raw) if madre_raw else hembra.get("madre_id")
-        fecha_desincorporacion = request.form.get("fecha_desincorporacion") or None
-        causa_desincorporacion = request.form.get("causa_desincorporacion") or None
+        fecha_desincorporacion = request.form.get("fecha_desincorporacion") or hembra.get("fecha_desincorporacion")
+        causa_desincorporacion = request.form.get("causa_desincorporacion") or hembra.get("causa_desincorporacion")
+        if padre_id == 0: 
+            padre_id = None 
         if activo:
             fecha_desincorporacion = None
             causa_desincorporacion = None

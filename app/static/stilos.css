@@ -303,3 +303,8 @@ body {
     border-radius:10px;
     box-shadow:0 0.5rem 1rem rgba(0,0,0,0.15);
 }
+/* Filas de tabla para animales inactivos */
+.inactivo{
+    background-color:#f2f2f2;
+    color:#888;
+}

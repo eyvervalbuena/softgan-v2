@@ -16,7 +16,7 @@
                       data-search-url="{{ url_for('ganaderia.buscar_hembra') }}">
                     <div class="mb-3 text-center">
                     <div class="mb-3 text-center">
-                        <div class="d-flex flex-column align-items-center justify-content-center border-dashed-sg-green photo-box text-muted bg-light rounded">
+                        <div id="espacioFotografico" class="d-flex flex-column align-items-center justify-content-center border-dashed-sg-green photo-box text-muted bg-light rounded">
                             <i class="bi bi-camera fs-1"></i>
                             <span>Espacio Fotográfico</span>
                         </div>
@@ -147,7 +147,7 @@
             <div class="table-responsive">
                 <table id="hembrasTable" class="table table-bordered table-striped">
                     <thead class="table-header-green text-center">
-                        <tr>
+                    <tr>
                             <th> No ID</th>
                             <th>Nombre</th>
                             <th>Tipo</th>
@@ -167,7 +167,7 @@
                     </thead>
                     <tbody>
                         {% for h in hembras %}
-                        <tr>
+                        <tr cclass="{% if not h.activo %}inactivo{% endif %}">
                             <td>{{ h.numero }}</td>
                             <td>{{ h.nombre }}</td>
                             <td>{{ h.tipo }}</td>
@@ -227,11 +227,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const causaDesinc = document.getElementById('causa_desincorporacion');
     const submitBtn = document.getElementById('submitBtn');
     const resetBtn = document.getElementById('resetFormBtn');
-    const alertBox = document.getElementById('searchAlert');
+    const alertBox = document.getElementById('searchAlert'); 
     const createUrl = form.dataset.createUrl;
     const updateUrl = form.dataset.updateUrl;
     const searchUrl = form.dataset.searchUrl;
     const originalNumero = numero.value;
+    const photoBox = document.getElementById('espacioFotografico');
+    const photoInput = document.getElementById('foto');
+    const photoPlaceholder = photoBox ? photoBox.innerHTML : '';
+    const staticBase = "{{ url_for('static', filename='') }}";
 
     // Todos los campos excepto el switch de activo y los ocultos
     const fields = Array.from(
@@ -269,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
         nombre.value = data.nombre || '';
         tipo.value = data.tipo || 'Leche';
         condicion.value = data.condicion || '';
-         activoSwitch.checked = Boolean(data.activo);
+        activoSwitch.checked = Boolean(data.activo);
         fechaNacimiento.value = data.fecha_nacimiento || '';
         origen.value = data.origen || 'Cría';
         fechaIncorp.value = data.fecha_incorporacion || '';
@@ -277,6 +281,20 @@ document.addEventListener('DOMContentLoaded', () => {
         madre.value = data.madre_id || '';
         fechaDesinc.value = data.fecha_desincorporacion || '';
         causaDesinc.value = data.causa_desincorporacion || '';
+
+        if (photoInput) photoInput.value = '';
+        if (photoBox) {
+            if (data.foto) {
+                const imgUrl = `${staticBase}${data.foto}?t=${Date.now()}`;
+                photoBox.innerHTML = `<img src="${imgUrl}" class="img-fluid" alt="Foto de hembra">`;
+                photoBox.classList.remove('text-muted');
+            } else {
+                photoBox.innerHTML = '<span>Sin imagen</span>';
+                photoBox.classList.add('text-muted');
+            }
+        }
+
+        toggleFields(activoSwitch.checked);
 
         form.action = updateUrl;
         submitBtn.innerHTML = '<i class="bi bi-save"></i> Guardar cambios';
@@ -328,6 +346,11 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleFields(true);
 
         document.querySelectorAll('.alert').forEach(a => a.classList.add('d-none'));
+        if (photoBox) {
+            photoBox.innerHTML = photoPlaceholder;
+            photoBox.classList.add('text-muted');
+        }
+        if (photoInput) photoInput.value = '';
     });
 });
 </script>
