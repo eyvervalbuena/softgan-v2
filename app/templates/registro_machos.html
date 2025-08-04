@@ -14,6 +14,7 @@
                       data-create-url="{{ url_for('ganaderia.registro_machos') }}"
                       data-update-url="{{ url_for('ganaderia.actualizar_macho') }}"
                       data-search-url="{{ url_for('ganaderia.buscar_macho') }}">
+                      <input type="hidden" id="macho_id" name="macho_id">
                     <div class="mb-3 text-center">
                     <div class="mb-3 text-center">    
                         <div id="espacioFotografico" class="d-flex flex-column align-items-center justify-content-center border-dashed-sg-green photo-box text-muted bg-light rounded">
@@ -179,26 +180,13 @@
 </div>
 {% endblock %}
 {% block scripts %}
+<script src="{{ url_for('static', filename='machos_table_filter.js') }}"></script>  
 <script>
-document.addEventListener('DOMContentLoaded', () => { 
-    const machoTable = document.getElementById('machosTable');
-    const tableFilter = document.getElementById('searchBar');
-    if (tableFilter) {
-        tableFilter.addEventListener('input', function () {
-            const term = this.value.toLowerCase();
-            document.querySelectorAll('#machosTable tbody tr').forEach(row => {
-                const cells = row.querySelectorAll('td');
-                const numero = cells[0]?.textContent.toLowerCase() || '';
-                const nombre = cells[1]?.textContent.toLowerCase() || '';
-                const tipo = cells[2]?.textContent.toLowerCase() || '';
-                row.style.display = (numero.includes(term) || nombre.includes(term) || tipo.includes(term)) ? '' : 'none';
-            });
-        });
-    }
-
+document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('machoForm');
     if (!form) return;
 
+    const machoId = document.getElementById('macho_id'); 
     const searchInput = document.getElementById('buscar');
     const numero = document.getElementById('numero');
     const nombre = document.getElementById('nombre');
@@ -244,6 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
     activoSwitch.addEventListener('change', () => toggleFields(activoSwitch.checked));
 
     function fillForm(data) {
+        machoId.value = data.id || '';
         numero.value = data.numero;
         nombre.value = data.nombre || '';
         tipoSelect.value = data.tipo || 'carne';
@@ -313,6 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
     resetBtn.addEventListener('click', () => {
         form.reset();
         form.action = createUrl;
+        machoId.value = '';
         numero.value = originalNumero;
         tipoSelect.value = 'carne';
         activoSwitch.checked = true;

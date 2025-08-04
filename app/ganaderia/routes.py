@@ -716,7 +716,7 @@ def actualizar_macho():
         flash('Acceso no autorizado', 'danger')
         return redirect(url_for('ganaderia.registro_machos'))
 
-    macho_id = request.form.get('numero')
+    macho_id = request.form.get('macho_id')
     if not macho_id:
         flash('ID inválido', 'warning')
         return redirect(url_for('ganaderia.registro_machos'))
