@@ -303,10 +303,14 @@ body {
     border-radius:10px;
     box-shadow:0 0.5rem 1rem rgba(0,0,0,0.15);
 }
+/* Filas de la tabla de hembras */
+ #hembrasTable tbody tr > td { 
+ background-color: #fff; 
+}
+
 /* Filas de tabla para animales inactivos */
 #hembrasTable tbody tr.inactivo > td {
     background-color: #fff8dc !important;
     color: #333 !important;
     font-style: italic;
-    ;
 }
