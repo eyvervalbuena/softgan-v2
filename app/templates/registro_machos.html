@@ -180,7 +180,8 @@
 {% endblock %}
 {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => { 
+    const machoTable = document.getElementById('machosTable');
     const tableFilter = document.getElementById('searchBar');
     if (tableFilter) {
         tableFilter.addEventListener('input', function () {
@@ -201,8 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('buscar');
     const numero = document.getElementById('numero');
     const nombre = document.getElementById('nombre');
-    const tipoRepro = document.getElementById('tipo_reproductor');
-    const tipoCarne = document.getElementById('tipo_carne');
+    const tipoSelect = document.getElementById('tipo');
     const condicion = document.getElementById('condicion');
     const activoSwitch = document.getElementById('activo');
     const fechaNacimiento = document.getElementById('fecha_nacimiento');
@@ -246,11 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function fillForm(data) {
         numero.value = data.numero;
         nombre.value = data.nombre || '';
-        if (data.tipo === 'Reproductor') {
-            tipoRepro.checked = true;
-        } else {
-            tipoCarne.checked = true;
-        }
+        tipoSelect.value = data.tipo || 'carne';
         condicion.value = data.condicion || '';
         activoSwitch.checked = Boolean(data.activo);
         fechaNacimiento.value = data.fecha_nacimiento || '';
@@ -279,8 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    function toggleInactive() {
-        function buscar(term) {
+    function buscar(term) {
         if (!term) return;
         fetch(`${searchUrl}?term=${encodeURIComponent(term)}`)
             .then(r => {
@@ -319,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
         form.reset();
         form.action = createUrl;
         numero.value = originalNumero;
-        tipoCarne.checked = true;
+        tipoSelect.value = 'carne';
         activoSwitch.checked = true;
         submitBtn.innerHTML = '<i class="bi bi-save"></i> Guardar';
         fields.forEach(field => field.disabled = false);
