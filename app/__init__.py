@@ -124,9 +124,77 @@ def crear_tablas():
             """CREATE TABLE IF NOT EXISTS machos (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 numero INT UNIQUE,
-                nombre VARCHAR(100)
+                nombre VARCHAR(100),
+                tipo VARCHAR(20),
+                condicion DECIMAL(3,1),
+                activo BOOLEAN,
+                fecha_nacimiento DATE,
+                origen VARCHAR(50),
+                fecha_incorporacion DATE,
+                padre_id INT,
+                madre_id INT,
+                fecha_desincorporacion DATE,
+                causa_desincorporacion TEXT,
+                foto VARCHAR(255)
             )"""
         )
+        
+        try:
+            cursor.execute("ALTER TABLE machos MODIFY condicion DECIMAL(3,1)")
+        except Exception:
+            pass
+
+        columnas_machos = [
+            ("tipo", "VARCHAR(20)"),
+            ("condicion", "DECIMAL(3,1)"),
+            ("activo", "BOOLEAN"),
+            ("fecha_nacimiento", "DATE"),
+            ("origen", "VARCHAR(50)"),
+            ("fecha_incorporacion", "DATE"),
+            ("padre_id", "INT"),
+            ("madre_id", "INT"),
+            ("fecha_desincorporacion", "DATE"),
+            ("causa_desincorporacion", "TEXT"),
+            ("foto", "VARCHAR(255)"),
+        ]
+        for col, tipo in columnas_machos:
+            cursor.execute(
+                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS "
+                "WHERE TABLE_NAME='machos' AND COLUMN_NAME=%s",
+                (col,),
+            )
+            row = cursor.fetchone()
+            if row and list(row.values())[0] == 0:
+                cursor.execute(f"ALTER TABLE machos ADD COLUMN {col} {tipo}")
+
+        cursor.execute(
+            "SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE "
+            "WHERE TABLE_NAME='machos' AND COLUMN_NAME='padre_id' "
+            "AND REFERENCED_TABLE_NAME='machos'",
+        )
+        if (cursor.fetchone() or {}).get("c", 0) == 0:
+            try:
+                cursor.execute(
+                    "ALTER TABLE machos ADD CONSTRAINT fk_machos_padre "
+                    "FOREIGN KEY (padre_id) REFERENCES machos(id) ON DELETE SET NULL"
+                )
+            except Exception:
+                pass
+
+        cursor.execute(
+            "SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE "
+            "WHERE TABLE_NAME='machos' AND COLUMN_NAME='madre_id' "
+            "AND REFERENCED_TABLE_NAME='hembras'",
+        )
+        if (cursor.fetchone() or {}).get("c", 0) == 0:
+            try:
+                cursor.execute(
+                    "ALTER TABLE machos ADD CONSTRAINT fk_machos_madre "
+                    "FOREIGN KEY (madre_id) REFERENCES hembras(id) ON DELETE SET NULL"
+                )
+            except Exception:
+                pass
+
         cursor.execute(
             """CREATE TABLE IF NOT EXISTS hembras (
                 id INT AUTO_INCREMENT PRIMARY KEY,

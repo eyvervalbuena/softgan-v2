@@ -537,9 +537,247 @@ def eliminar_hembra(hembra_id):
     return render_template("eliminar_hembra.html", hembra=hembra)
 
 
-@ganaderia_bp.route("/machos")
+@ganaderia_bp.route("/machos", methods=["GET", "POST"])
 def registro_machos():
-    return render_template('registro_machos.html')
+    if "usuario" not in session:
+        flash("Debes iniciar sesión para acceder.", "warning")
+        return redirect(url_for("auth.login"))
+
+    if request.method == "POST":
+        numero_raw = request.form.get("numero")
+        try:
+            numero = int(numero_raw)
+        except (TypeError, ValueError):
+            numero = None
+        nombre = request.form.get("nombre")
+        tipo = request.form.get("tipo")
+        cond_raw = request.form.get("condicion")
+        try:
+            condicion = float(cond_raw) if cond_raw else None
+        except (TypeError, ValueError):
+            condicion = None
+        activo = 1 if request.form.getlist("activo")[-1] == "1" else 0
+        fecha_nacimiento = request.form.get("fecha_nacimiento") or None
+        fecha_incorporacion = request.form.get("fecha_incorporacion") or None
+        origen = request.form.get("origen")
+        padre_raw = request.form.get("padre_id")
+        madre_raw = request.form.get("madre_id")
+        try:
+            padre_id = int(padre_raw) if padre_raw else None
+        except (TypeError, ValueError):
+            padre_id = None
+        try:
+            madre_id = int(madre_raw) if madre_raw else None
+        except (TypeError, ValueError):
+            madre_id = None
+        fecha_desincorporacion = request.form.get("fecha_desincorporacion") or None
+        causa_desincorporacion = request.form.get("causa_desincorporacion") or None
+
+        if activo:
+            fecha_desincorporacion = None
+            causa_desincorporacion = None
+            if not numero or not nombre or condicion is None:
+                flash("ID, nombre y condición son obligatorios.", "warning")
+                return redirect(url_for("ganaderia.registro_machos"))
+        else:
+            if not fecha_desincorporacion or not causa_desincorporacion:
+                flash(
+                    "Fecha y causa de desincorporación son obligatorias al desactivar.",
+                    "warning",
+                )
+                return redirect(url_for("ganaderia.registro_machos"))
+
+        foto_file = request.files.get("foto")
+        foto_path = None
+        if foto_file and foto_file.filename:
+            filename = secure_filename(foto_file.filename)
+            ext = filename.rsplit(".", 1)[-1].lower()
+            if ext not in ALLOWED_EXTS:
+                flash("Formato de imagen no permitido.", "warning")
+                return redirect(url_for("ganaderia.registro_machos"))
+            foto_file.seek(0, os.SEEK_END)
+            size = foto_file.tell()
+            foto_file.seek(0)
+            if size > MAX_IMAGE_SIZE:
+                flash("La imagen supera el tamaño máximo permitido.", "warning")
+                return redirect(url_for("ganaderia.registro_machos"))
+            dir_path = os.path.join(current_app.root_path, "static", "imagenes", "machos")
+            os.makedirs(dir_path, exist_ok=True)
+            unique_name = f"{int(time.time())}_{filename}"
+            foto_file.save(os.path.join(dir_path, unique_name))
+            foto_path = os.path.join("imagenes", "machos", unique_name)
+
+        with mysql.connection.cursor() as cursor:
+            cursor.execute("SELECT id FROM machos WHERE numero=%s", (numero,))
+            existe_macho = cursor.fetchone()
+            cursor.execute("SELECT id FROM hembras WHERE numero=%s", (numero,))
+            existe_hembra = cursor.fetchone()
+        if existe_macho or existe_hembra:
+            flash("El ID ya existe en el sistema.", "warning")
+            return redirect(url_for("ganaderia.registro_machos"))
+
+        with mysql.connection.cursor() as cursor:
+            cursor.execute(
+                """INSERT INTO machos (
+                    numero, nombre, tipo, condicion, activo, fecha_nacimiento,
+                    fecha_incorporacion, origen, padre_id, madre_id,
+                    fecha_desincorporacion, causa_desincorporacion, foto
+                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                (
+                    numero,
+                    nombre,
+                    tipo,
+                    condicion,
+                    activo,
+                    fecha_nacimiento,
+                    fecha_incorporacion,
+                    origen,
+                    padre_id,
+                    madre_id,
+                    fecha_desincorporacion,
+                    causa_desincorporacion,
+                    foto_path,
+                ),
+            )
+            mysql.connection.commit()
+        flash("Macho registrado correctamente.", "success")
+        return redirect(url_for("ganaderia.registro_machos"))
+
+    with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+        cursor.execute("SELECT COALESCE(MAX(numero),0) AS m FROM machos")
+        max_m = cursor.fetchone() or {}
+        cursor.execute("SELECT COALESCE(MAX(numero),0) AS h FROM hembras")
+        max_h = cursor.fetchone() or {}
+        next_numero = max(max_m.get("m", 0), max_h.get("h", 0)) + 1
+
+        cursor.execute("SELECT id, numero, nombre FROM machos ORDER BY numero")
+        padres = cursor.fetchall() or []
+        cursor.execute("SELECT id, numero, nombre FROM hembras ORDER BY numero")
+        madres = cursor.fetchall() or []
+
+        cursor.execute(
+            "SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='pesajes'"
+        )
+        tiene_pesajes = (cursor.fetchone() or {}).get("c", 0)
+        if tiene_pesajes:
+            cursor.execute(
+                """SELECT m.*, 
+                           (SELECT p.peso FROM pesajes p WHERE p.animal_id=m.id ORDER BY p.fecha DESC LIMIT 1) AS ultimo_peso,
+                           (SELECT p.fecha FROM pesajes p WHERE p.animal_id=m.id ORDER BY p.fecha DESC LIMIT 1) AS fecha_ultimo_pesaje
+                    FROM machos m
+                    ORDER BY m.numero ASC"""
+            )
+        else:
+            cursor.execute(
+                "SELECT m.*, NULL AS ultimo_peso, NULL AS fecha_ultimo_pesaje FROM machos m ORDER BY m.numero ASC"
+            )
+        machos = cursor.fetchall() or []
+
+    for m in machos:
+        m["edad"] = calcular_edad(m.get("fecha_nacimiento"))
+
+    return render_template(
+        "registro_machos.html",
+        machos=machos,
+        padres=padres,
+        madres=madres,
+        next_numero=next_numero,
+    )
+
+
+@ganaderia_bp.route('/registro_machos/actualizar', methods=['POST'])
+def actualizar_macho():
+    if 'usuario' not in session or session.get('rol') not in ['admin', 'supervisor']:
+        flash('Acceso no autorizado', 'danger')
+        return redirect(url_for('ganaderia.registro_machos'))
+
+    macho_id = request.form.get('numero')
+    if not macho_id:
+        flash('ID inválido', 'warning')
+        return redirect(url_for('ganaderia.registro_machos'))
+
+    with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+        cursor.execute('SELECT * FROM machos WHERE id=%s', (macho_id,))
+        macho = cursor.fetchone()
+    if not macho:
+        flash('Macho no encontrado', 'warning')
+        return redirect(url_for('ganaderia.registro_machos'))
+
+    numero_raw = request.form.get('numero')
+    try:
+        numero = int(numero_raw) if numero_raw else macho.get('numero')
+    except (TypeError, ValueError):
+        numero = macho.get('numero')
+    nombre = request.form.get('nombre') or macho.get('nombre')
+    tipo = request.form.get('tipo') or macho.get('tipo')
+    cond_raw = request.form.get('condicion')
+    if cond_raw is None:
+        condicion = macho.get('condicion')
+    else:
+        try:
+            condicion = float(cond_raw)
+        except (TypeError, ValueError):
+            condicion = None
+    activo = 1 if request.form.getlist('activo')[-1] == '1' else 0
+    fecha_nacimiento = request.form.get('fecha_nacimiento') or macho.get('fecha_nacimiento')
+    origen = request.form.get('origen') or macho.get('origen')
+    fecha_incorporacion = request.form.get('fecha_incorporacion') or macho.get('fecha_incorporacion')
+    padre_raw = request.form.get('padre_id')
+    madre_raw = request.form.get('madre_id')
+    padre_id = int(padre_raw) if padre_raw else macho.get('padre_id')
+    madre_id = int(madre_raw) if madre_raw else macho.get('madre_id')
+    if padre_id == 0:
+        padre_id = None
+    fecha_desincorporacion = request.form.get('fecha_desincorporacion') or None
+    causa_desincorporacion = request.form.get('causa_desincorporacion') or None
+    if activo:
+        fecha_desincorporacion = None
+        causa_desincorporacion = None
+        if not nombre or condicion is None:
+            flash('Nombre y condición son obligatorios.', 'warning')
+            return redirect(url_for('ganaderia.registro_machos'))
+    else:
+        if not fecha_desincorporacion or not causa_desincorporacion:
+            flash('Fecha y causa de desincorporación son obligatorias al desactivar.', 'warning')
+            return redirect(url_for('ganaderia.registro_machos'))
+
+    foto_path = macho.get('foto')
+    foto_file = request.files.get('foto')
+    if foto_file and foto_file.filename:
+        filename = secure_filename(foto_file.filename)
+        ext = filename.rsplit('.', 1)[-1].lower()
+        if ext not in ALLOWED_EXTS:
+            flash('Formato de imagen no permitido.', 'warning')
+            return redirect(url_for('ganaderia.registro_machos'))
+        foto_file.seek(0, os.SEEK_END)
+        size = foto_file.tell()
+        foto_file.seek(0)
+        if size > MAX_IMAGE_SIZE:
+            flash('La imagen supera el tamaño máximo permitido.', 'warning')
+            return redirect(url_for('ganaderia.registro_machos'))
+        dir_path = os.path.join(current_app.root_path, 'static', 'imagenes', 'machos')
+        os.makedirs(dir_path, exist_ok=True)
+        unique_name = f"{int(time.time())}_{filename}"
+        foto_file.save(os.path.join(dir_path, unique_name))
+        foto_path = os.path.join('imagenes', 'machos', unique_name)
+
+    with mysql.connection.cursor() as cursor:
+        cursor.execute('SELECT id FROM machos WHERE numero=%s AND id!=%s', (numero, macho_id))
+        existe_macho = cursor.fetchone()
+        cursor.execute('SELECT id FROM hembras WHERE numero=%s', (numero,))
+        existe_hembra = cursor.fetchone()
+    if existe_macho or existe_hembra:
+        flash('El ID ya existe en el sistema.', 'warning')
+        return redirect(url_for('ganaderia.registro_machos'))
+
+    with mysql.connection.cursor() as cursor:
+        cursor.execute(
+            'UPDATE machos SET numero=%s, nombre=%s, tipo=%s, condicion=%s, activo=%s, fecha_nacimiento=%s, fecha_incorporacion=%s, origen=%s, padre_id=%s, madre_id=%s, fecha_desincorporacion=%s, causa_desincorporacion=%s, foto=%s WHERE id=%s',
+            (numero, nombre, tipo, condicion, activo, fecha_nacimiento, fecha_incorporacion, origen, padre_id, madre_id, fecha_desincorporacion, causa_desincorporacion, foto_path, macho_id),
+        )
+        mysql.connection.commit()
+    flash('Macho actualizado correctamente.', 'success')
+    return redirect(url_for('ganaderia.registro_machos'))
 
 @ganaderia_bp.route("/crias")
 def registro_crias():

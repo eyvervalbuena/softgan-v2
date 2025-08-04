@@ -1,154 +1,198 @@
 {% extends 'base.html' %}
 {% block title %}Registro de Machos{% endblock %}
-{% block head_extra %}
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-{% endblock %}
 {% block content %}
 <div class="container-fluid bg-light min-vh-90">
     <div class="row pt-3">
+        <!---- formulario de registro de machos -->
         <div class="col-md-3">
             <div class="form-section p-0 border border-2 border-sg-green">
                 <div class="bg-success text-white text-center py-2 rounded-top">
                     <h4 class="mb-0"><i class="bi bi-journal-plus me-2"></i>Registro de Macho</h4>
                 </div>
-                <form class="p-3">
+                <form id="machoForm" method="POST" enctype="multipart/form-data" class="p-3"
+                      action="{{ url_for('ganaderia.registro_machos') }}">
                     <div class="mb-3 text-center">
-                        <div class="d-flex flex-column align-items-center justify-content-center border-dashed-sg-green photo-box text-muted bg-light rounded">
+                        <div id="EspacioFotografico" class="d-flex flex-column align-items-center justify-content-center border-dashed-sg-green photo-box text-muted bg-light rounded">
                             <i class="bi bi-camera fs-1"></i>
                             <span>Espacio Fotográfico</span>
                         </div>
+                        <input type="file" class="form-control d-none" id="foto" name="foto" accept=".jpg,.jpeg,.png">
                     </div>
                     <div class="row g-2 mb-2">
-                        <div class="col-6 col-md-4 max-w-120">
-                            <label class="form-label">No Macho</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control max-w-80" id="no_macho" name="no_macho" />
-                                <button type="button" class="btn btn-outline-primary" id="btnBuscarMacho" title="Buscar">
-                                    <i class="bi bi-search"></i>
-                                </button>
-                            </div>
+                        <div class="col-6 col-md-4">
+                            <label for="numero" class="form-label">No Macho</label>
+                            <input type="text" class="form-control" id="numero" name="numero" value="{{ next_numero }}">
                         </div>
-                        <div class="col-6 col-md-4 mt-2 mt-md-0">
+                        <div class="col-6 col-md-8">
+                            <label for="nombre" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" required>
+                        </div>
+                        </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6 col-md-6">
                             <label class="form-label">Tipo</label>
-                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <div class="d-flex gap-2">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="tipo" id="reproductor" value="reproductor">
-                                    <label class="form-check-label" for="reproductor">reproductor</label>
+                                    <input class="form-check-input" type="radio" name="tipo" id="tipo_reproductor" value="Reproductor">
+                                    <label class="form-check-label" for="tipo_reproductor">Reproductor</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="tipo" id="carne" value="carne" checked>
-                                    <label class="form-check-label" for="carne">Carne</label>
+                                    <input class="form-check-input" type="radio" name="tipo" id="tipo_carne" value="Carne" checked>
+                                    <label class="form-check-label" for="tipo_carne">Carne</label>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-6 col-md-4 mt-2 mt-md-0 ms-auto max-w-105">
-                            <label class="form-label">Condición</label>
-                            <select class="form-select max-w-80">
-                                <option>2</option>
-                                <option>2.5</option>
-                                <option>3</option>
-                                <option>3.5</option>
-                                <option>4</option>
+                        <div class="col-6 col-md-3">
+                            <label for="condicion" class="form-label">Condición</label>
+                            <select class="form-select" id="condicion" name="condicion" required>
+                                <option value="2">2</option>
+                                <option value="2.5">2.5</option>
+                                <option value="3">3</option>
+                                <option value="3.5">3.5</option>
+                                <option value="4">4</option>
                             </select>
                         </div>
-                    </div>
-                    <div class="row g-2 mb-2">
-                        <div class="col-12 col-md-7">
-                            <label class="form-label">Nombre</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" />
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-5 mt-2 mt-md-0 d-flex align-items-center justify-content-md-end">
-                            <div class="form-check form-switch ms-md-auto">
-                                <input class="form-check-input" type="checkbox" id="estatus" checked>
-                                <label class="form-check-label" for="estatus">activo</label>
+                     <div class="col-12 col-md-3 d-flex align-items-center justify-content-md-end">
+                            <div class="form-check form-switch ms-md-auto mt-2 mt-md-0">
+                                <input type="hidden" name="activo" value="0">
+                                <input class="form-check-input" type="checkbox" id="activo" name="activo" value="1" checked>
+                                <label class="form-check-label" for="activo">Activo</label>
                             </div>
                         </div>
                     </div>
                     <div class="row g-2 mb-2">
-                        <div class="col-6">
-                            <label class="form-label">Origen</label>
-                            <select class="form-select">
-                                <option>Cría</option>
-                                <option>Compra</option>
-                            </select>
+                        <div class="col-6 max-w-170">
+                            <label for="fecha_nacimiento" class="form-label">Fecha de nacimiento</label>
+                            <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento">
                         </div>
                         <div class="col-6 max-w-170">
-                            <label class="form-label">F.Incorporación</label>
-                            <input type="date" class="form-control min-w-0" id="fecha_incorporacion" />
+                            <label for="fecha_incorporacion" class="form-label">F. Incorporación</label>
+                            <input type="date" class="form-control" id="fecha_incorporacion" name="fecha_incorporacion">
                         </div>
                     </div>
                     <div class="row g-2 mb-2">
-                        <div class="col-6">
-                            <label class="form-label">Padre</label>
-                            <select class="form-select">
-                                <option>-- Seleccion --</option>
+                        <div class="col-4">
+                            <label for="origen" class="form-label">Origen</label>
+                            <select class="form-select" id="origen" name="origen">
+                                <option value="Cría">Cría</option>
+                                <option value="Compra">Compra</option>
                             </select>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label">Madre</label>
-                            <select class="form-select">
-                                <option>-- Seleccion --</option>
+                        <div class="col-4">
+                            <label for="padre_id" class="form-label">Padre</label>
+                            <select class="form-select" id="padre_id" name="padre_id">
+                                <option value="">-- Selección --</option>
+                                {% for p in padres %}
+                                <option value="{{ p.id }}">{{ p.numero }} - {{ p.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    <div class="col-4">
+                            <label for="madre_id" class="form-label">Madre</label>
+                            <select class="form-select" id="madre_id" name="madre_id">
+                                <option value="">-- Selección --</option>
+                                {% for m in madres %}
+                                <option value="{{ m.id }}">{{ m.numero }} - {{ m.nombre }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                     </div>
                     <div class="row g-2 mb-2">
                         <div class="col-6 max-w-170">
-                            <label class="form-label">Fecha de Nacimiento</label>
-                            <input type="date" class="form-control min-w-0" id="fecha_nacimiento" />
-                        </div>
-                    </div>
-                    <div class="row g-2 mb-2">
-                        <div class="col-6 max-w-170">
-                            <label class="form-label">Fecha de Desincorporación</label>
-                            <input type="date" class="form-control min-w-0" id="fecha_desincorporacion" />
+                            <label for="fecha_desincorporacion" class="form-label">F Desincorporación</label>
+                            <input type="date" class="form-control" id="fecha_desincorporacion" name="fecha_desincorporacion" disabled>
                         </div>
                         <div class="col-6">
-                            <label class="form-label">Causa de Desincorporación</label>
-                            <select class="form-select">
-                                <option>Venta</option>
-                                <option>Muerte</option>
-                                <option>Perdida</option>
+                            <label for="causa_desincorporacion" class="form-label">Causa</label>
+                            <select class="form-select" id="causa_desincorporacion" name="causa_desincorporacion" disabled>
+                                <option value="">-- Selecciona --</option>
+                                <option value="Venta">Venta</option>
+                                <option value="Muerte">Muerte</option>
+                                <option value="Pérdida">Pérdida</option>
+                                <option value="Otro">Otro</option>
                             </select>
                         </div>
                     </div>
                     <div class="d-flex justify-content-end gap-2 mt-3">
-                        <button type="button" class="btn btn-success"><i class="bi bi-save me-1"></i>Guardar</button>
-                        <button type="button" class="btn btn-secondary"><i class="bi bi-x-circle me-1"></i>Cancelar</button>
+                        <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Guardar</button>
                     </div>
                 </form>
             </div>
         </div>
+        <!---- tabla de machos registrados -->
         <div class="col-md-9">
-            <div class="mb-4">
-                <div class="bg-success text-white text-center py-2 rounded-top">
-                    <h5 class="mb-0">Datos de Registro de Machos</h5>
-                </div>
-                <div class="table-responsive border border-2 border-sg-green border-top-0 rounded-bottom bg-light">
-                    <table class="table table-bordered table-hover align-middle mb-0">
-                        <thead class="table-header-green text-center">
-                            <tr>
-                                <th>No / ID</th>
-                                <th>Nombre</th>
-                                <th>Tipo</th>
-                                <th>Estatus</th>
-                                <th>Condición</th>
-                                <th>F. Nacimiento</th>
-                                <th>Edad</th>
-                                <th>Incorporación</th>
-                                <th>Origen</th>
-                                <th>Peso</th>
-                                <th>Último pesaje</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Aquí irán los registros de machos -->
-                        </tbody>
-                    </table>
-                </div>
+            <h5 class="text-success text-center mb-3">Datos de Machos</h5>
+            <div class="table-responsive">
+                <table id="machosTable" class="table table-bordered">
+                    <thead class="table-header-green text-center">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Estatus</th>
+                            <th>Condición</th>
+                            <th>F. Nacimiento</th>
+                            <th>Edad</th>
+                            <th>Incorporación</th>
+                            <th>Origen</th>
+                            <th>Último peso</th>
+                            <th>Último pesaje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in machos %}
+                        <tr class="{{ 'inactivo' if m.activo == 0 else '' }}">
+                            <td>{{ m.numero }}</td>
+                            <td>{{ m.nombre }}</td>
+                            <td>{{ m.tipo }}</td>
+                            <td>{{ 'Activo' if m.activo else 'Inactivo' }}</td>
+                            <td>{{ m.condicion }}</td>
+                            <td>{{ m.fecha_nacimiento or '' }}</td>
+                            <td>{{ m.edad }}</td>
+                            <td>{{ m.fecha_incorporacion or '' }}</td>
+                            <td>{{ m.origen }}</td>
+                            <td>{{ m.ultimo_peso or '' }}</td>
+                            <td>{{ m.fecha_ultimo_pesaje or '' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const activo = document.getElementById('activo');
+    const fechaDes = document.getElementById('fecha_desincorporacion');
+    const causaDes = document.getElementById('causa_desincorporacion');
+    const fotoInput = document.getElementById('foto');
+    const fotoBox = document.getElementById('espacioFotografico');
+
+    function toggleInactive() {
+        const isActive = activo.checked;
+        fechaDes.disabled = isActive;
+        causaDes.disabled = isActive;
+        fechaDes.required = !isActive;
+        causaDes.required = !isActive;
+    }
+    activo.addEventListener('change', toggleInactive);
+    toggleInactive();
+
+    if (fotoBox && fotoInput) {
+        fotoBox.addEventListener('click', () => fotoInput.click());
+        fotoInput.addEventListener('change', () => {
+            const file = fotoInput.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                fotoBox.innerHTML = '<img src="' + e.target.result + '" class="img-fluid" alt="Foto de macho">';
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+});
+</script>
 {% endblock %}
