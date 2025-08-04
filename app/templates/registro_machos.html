@@ -10,37 +10,48 @@
                     <h4 class="mb-0"><i class="bi bi-journal-plus me-2"></i>Registro de Macho</h4>
                 </div>
                 <form id="machoForm" method="POST" enctype="multipart/form-data" class="p-3"
-                      action="{{ url_for('ganaderia.registro_machos') }}">
+                      action="{{ url_for('ganaderia.registro_machos') }}"
+                      data-create-url="{{ url_for('ganaderia.registro_machos') }}"
+                      data-update-url="{{ url_for('ganaderia.actualizar_macho') }}"
+                      data-search-url="{{ url_for('ganaderia.buscar_macho') }}">
                     <div class="mb-3 text-center">
-                        <div id="EspacioFotografico" class="d-flex flex-column align-items-center justify-content-center border-dashed-sg-green photo-box text-muted bg-light rounded">
+                    <div class="mb-3 text-center">    
+                        <div id="espacioFotografico" class="d-flex flex-column align-items-center justify-content-center border-dashed-sg-green photo-box text-muted bg-light rounded">
                             <i class="bi bi-camera fs-1"></i>
                             <span>Espacio Fotográfico</span>
                         </div>
                         <input type="file" class="form-control d-none" id="foto" name="foto" accept=".jpg,.jpeg,.png">
                     </div>
-                    <div class="row g-2 mb-2">
-                        <div class="col-6 col-md-4">
-                            <label for="numero" class="form-label">No Macho</label>
-                            <input type="text" class="form-control" id="numero" name="numero" value="{{ next_numero }}">
+                    <div class="row g-10 mb-2">
+                        <div class="col-10"></div>
+                        <div class="col-12 col-md-8 max-w-180">
+                            <label for="buscar" class="form-label">Buscar</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="buscar" placeholder="ID o nombre">
+                                <button type="button" class="btn btn-outline-secondary" id="resetFormBtn">
+                                    <i class="bi bi-arrow-clockwise"></i> Limpiar
+                                </button>
+                            </div>
                         </div>
-                        <div class="col-6 col-md-8">
+                        </div>
+                    </div>
+                    <div id="searchAlert" class="alert alert-warning py-1 d-none" role="alert"></div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6 col-md-3 max-w-120">
+                            <label for="numero" class="form-label">No Macho</label>
+                            <input type="text" class="form-control" id="numero" name="numero" value="{{ next_numero }}" readonly>
+                        </div>
+                        <div class="col-12 col-md-9">
                             <label for="nombre" class="form-label">Nombre</label>
                             <input type="text" class="form-control" id="nombre" name="nombre" required>
                         </div>
-                        </div>
                     <div class="row g-2 mb-2">
-                        <div class="col-6 col-md-6">
+                        <div class="col-6 col-md-4">
                             <label class="form-label">Tipo</label>
-                            <div class="d-flex gap-2">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="tipo" id="tipo_reproductor" value="Reproductor">
-                                    <label class="form-check-label" for="tipo_reproductor">Reproductor</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="tipo" id="tipo_carne" value="Carne" checked>
-                                    <label class="form-check-label" for="tipo_carne">Carne</label>
-                                </div>
-                            </div>
+                            <select class="form-select" id="tipo" name="tipo">
+                                <option value="carne">Carne</option>
+                                <option value="Reproductor">Reproductor</option>
+                            </select>
                         </div>
                         <div class="col-6 col-md-3">
                             <label for="condicion" class="form-label">Condición</label>
@@ -59,7 +70,8 @@
                                 <label class="form-check-label" for="activo">Activo</label>
                             </div>
                         </div>
-                    </div>
+                        </div>
+
                     <div class="row g-2 mb-2">
                         <div class="col-6 max-w-170">
                             <label for="fecha_nacimiento" class="form-label">Fecha de nacimiento</label>
@@ -69,7 +81,7 @@
                             <label for="fecha_incorporacion" class="form-label">F. Incorporación</label>
                             <input type="date" class="form-control" id="fecha_incorporacion" name="fecha_incorporacion">
                         </div>
-                    </div>
+                        </div>
                     <div class="row g-2 mb-2">
                         <div class="col-4">
                             <label for="origen" class="form-label">Origen</label>
@@ -87,7 +99,7 @@
                                 {% endfor %}
                             </select>
                         </div>
-                    <div class="col-4">
+                        <div class="col-4">
                             <label for="madre_id" class="form-label">Madre</label>
                             <select class="form-select" id="madre_id" name="madre_id">
                                 <option value="">-- Selección --</option>
@@ -114,14 +126,18 @@
                         </div>
                     </div>
                     <div class="d-flex justify-content-end gap-2 mt-3">
-                        <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Guardar</button>
+                        <button type="submit" class="btn btn-success" id="submitBtn">
+                            <i class="bi bi-save"></i> Guardar
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
+    </div>    
         <!---- tabla de machos registrados -->
         <div class="col-md-9">
             <h5 class="text-success text-center mb-3">Datos de Machos</h5>
+            <input id="searchBar" type="text" class="form-control mb-2" placeholder="Buscar...">
             <div class="table-responsive">
                 <table id="machosTable" class="table table-bordered">
                     <thead class="table-header-green text-center">
@@ -165,30 +181,166 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const activo = document.getElementById('activo');
-    const fechaDes = document.getElementById('fecha_desincorporacion');
-    const causaDes = document.getElementById('causa_desincorporacion');
-    const fotoInput = document.getElementById('foto');
-    const fotoBox = document.getElementById('espacioFotografico');
+    const tableFilter = document.getElementById('searchBar');
+    if (tableFilter) {
+        tableFilter.addEventListener('input', function () {
+            const term = this.value.toLowerCase();
+            document.querySelectorAll('#machosTable tbody tr').forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const numero = cells[0]?.textContent.toLowerCase() || '';
+                const nombre = cells[1]?.textContent.toLowerCase() || '';
+                const tipo = cells[2]?.textContent.toLowerCase() || '';
+                row.style.display = (numero.includes(term) || nombre.includes(term) || tipo.includes(term)) ? '' : 'none';
+            });
+        });
+    }
+
+    const form = document.getElementById('machoForm');
+    if (!form) return;
+
+    const searchInput = document.getElementById('buscar');
+    const numero = document.getElementById('numero');
+    const nombre = document.getElementById('nombre');
+    const tipoRepro = document.getElementById('tipo_reproductor');
+    const tipoCarne = document.getElementById('tipo_carne');
+    const condicion = document.getElementById('condicion');
+    const activoSwitch = document.getElementById('activo');
+    const fechaNacimiento = document.getElementById('fecha_nacimiento');
+    const fechaIncorp = document.getElementById('fecha_incorporacion');
+    const origen = document.getElementById('origen');
+    const padre = document.getElementById('padre_id');
+    const madre = document.getElementById('madre_id');
+    const fechaDesinc = document.getElementById('fecha_desincorporacion');
+    const causaDesinc = document.getElementById('causa_desincorporacion');
+    const submitBtn = document.getElementById('submitBtn');
+    const resetBtn = document.getElementById('resetFormBtn');
+    const alertBox = document.getElementById('searchAlert');
+    const createUrl = form.dataset.createUrl;
+    const updateUrl = form.dataset.updateUrl;
+    const searchUrl = form.dataset.searchUrl;
+    const originalNumero = numero.value;
+    const photoBox = document.getElementById('espacioFotografico');
+    const photoInput = document.getElementById('foto');
+    const photoPlaceholder = photoBox ? photoBox.innerHTML : '';
+    const staticBase = "{{ url_for('static', filename='') }}";
+
+    const fields = Array.from(
+        form.querySelectorAll('input:not([type="hidden"]), select, textarea')
+    ).filter(el => el.id !== 'activo');
+
+    function toggleFields(isActive) {
+        fields.forEach(field => {
+            if (field === fechaDesinc || field === causaDesinc) {
+                field.disabled = isActive;
+            } else if (field.id !== 'numero') {
+                field.disabled = !isActive;
+            }
+        });
+        fechaDesinc.required = !isActive;
+        causaDesinc.required = !isActive;
+    }
+
+    toggleFields(activoSwitch.checked);
+    activoSwitch.addEventListener('change', () => toggleFields(activoSwitch.checked));
+
+    function fillForm(data) {
+        numero.value = data.numero;
+        nombre.value = data.nombre || '';
+        if (data.tipo === 'Reproductor') {
+            tipoRepro.checked = true;
+        } else {
+            tipoCarne.checked = true;
+        }
+        condicion.value = data.condicion || '';
+        activoSwitch.checked = Boolean(data.activo);
+        fechaNacimiento.value = data.fecha_nacimiento || '';
+        fechaIncorp.value = data.fecha_incorporacion || '';
+        origen.value = data.origen || 'Cría';
+        padre.value = data.padre_id || '';
+        madre.value = data.madre_id || '';
+        fechaDesinc.value = data.fecha_desincorporacion || '';
+        causaDesinc.value = data.causa_desincorporacion || '';
+
+        if (photoInput) photoInput.value = '';
+        if (photoBox) {
+            if (data.foto) {
+                const imgUrl = `${staticBase}${data.foto}?t=${Date.now()}`;
+                photoBox.innerHTML = `<img src="${imgUrl}" class="img-fluid" alt="Foto de macho">`;
+                photoBox.classList.remove('text-muted');
+            } else {
+                photoBox.innerHTML = '<span>Sin imagen</span>';
+                photoBox.classList.add('text-muted');
+            }
+        }
+
+        toggleFields(activoSwitch.checked);
+        form.action = updateUrl;
+        submitBtn.innerHTML = '<i class="bi bi-save"></i> Guardar cambios';
+    }
+
 
     function toggleInactive() {
-        const isActive = activo.checked;
-        fechaDes.disabled = isActive;
-        causaDes.disabled = isActive;
-        fechaDes.required = !isActive;
-        causaDes.required = !isActive;
+        function buscar(term) {
+        if (!term) return;
+        fetch(`${searchUrl}?term=${encodeURIComponent(term)}`)
+            .then(r => {
+                if (!r.ok) throw new Error('nf');
+                return r.json();
+            })
+            .then(data => {
+                fillForm(data);
+                if (data.multiple) {
+                    alertBox.textContent = 'Se encontraron varias coincidencias, mostrando la primera';
+                    alertBox.classList.remove('d-none');
+                } else {
+                    alertBox.classList.add('d-none');
+                }
+            })
+            .catch(() => {
+                alertBox.textContent = 'No se encontraron resultados';
+                alertBox.classList.remove('d-none');
+            });
     }
-    activo.addEventListener('change', toggleInactive);
-    toggleInactive();
 
-    if (fotoBox && fotoInput) {
-        fotoBox.addEventListener('click', () => fotoInput.click());
-        fotoInput.addEventListener('change', () => {
-            const file = fotoInput.files[0];
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', e => {
+            const term = e.target.value.trim();
+            clearTimeout(searchTimeout);
+            if (!term) {
+                alertBox.classList.add('d-none');
+                return;
+            }
+            searchTimeout = setTimeout(() => buscar(term), 300);
+        });
+    }
+
+    resetBtn.addEventListener('click', () => {
+        form.reset();
+        form.action = createUrl;
+        numero.value = originalNumero;
+        tipoCarne.checked = true;
+        activoSwitch.checked = true;
+        submitBtn.innerHTML = '<i class="bi bi-save"></i> Guardar';
+        fields.forEach(field => field.disabled = false);
+        toggleFields(true);
+        document.querySelectorAll('.alert').forEach(a => a.classList.add('d-none'));
+        if (photoBox) {
+            photoBox.innerHTML = photoPlaceholder;
+            photoBox.classList.add('text-muted');
+        }
+        if (photoInput) photoInput.value = '';
+    });
+
+    if (photoBox && photoInput) {
+        photoBox.addEventListener('click', () => photoInput.click());
+        photoInput.addEventListener('change', () => {
+            const file = photoInput.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = e => {
-                fotoBox.innerHTML = '<img src="' + e.target.result + '" class="img-fluid" alt="Foto de macho">';
+                 photoBox.innerHTML = `<img src="${e.target.result}" class="img-fluid" alt="Foto de macho">`;
+                photoBox.classList.remove('text-muted');
             };
             reader.readAsDataURL(file);
         });

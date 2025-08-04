@@ -684,6 +684,31 @@ def registro_machos():
         next_numero=next_numero,
     )
 
+@ganaderia_bp.route('/registro_machos/buscar')
+def buscar_macho():
+    if 'usuario' not in session:
+        return jsonify({'error': 'unauthorized'}), 401
+    term = request.args.get('term', '').strip()
+    if not term:
+        return jsonify({'error': 'not found'}), 404
+    if term.isdigit():
+        query = 'SELECT * FROM machos WHERE numero=%s'
+        params = (term,)
+    else:
+        query = 'SELECT * FROM machos WHERE nombre LIKE %s ORDER BY numero LIMIT 2'
+        params = (f"%{term}%",)
+    with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+        cursor.execute(query, params)
+        machos = cursor.fetchall()
+    if not machos:
+        return jsonify({'error': 'not found'}), 404
+    macho = machos[0]
+    for campo in ['fecha_nacimiento', 'fecha_incorporacion', 'fecha_desincorporacion']:
+        if macho.get(campo):
+            macho[campo] = macho[campo].isoformat()
+    if len(machos) > 1:
+        macho['multiple'] = True
+    return jsonify(macho)
 
 @ganaderia_bp.route('/registro_machos/actualizar', methods=['POST'])
 def actualizar_macho():
