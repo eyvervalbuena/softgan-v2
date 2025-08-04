@@ -223,7 +223,7 @@ def registro_hembras():
             "FROM hembras h "
             "LEFT JOIN machos p ON h.padre_id = p.id "
             "LEFT JOIN hembras m ON h.madre_id = m.id "
-            "ORDER BY h.id DESC"
+            "ORDER BY h.id asc"
         )
         hembras = cursor.fetchall() or []
         for h in hembras:
