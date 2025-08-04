@@ -304,9 +304,9 @@ body {
     box-shadow:0 0.5rem 1rem rgba(0,0,0,0.15);
 }
 /* Filas de tabla para animales inactivos */
-.inactivo {
+#hembrasTable tbody tr.inactivo > td {
     background-color: #fff8dc !important;
     color: #333 !important;
     font-style: italic;
-    
+    ;
 }

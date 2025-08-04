@@ -167,7 +167,7 @@
                     </thead>
                     <tbody>
                         {% for h in hembras %}
-                        <tr class="{% if not h.activo %}inactivo{% endif %}">
+                        <tr class="{{ 'inactivo' if h.activo == 0 else '' }}">
                             <td>{{ h.numero }}</td>
                             <td>{{ h.nombre }}</td>
                             <td>{{ h.tipo }}</td>

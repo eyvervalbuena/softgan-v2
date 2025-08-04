@@ -214,16 +214,16 @@ def registro_hembras():
         cursor.execute("SELECT COALESCE(MAX(numero),0)+1 AS n FROM hembras")
         row = cursor.fetchone() or {}
         next_numero = row.get("n", 1)
-        cursor.execute("SELECT id, numero, nombre FROM machos ORDER BY id")
+        cursor.execute("SELECT id, numero, nombre FROM machos ORDER BY numero")
         machos = cursor.fetchall() or []
-        cursor.execute("SELECT id, numero, nombre FROM hembras ORDER BY id")
+        cursor.execute("SELECT id, numero, nombre FROM hembras ORDER BY numero")
         madres = cursor.fetchall() or []
         cursor.execute(
             "SELECT h.*, p.numero AS padre_numero, m.numero AS madre_numero "
             "FROM hembras h "
             "LEFT JOIN machos p ON h.padre_id = p.id "
             "LEFT JOIN hembras m ON h.madre_id = m.id "
-            "ORDER BY h.id asc"
+            "ORDER BY h.id ASC"
         )
         hembras = cursor.fetchall() or []
         for h in hembras:
@@ -249,7 +249,7 @@ def buscar_hembra():
         query = 'SELECT * FROM hembras WHERE id=%s'
         params = (term,)
     else:
-        query = 'SELECT * FROM hembras WHERE nombre LIKE %s ORDER BY id LIMIT 2'
+        query = 'SELECT * FROM hembras WHERE nombre LIKE %s ORDER BY numero LIMIT 2'
         params = (f"%{term}%",)
     with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
         cursor.execute(query, params)
@@ -500,9 +500,9 @@ def editar_hembra(hembra_id):
         )
 
     with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
-        cursor.execute("SELECT id, numero, nombre FROM machos ORDER BY id")
+        cursor.execute("SELECT id, numero, nombre FROM machos ORDER BY numero")
         machos = cursor.fetchall() or []
-        cursor.execute("SELECT id, numero, nombre FROM hembras ORDER BY id")
+        cursor.execute("SELECT id, numero, nombre FROM hembras ORDER BY numero")
         madres = cursor.fetchall() or []
 
     return render_template(
