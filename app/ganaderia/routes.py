@@ -283,18 +283,24 @@ def actualizar_hembra():
         flash('Acceso no autorizado', 'danger')
         return redirect(url_for('ganaderia.registro_hembras'))
 
-    hembra_numero = request.form.get('numero')
-    if not hembra_numero:
+    hembra_id_raw = request.form.get('hembra_id')
+    try:
+        hembra_id = int(hembra_id_raw)
+    except (TypeError, ValueError):
         flash('ID inválido', 'warning')
         return redirect(url_for('ganaderia.registro_hembras'))
 
     with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
-        cursor.execute('SELECT * FROM hembras WHERE numero=%s', (hembra_numero,))
+        cursor.execute('SELECT * FROM hembras WHERE id=%s', (hembra_id,))
         hembra = cursor.fetchone()
     if not hembra:
         flash('Hembra no encontrada', 'warning')
         return redirect(url_for('ganaderia.registro_hembras'))
-    hembra_id = hembra.get('id')
+    numero_raw = request.form.get('numero')
+    try:
+        numero = int(numero_raw) if numero_raw else hembra.get('numero')
+    except (TypeError, ValueError):
+        numero = hembra.get('numero')
 
     nombre = request.form.get('nombre') or hembra.get('nombre')
     tipo = request.form.get('tipo') or hembra.get('tipo')
@@ -348,6 +354,15 @@ def actualizar_hembra():
         foto_file.save(os.path.join(dir_path, unique_name))
         foto_path = os.path.join('imagenes', 'hembras', unique_name)
 
+        old_numero = hembra.get('numero')
+    if numero != old_numero:
+        with mysql.connection.cursor() as cursor:
+            cursor.execute('SELECT numero FROM animales WHERE numero=%s', (numero,))
+            if cursor.fetchone():
+                flash('El ID ya existe en el sistema.', 'warning')
+                return redirect(url_for('ganaderia.registro_hembras'))
+            cursor.execute('UPDATE animales SET numero=%s WHERE numero=%s', (numero, old_numero))
+
     with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
         cursor.execute(
             'SELECT id FROM hembras WHERE nombre=%s AND fecha_nacimiento=%s AND id!=%s',
@@ -360,8 +375,9 @@ def actualizar_hembra():
 
     with mysql.connection.cursor() as cursor:
         cursor.execute(
-            'UPDATE hembras SET nombre=%s, tipo=%s, condicion=%s, activo=%s, fecha_nacimiento=%s, origen=%s, fecha_incorporacion=%s, padre_id=%s, madre_id=%s, fecha_desincorporacion=%s, causa_desincorporacion=%s, foto=%s WHERE id=%s',
+            'UPDATE hembras SET numero=%s, nombre=%s, tipo=%s, condicion=%s, activo=%s, fecha_nacimiento=%s, origen=%s, fecha_incorporacion=%s, padre_id=%s, madre_id=%s, fecha_desincorporacion=%s, causa_desincorporacion=%s, foto=%s WHERE id=%s',
             (
+                numero,
                 nombre,
                 tipo,
                 condicion,

@@ -14,6 +14,7 @@
                       data-create-url="{{ url_for('ganaderia.registro_hembras') }}"
                       data-update-url="{{ url_for('ganaderia.actualizar_hembra') }}"
                       data-search-url="{{ url_for('ganaderia.buscar_hembra') }}">
+                      <input type="hidden" id="hembra_id" name="hembra_id">
                     <div class="mb-3 text-center">
                     <div class="mb-3 text-center">
                         <div id="espacioFotografico" class="d-flex flex-column align-items-center justify-content-center border-dashed-sg-green photo-box text-muted bg-light rounded">
@@ -214,6 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const searchInput = document.getElementById('buscar');
     const numero = document.getElementById('numero');
+    const hembraId = document.getElementById('hembra_id');
     const nombre = document.getElementById('nombre');
     const tipo = document.getElementById('tipo');
     const condicion = document.getElementById('condicion');
@@ -269,7 +271,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Rellenar formulario con datos existentes
 
     function fillForm(data) {
-        numero.value = data.id;
+        hembraId.value = data.id || '';
+        numero.value = data.numero;
         nombre.value = data.nombre || '';
         tipo.value = data.tipo || 'Leche';
         condicion.value = data.condicion || '';
@@ -339,6 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
         form.reset();
         form.action = createUrl;
         numero.value = originalNumero;
+        hembraId.value = '';
         activoSwitch.checked = true;
         submitBtn.innerHTML = '<i class="bi bi-save"></i> Guardar';
 
