@@ -120,6 +120,12 @@ def crear_tablas():
                 FOREIGN KEY (creado_por) REFERENCES usuarios(id) ON DELETE SET NULL
             )"""
         )
+        # Tabla base para todos los animales
+        cursor.execute(
+            """CREATE TABLE IF NOT EXISTS animales (
+                numero INT AUTO_INCREMENT PRIMARY KEY
+            )"""
+        )
         cursor.execute(
             """CREATE TABLE IF NOT EXISTS machos (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -135,7 +141,8 @@ def crear_tablas():
                 madre_id INT,
                 fecha_desincorporacion DATE,
                 causa_desincorporacion TEXT,
-                foto VARCHAR(255)
+                foto VARCHAR(255),
+                FOREIGN KEY (numero) REFERENCES animales(numero)
             )"""
         )
         
@@ -194,6 +201,19 @@ def crear_tablas():
                 )
             except Exception:
                 pass
+            cursor.execute(
+            "SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE "
+            "WHERE TABLE_NAME='machos' AND COLUMN_NAME='numero' "
+            "AND REFERENCED_TABLE_NAME='animales'",
+        )
+        if (cursor.fetchone() or {}).get("c", 0) == 0:
+            try:
+                cursor.execute(
+                    "ALTER TABLE machos ADD CONSTRAINT fk_machos_numero "
+                    "FOREIGN KEY (numero) REFERENCES animales(numero) ON DELETE CASCADE",
+                )
+            except Exception:
+                pass
 
         cursor.execute(
             """CREATE TABLE IF NOT EXISTS hembras (
@@ -212,7 +232,8 @@ def crear_tablas():
                 causa_desincorporacion TEXT,
                 foto VARCHAR(255),
                 FOREIGN KEY (padre_id) REFERENCES machos(id) ON DELETE SET NULL,
-                FOREIGN KEY (madre_id) REFERENCES hembras(id) ON DELETE SET NULL
+                FOREIGN KEY (madre_id) REFERENCES hembras(id) ON DELETE SET NULL,
+                FOREIGN KEY (numero) REFERENCES animales(numero)
             )"""
         )
         
@@ -265,6 +286,19 @@ def crear_tablas():
                 cursor.execute(
                     "ALTER TABLE hembras ADD CONSTRAINT fk_hembras_madre "
                     "FOREIGN KEY (madre_id) REFERENCES hembras(id) ON DELETE SET NULL"
+                )
+            except Exception:
+                pass
+            cursor.execute(
+            "SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE "
+            "WHERE TABLE_NAME='hembras' AND COLUMN_NAME='numero' "
+            "AND REFERENCED_TABLE_NAME='animales'",
+        )
+        if (cursor.fetchone() or {}).get("c", 0) == 0:
+            try:
+                cursor.execute(
+                    "ALTER TABLE hembras ADD CONSTRAINT fk_hembras_numero "
+                    "FOREIGN KEY (numero) REFERENCES animales(numero) ON DELETE CASCADE",
                 )
             except Exception:
                 pass

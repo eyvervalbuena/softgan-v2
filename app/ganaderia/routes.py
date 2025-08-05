@@ -184,10 +184,14 @@ def registro_hembras():
             return redirect(url_for("ganaderia.registro_hembras"))
 
         with mysql.connection.cursor() as cursor:
+            # número único para todos los animales
+            cursor.execute("INSERT INTO animales () VALUES ()")
+            numero = cursor.lastrowid
             cursor.execute(
-                "INSERT INTO hembras (nombre, tipo, condicion, activo, fecha_nacimiento, origen, fecha_incorporacion, padre_id, madre_id, fecha_desincorporacion, causa_desincorporacion, foto) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                 "INSERT INTO hembras (numero, nombre, tipo, condicion, activo, fecha_nacimiento, origen, fecha_incorporacion, padre_id, madre_id, fecha_desincorporacion, causa_desincorporacion, foto) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                 (
+                    numero,
                     nombre,
                     tipo,
                     condicion,
@@ -202,16 +206,12 @@ def registro_hembras():
                     foto_path,
                 ),
             )
-            hembra_id = cursor.lastrowid
-            cursor.execute(
-                "UPDATE hembras SET numero=%s WHERE id=%s", (hembra_id, hembra_id)
-            )
             mysql.connection.commit()
         flash("Hembra registrada correctamente.", "success")
         return redirect(url_for("ganaderia.registro_hembras"))
 
     with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
-        cursor.execute("SELECT COALESCE(MAX(numero),0)+1 AS n FROM hembras")
+        cursor.execute("SELECT COALESCE(MAX(numero),0)+1 AS n FROM animales")
         row = cursor.fetchone() or {}
         next_numero = row.get("n", 1)
         cursor.execute("SELECT id, numero, nombre FROM machos ORDER BY numero")
@@ -246,7 +246,7 @@ def buscar_hembra():
     if not term:
         return jsonify({'error': 'not found'}), 404
     if term.isdigit():
-        query = 'SELECT * FROM hembras WHERE id=%s'
+        query = 'SELECT * FROM hembras WHERE numero=%s'
         params = (term,)
     else:
         query = 'SELECT * FROM hembras WHERE nombre LIKE %s ORDER BY numero LIMIT 2'
@@ -283,17 +283,18 @@ def actualizar_hembra():
         flash('Acceso no autorizado', 'danger')
         return redirect(url_for('ganaderia.registro_hembras'))
 
-    hembra_id = request.form.get('numero')
-    if not hembra_id:
+    hembra_numero = request.form.get('numero')
+    if not hembra_numero:
         flash('ID inválido', 'warning')
         return redirect(url_for('ganaderia.registro_hembras'))
 
     with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
-        cursor.execute('SELECT * FROM hembras WHERE id=%s', (hembra_id,))
+        cursor.execute('SELECT * FROM hembras WHERE numero=%s', (hembra_numero,))
         hembra = cursor.fetchone()
     if not hembra:
         flash('Hembra no encontrada', 'warning')
         return redirect(url_for('ganaderia.registro_hembras'))
+    hembra_id = hembra.get('id')
 
     nombre = request.form.get('nombre') or hembra.get('nombre')
     tipo = request.form.get('tipo') or hembra.get('tipo')
@@ -520,7 +521,7 @@ def eliminar_hembra(hembra_id):
         return redirect(url_for("ganaderia.registro_hembras"))
 
     with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
-        cursor.execute("SELECT id, nombre FROM hembras WHERE id=%s", (hembra_id,))
+        cursor.execute("SELECT id, numero, nombre FROM hembras WHERE id=%s", (hembra_id,))
         hembra = cursor.fetchone()
 
     if not hembra:
@@ -530,6 +531,7 @@ def eliminar_hembra(hembra_id):
     if request.method == "POST":
         with mysql.connection.cursor() as cursor:
             cursor.execute("DELETE FROM hembras WHERE id=%s", (hembra_id,))
+            cursor.execute("DELETE FROM animales WHERE numero=%s", (hembra['numero'],))
             mysql.connection.commit()
         flash("Hembra eliminada correctamente.", "success")
         return redirect(url_for("ganaderia.registro_hembras"))
@@ -544,11 +546,6 @@ def registro_machos():
         return redirect(url_for("auth.login"))
 
     if request.method == "POST":
-        numero_raw = request.form.get("numero")
-        try:
-            numero = int(numero_raw)
-        except (TypeError, ValueError):
-            numero = None
         nombre = request.form.get("nombre")
         tipo = request.form.get("tipo")
         cond_raw = request.form.get("condicion")
@@ -576,8 +573,8 @@ def registro_machos():
         if activo:
             fecha_desincorporacion = None
             causa_desincorporacion = None
-            if not numero or not nombre or condicion is None:
-                flash("ID, nombre y condición son obligatorios.", "warning")
+            if not nombre or condicion is None:
+                flash("Nombre y condición son obligatorios.", "warning")
                 return redirect(url_for("ganaderia.registro_machos"))
         else:
             if not fecha_desincorporacion or not causa_desincorporacion:
@@ -608,15 +605,8 @@ def registro_machos():
             foto_path = os.path.join("imagenes", "machos", unique_name)
 
         with mysql.connection.cursor() as cursor:
-            cursor.execute("SELECT id FROM machos WHERE numero=%s", (numero,))
-            existe_macho = cursor.fetchone()
-            cursor.execute("SELECT id FROM hembras WHERE numero=%s", (numero,))
-            existe_hembra = cursor.fetchone()
-        if existe_macho or existe_hembra:
-            flash("El ID ya existe en el sistema.", "warning")
-            return redirect(url_for("ganaderia.registro_machos"))
-
-        with mysql.connection.cursor() as cursor:
+            cursor.execute("INSERT INTO animales () VALUES ()")
+            numero = cursor.lastrowid
             cursor.execute(
                 """INSERT INTO machos (
                     numero, nombre, tipo, condicion, activo, fecha_nacimiento,
@@ -644,11 +634,9 @@ def registro_machos():
         return redirect(url_for("ganaderia.registro_machos"))
 
     with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
-        cursor.execute("SELECT COALESCE(MAX(numero),0) AS m FROM machos")
-        max_m = cursor.fetchone() or {}
-        cursor.execute("SELECT COALESCE(MAX(numero),0) AS h FROM hembras")
-        max_h = cursor.fetchone() or {}
-        next_numero = max(max_m.get("m", 0), max_h.get("h", 0)) + 1
+        cursor.execute("SELECT COALESCE(MAX(numero),0)+1 AS n FROM animales")
+        row = cursor.fetchone() or {}
+        next_numero = row.get("n", 1)
 
         cursor.execute("SELECT id, numero, nombre FROM machos ORDER BY numero")
         padres = cursor.fetchall() or []
@@ -786,14 +774,14 @@ def actualizar_macho():
         foto_file.save(os.path.join(dir_path, unique_name))
         foto_path = os.path.join('imagenes', 'machos', unique_name)
 
-    with mysql.connection.cursor() as cursor:
-        cursor.execute('SELECT id FROM machos WHERE numero=%s AND id!=%s', (numero, macho_id))
-        existe_macho = cursor.fetchone()
-        cursor.execute('SELECT id FROM hembras WHERE numero=%s', (numero,))
-        existe_hembra = cursor.fetchone()
-    if existe_macho or existe_hembra:
-        flash('El ID ya existe en el sistema.', 'warning')
-        return redirect(url_for('ganaderia.registro_machos'))
+    old_numero = macho.get('numero')
+    if numero != old_numero:
+        with mysql.connection.cursor() as cursor:
+            cursor.execute('SELECT numero FROM animales WHERE numero=%s', (numero,))
+            if cursor.fetchone():
+                flash('El ID ya existe en el sistema.', 'warning')
+                return redirect(url_for('ganaderia.registro_machos'))
+            cursor.execute('UPDATE animales SET numero=%s WHERE numero=%s', (numero, old_numero))
 
     with mysql.connection.cursor() as cursor:
         cursor.execute(
