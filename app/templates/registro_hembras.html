@@ -356,6 +356,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (photoInput) photoInput.value = '';
     });
+    
+    if (photoBox && photoInput) {
+        photoBox.addEventListener('click', () => photoInput.click());
+        photoInput.addEventListener('change', () => {
+            const file = photoInput.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                photoBox.innerHTML = `<img src="${e.target.result}" class="img-fluid" alt="Foto de hembra">`;
+                photoBox.classList.remove('text-muted');
+            };
+            reader.readAsDataURL(file);
+        });
+    }
 });
 </script>
 {% endblock %}

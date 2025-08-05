@@ -283,10 +283,8 @@ def actualizar_hembra():
         flash('Acceso no autorizado', 'danger')
         return redirect(url_for('ganaderia.registro_hembras'))
 
-    hembra_id_raw = request.form.get('hembra_id')
-    try:
-        hembra_id = int(hembra_id_raw)
-    except (TypeError, ValueError):
+    hembra_id = request.form.get('hembra_id')
+    if not hembra_id:
         flash('ID inválido', 'warning')
         return redirect(url_for('ganaderia.registro_hembras'))
 
@@ -354,7 +352,7 @@ def actualizar_hembra():
         foto_file.save(os.path.join(dir_path, unique_name))
         foto_path = os.path.join('imagenes', 'hembras', unique_name)
 
-        old_numero = hembra.get('numero')
+    old_numero = hembra.get('numero')
     if numero != old_numero:
         with mysql.connection.cursor() as cursor:
             cursor.execute('SELECT numero FROM animales WHERE numero=%s', (numero,))
