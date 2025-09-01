@@ -120,6 +120,51 @@ def crear_tablas():
                 FOREIGN KEY (creado_por) REFERENCES usuarios(id) ON DELETE SET NULL
             )"""
         )
+        # --------------------------------------------------------------
+        # Producción de leche
+        # --------------------------------------------------------------
+        cursor.execute(
+            """CREATE TABLE IF NOT EXISTS produccion_leche (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                hembra_id INT NOT NULL,
+                fecha DATE NOT NULL,
+                numero_ordenyo TINYINT NOT NULL,
+                litros DECIMAL(6,2) NOT NULL,
+                creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY uq_produccion_unica (hembra_id, fecha, numero_ordenyo),
+                INDEX idx_h_f (hembra_id, fecha)
+            )"""
+        )
+        # Registro de partos
+        cursor.execute(
+            """CREATE TABLE IF NOT EXISTS partos (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                hembra_id INT NOT NULL,
+                numero_parto INT NOT NULL,
+                fecha DATE NOT NULL,
+                sexo_cria ENUM('Macho','Hembra') NOT NULL,
+                numero_cria INT NULL,
+                peso_nacer DECIMAL(5,2) NULL,
+                toro_id INT NULL,
+                tipo_parto ENUM('Normal','Asistido','Mortinato') NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY uq_parto_hembra_num (hembra_id, numero_parto),
+                INDEX idx_partos_hembra_fecha (hembra_id, fecha),
+                CONSTRAINT fk_partos_hembra FOREIGN KEY (hembra_id) REFERENCES hembras(id) ON DELETE CASCADE
+            )"""
+        )
+        # Asegurar columnas usadas en hembras para el módulo de leche
+        for col, tipo in [("num_crias", "INT"), ("ordenyos_dia", "INT"), ("ultimo_parto", "DATE")]:
+            cursor.execute(
+                "SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.COLUMNS "
+                "WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='hembras' AND COLUMN_NAME=%s",
+                (col,),
+            )
+            if (cursor.fetchone() or {}).get("c", 0) == 0:
+                try:
+                    cursor.execute(f"ALTER TABLE hembras ADD COLUMN {col} {tipo} NULL")
+                except Exception:
+                    pass
         # Tabla base para todos los animales
         cursor.execute(
             """CREATE TABLE IF NOT EXISTS animales (
@@ -173,6 +218,14 @@ def crear_tablas():
             row = cursor.fetchone()
             if row and list(row.values())[0] == 0:
                 cursor.execute(f"ALTER TABLE machos ADD COLUMN {col} {tipo}")
+
+        # Asegurar columna propietario para machos
+        cursor.execute(
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='machos' AND COLUMN_NAME='propietario'"
+        )
+        row = cursor.fetchone()
+        if row and list(row.values())[0] == 0:
+            cursor.execute("ALTER TABLE machos ADD COLUMN propietario VARCHAR(100)")
 
         cursor.execute(
             "SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE "
@@ -261,6 +314,14 @@ def crear_tablas():
             if row and list(row.values())[0] == 0:
                 cursor.execute(f"ALTER TABLE hembras ADD COLUMN {col} {tipo}")
 
+        # Asegurar columna propietario para hembras
+        cursor.execute(
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='hembras' AND COLUMN_NAME='propietario'"
+        )
+        row = cursor.fetchone()
+        if row and list(row.values())[0] == 0:
+            cursor.execute("ALTER TABLE hembras ADD COLUMN propietario VARCHAR(100)")
+
         # Relaciones padre/madre
         cursor.execute(
             "SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE "
@@ -302,12 +363,75 @@ def crear_tablas():
                 )
             except Exception:
                 pass
+        # --------------------------------------------------------------
+        # Vista unificada de semovientes (machos + hembras)
+        # --------------------------------------------------------------
+        # Crear o actualizar la vista "semovientes" que unifica campos comunes
+        # y específicos. Campos no aplicables quedan como NULL (se mostrarán como N/A en UI).
+        try:
+            view_sql = (
+                "CREATE OR REPLACE VIEW semovientes AS "
+                "SELECT m.id AS semoviente_id, m.numero, m.nombre, "
+                "NULL AS raza, m.fecha_nacimiento, m.propietario, "
+                "m.condicion AS condicion_corporal, m.origen, "
+                "NULL AS peso_inicial, NULL AS peso_actual, NULL AS destino, "
+                "NULL AS estado_reproductivo, NULL AS fecha_parto, NULL AS litros_leche, "
+                "'Macho' AS sexo, m.activo AS activo, m.foto "
+                "FROM machos m "
+                "UNION ALL "
+                "SELECT h.id AS semoviente_id, h.numero, h.nombre, "
+                "NULL AS raza, h.fecha_nacimiento, h.propietario, "
+                "h.condicion AS condicion_corporal, h.origen, "
+                "NULL AS peso_inicial, NULL AS peso_actual, NULL AS destino, "
+                "NULL AS estado_reproductivo, NULL AS fecha_parto, NULL AS litros_leche, "
+                "'Hembra' AS sexo, h.activo AS activo, h.foto "
+                "FROM hembras h"
+            )
+            cursor.execute(view_sql)
+        except Exception:
+            # Fallback para motores que no soporten OR REPLACE: comprobar existencia y recrear
+            cursor.execute(
+                "SELECT COUNT(*) AS c FROM information_schema.views "
+                "WHERE table_schema = DATABASE() AND table_name = 'semovientes'"
+            )
+            exists = (cursor.fetchone() or {}).get("c", 0) > 0
+            if exists:
+                try:
+                    cursor.execute("DROP VIEW semovientes")
+                except Exception:
+                    pass
+            cursor.execute(
+                "CREATE VIEW semovientes AS "
+                "SELECT m.id AS semoviente_id, m.numero, m.nombre, "
+                "NULL AS raza, m.fecha_nacimiento, m.propietario, "
+                "m.condicion AS condicion_corporal, m.origen, "
+                "NULL AS peso_inicial, NULL AS peso_actual, NULL AS destino, "
+                "NULL AS estado_reproductivo, NULL AS fecha_parto, NULL AS litros_leche, "
+                "'Macho' AS sexo, m.activo AS activo, m.foto "
+                "FROM machos m "
+                "UNION ALL "
+                "SELECT h.id AS semoviente_id, h.numero, h.nombre, "
+                "NULL AS raza, h.fecha_nacimiento, h.propietario, "
+                "h.condicion AS condicion_corporal, h.origen, "
+                "NULL AS peso_inicial, NULL AS peso_actual, NULL AS destino, "
+                "NULL AS estado_reproductivo, NULL AS fecha_parto, NULL AS litros_leche, "
+                "'Hembra' AS sexo, h.activo AS activo, h.foto "
+                "FROM hembras h"
+            )
 def create_app():
     app = Flask(__name__)
     app.config.from_pyfile('config.py')
     app.secret_key = os.getenv('SECRET_KEY', 'softgan_secret_key')
 
     mysql.init_app(app)
+
+    # Activar logging DEBUG
+    try:
+        import logging
+        app.logger.setLevel(logging.DEBUG)
+        logging.getLogger('werkzeug').setLevel(logging.DEBUG)
+    except Exception:
+        pass
 
     from .auth.routes import auth_bp
     from .ganaderia.routes import setup_bp, ganaderia_bp
@@ -319,6 +443,7 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(setup_bp)
     app.register_blueprint(ganaderia_bp)
+    
     app.register_blueprint(sanitario_bp)
     app.register_blueprint(almacen_bp)
     app.register_blueprint(alertas_bp)

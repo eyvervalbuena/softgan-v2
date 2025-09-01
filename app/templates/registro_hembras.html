@@ -244,6 +244,14 @@ document.addEventListener('DOMContentLoaded', () => {
         form.querySelectorAll('input:not([type="hidden"]), select, textarea')
     ).filter(el => el.id !== 'activo');
 
+    // Inicializar opciones de condición corporal 1.0–5.0 en pasos de 0.5
+    (function initCondicionOptions() {
+        if (!condicion) return;
+        const values = [];
+        for (let c = 1.0; c <= 5.0001; c += 0.5) values.push(c.toFixed(1));
+        condicion.innerHTML = values.map(v => `<option value="${v}">${v}</option>`).join('');
+    })();
+
     /**
      * Habilita o deshabilita los campos dependiendo del estado del switch #activo.
      * Cuando está activo se deshabilitan los campos de desincorporación.
@@ -275,7 +283,25 @@ document.addEventListener('DOMContentLoaded', () => {
         numero.value = data.numero;
         nombre.value = data.nombre || '';
         tipo.value = data.tipo || 'Leche';
-        condicion.value = data.condicion || '';
+        // Normalizar condición corporal a formato con 1 decimal y asegurar opción en el select
+        if (data.condicion !== undefined && data.condicion !== null && data.condicion !== '') {
+            const val = Number(data.condicion);
+            const fixed = isNaN(val) ? '' : val.toFixed(1);
+            if (fixed) {
+                // Asegurar que exista la opción en el select
+                let exists = false;
+                Array.from(condicion.options).forEach(opt => { if (opt.value === fixed) exists = true; });
+                if (!exists) {
+                    const opt = document.createElement('option');
+                    opt.value = fixed; opt.textContent = fixed; condicion.appendChild(opt);
+                }
+                condicion.value = fixed;
+            } else {
+                condicion.value = '';
+            }
+        } else {
+            condicion.value = '';
+        }
         activoSwitch.checked = Boolean(data.activo);
         fechaNacimiento.value = data.fecha_nacimiento || '';
         origen.value = data.origen || 'Cría';
@@ -334,7 +360,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 alertBox.classList.add('d-none');
                 return;
             }
-            searchTimeout = setTimeout(() => buscar(term), 300);
+            // Si es numérico (ID) buscar más rápido
+            const delay = /^\d+$/.test(term) ? 150 : 300;
+            searchTimeout = setTimeout(() => buscar(term), delay);
+        });
+        // Ejecutar búsqueda también al perder foco
+        searchInput.addEventListener('blur', e => {
+            const term = e.target.value.trim();
+            if (term) buscar(term);
+        });
+        // Enter ejecuta búsqueda inmediata
+        searchInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const term = e.target.value.trim();
+                if (term) buscar(term);
+            }
         });
     }
     // Restablecer formulario a su estado original

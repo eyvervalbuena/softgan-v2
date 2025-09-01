@@ -1,0 +1,324 @@
+{% extends 'base.html' %}
+{% block title %}Semovientes{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Semovientes</h3>
+    <form id="searchForm" class="d-flex" method="get" action="{{ url_for('main.semovientes') }}">
+      <input id="q" class="form-control me-2" type="search" placeholder="Buscar (nombre, número, origen, sexo)" name="q" value="{{ q }}" autocomplete="off" />
+      <noscript>
+        <button class="btn btn-primary me-2" type="submit">Buscar</button>
+      </noscript>
+      <button id="resetBtn" class="btn btn-outline-secondary" type="button">Restablecer</button>
+    </form>
+  </div>
+  <div id="semovientes-summary" class="mb-3">
+    {% include 'partials/_semovientes_summary.html' %}
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Número</th>
+          <th>Nombre</th>
+          <th>Sexo</th>
+          <th>Raza</th>
+          <th>Fecha Nacimiento</th>
+          <th>Edad</th>
+          <th>Estado</th>
+          <th>Propietario</th>
+          <th>Condición Corporal</th>
+          <th>Origen</th>
+          <th>Peso Inicial</th>
+          <th>Peso Actual</th>
+          <th>Destino</th>
+          <th>Estado Reproductivo</th>
+          <th>Fecha Parto</th>
+          <th>Litros Leche</th>
+        </tr>
+      </thead>
+      <tbody id="semovientes-tbody">
+        {% set rows = items %}
+        {% include 'partials/_semovientes_tbody.html' %}
+      </tbody>
+    </table>
+  </div>
+
+  <div id="semovientes-pagination">
+    {% include 'partials/_semovientes_pagination.html' %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  (function() {
+    const qInput = document.getElementById('q');
+    const resetBtn = document.getElementById('resetBtn');
+    const tbody = document.getElementById('semovientes-tbody');
+    const pagination = document.getElementById('semovientes-pagination');
+    const form = document.getElementById('searchForm');
+
+    // Previene envío del form por Enter
+    form.addEventListener('submit', function(ev) {
+      ev.preventDefault();
+      // Fallback: ejecuta búsqueda vía AJAX igual que input
+      triggerSearch(qInput.value);
+    });
+
+    // Debounce
+    let timer = null;
+    qInput.addEventListener('input', function() {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        triggerSearch(qInput.value);
+      }, 300);
+    });
+
+    // Escape = Restablecer
+    qInput.addEventListener('keydown', function(ev) {
+      if (ev.key === 'Escape') {
+        ev.preventDefault();
+        doReset();
+      }
+    });
+
+    // Botón Restablecer
+    resetBtn.addEventListener('click', doReset);
+
+    function doReset() {
+      qInput.value = '';
+      // Actualiza tabla y paginación a página 1 sin q
+      fetchPartial({ page: 1 });
+      // Quita q del querystring actual
+      const url = new URL(window.location.href);
+      url.searchParams.delete('q');
+      url.searchParams.set('page', '1');
+      window.history.replaceState({}, '', url);
+      qInput.focus();
+    }
+
+    function triggerSearch(val) {
+      fetchPartial({ q: val, page: 1 });
+    }
+
+    async function fetchPartial({ q, page }) {
+      try {
+        const url = new URL(window.location.origin + '{{ url_for('main.semovientes') }}');
+        url.searchParams.set('partial', '1');
+        if (q && q.trim() !== '') url.searchParams.set('q', q.trim());
+        url.searchParams.set('page', String(page || 1));
+
+        const resp = await fetch(url, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const ctype = resp.headers.get('content-type') || '';
+        if (ctype.includes('application/json')) {
+          const data = await resp.json();
+          if (data.tbody !== undefined) tbody.innerHTML = data.tbody;
+          if (data.pagination !== undefined) pagination.innerHTML = data.pagination;
+          const summary = document.getElementById('semovientes-summary');
+          if (summary && data.summary !== undefined) summary.innerHTML = data.summary;
+        } else {
+          const html = await resp.text();
+          const tmp = document.createElement('div');
+          tmp.innerHTML = html;
+          const tbodyFrag = tmp.querySelector('#semovientes-tbody-fragment');
+          const pagFrag = tmp.querySelector('#semovientes-pagination');
+          if (tbodyFrag) tbody.innerHTML = tbodyFrag.innerHTML; else tbody.innerHTML = html;
+          if (pagFrag) pagination.innerHTML = pagFrag.innerHTML;
+        }
+        // Mantener enlaces de paginación funcionando: delegación para interceptar clicks y cargar por AJAX
+        enableAjaxPagination();
+      } catch (e) {
+        console.error('Error al actualizar la tabla:', e);
+      }
+    }
+
+    function enableAjaxPagination() {
+      // Intercepta clicks en paginación para evitar recarga completa
+      pagination.querySelectorAll('a.page-link').forEach(a => {
+        a.addEventListener('click', function(ev) {
+          ev.preventDefault();
+          const url = new URL(a.href);
+          const page = parseInt(url.searchParams.get('page') || '1', 10);
+          const qParam = url.searchParams.get('q') || qInput.value;
+          fetchPartial({ q: qParam, page });
+          // No modificamos la URL para no confundir navegación; si deseas, puedes usar replaceState aquí
+        });
+      });
+    }
+
+    // Inicializa comportamiento AJAX para paginación renderizada inicialmente
+    enableAjaxPagination();
+
+    // Delegated inline editing for Propietario (dblclick/Enter)
+    function installOwnerEditDelegation() {
+      const container = document.getElementById('semovientes-tbody');
+      if (!container || container._ownerDelegated) return;
+      container._ownerDelegated = true;
+      const startEditFor = (span) => {
+        if (!span || !span.matches('.propietario-text[data-editable="1"]')) return;
+        const td = span.closest('td');
+        const tr = span.closest('tr');
+        const id = tr?.dataset.id;
+        const sexo = tr?.dataset.sexo;
+        const current = span.getAttribute('data-value') || '';
+        const originalHTML = td.innerHTML;
+        td.innerHTML = '';
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'form-control form-control-sm';
+        input.value = current;
+        input.placeholder = 'Propietario';
+        input.maxLength = 100;
+        const actions = document.createElement('div');
+        actions.className = 'mt-2 d-flex gap-2';
+        const saveBtn = document.createElement('button');
+        saveBtn.type = 'button';
+        saveBtn.className = 'btn btn-sm btn-success';
+        saveBtn.textContent = 'Guardar';
+        const cancelBtn = document.createElement('button');
+        cancelBtn.type = 'button';
+        cancelBtn.className = 'btn btn-sm btn-outline-secondary';
+        cancelBtn.textContent = 'Cancelar';
+        const msg = document.createElement('div');
+        msg.className = 'small mt-2';
+        td.appendChild(input);
+        td.appendChild(actions);
+        actions.appendChild(saveBtn);
+        actions.appendChild(cancelBtn);
+        td.appendChild(msg);
+        input.focus();
+        const cleanup = (newText) => {
+          if (typeof newText === 'string') {
+            const texto = newText.length ? newText : 'N/A';
+            td.innerHTML = `<span class=\"propietario-text\" data-editable=\"1\" tabindex=\"0\" data-value=\"${newText || ''}\">${texto}</span>`;
+          } else {
+            td.innerHTML = originalHTML;
+          }
+        };
+        cancelBtn.addEventListener('click', () => cleanup());
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') cleanup();
+          if (e.key === 'Enter') saveBtn.click();
+        });
+        saveBtn.addEventListener('click', async () => {
+          const nuevo = input.value.trim();
+          msg.textContent = 'Guardando...';
+          msg.className = 'small mt-2 text-muted';
+          try {
+            const resp = await fetch('{{ url_for('main.actualizar_propietario_semoviente') }}', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id, sexo, propietario: nuevo })
+            });
+            const data = await resp.json();
+            if (!resp.ok || !data.ok) throw new Error(data.error || 'Error');
+            cleanup(nuevo);
+          } catch (e) {
+            msg.textContent = 'No se pudo guardar';
+            msg.className = 'small mt-2 text-danger';
+          }
+        });
+      };
+      container.addEventListener('dblclick', (e) => {
+        const span = e.target.closest('.propietario-text[data-editable="1"]');
+        if (span && container.contains(span)) startEditFor(span);
+      });
+      container.addEventListener('keydown', (e) => {
+        const span = e.target.closest('.propietario-text[data-editable="1"]');
+        if (span && e.key === 'Enter') { e.preventDefault(); startEditFor(span); }
+      });
+    }
+
+    // Activar delegación de edición inline
+    installOwnerEditDelegation();
+
+    // Inline edit Propietario (solo admin/administrador)
+    function enableEditable() {
+      document.querySelectorAll('.propietario-edit').forEach(btn => {
+        if (btn._bound) return; // evitar múltiples binds tras reemplazos
+        btn._bound = true;
+        btn.addEventListener('click', function() {
+          const td = btn.closest('td');
+          const tr = btn.closest('tr');
+          const id = btn.getAttribute('data-id');
+          const sexo = btn.getAttribute('data-sexo');
+          const current = btn.getAttribute('data-value') || '';
+
+          // Construir editor inline
+          const originalHTML = td.innerHTML;
+          td._originalHTML = originalHTML;
+          td.innerHTML = '';
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.className = 'form-control form-control-sm';
+          input.value = current;
+          input.placeholder = 'Propietario';
+          input.maxLength = 100;
+          const actions = document.createElement('div');
+          actions.className = 'mt-2 d-flex gap-2';
+          const saveBtn = document.createElement('button');
+          saveBtn.type = 'button';
+          saveBtn.className = 'btn btn-sm btn-success';
+          saveBtn.textContent = 'Guardar';
+          const cancelBtn = document.createElement('button');
+          cancelBtn.type = 'button';
+          cancelBtn.className = 'btn btn-sm btn-outline-secondary';
+          cancelBtn.textContent = 'Cancelar';
+          const msg = document.createElement('div');
+          msg.className = 'small mt-2';
+          td.appendChild(input);
+          td.appendChild(actions);
+          actions.appendChild(saveBtn);
+          actions.appendChild(cancelBtn);
+          td.appendChild(msg);
+          input.focus();
+
+          cancelBtn.addEventListener('click', () => {
+            td.innerHTML = originalHTML;
+            enableEditable();
+          });
+
+          saveBtn.addEventListener('click', async () => {
+            const nuevo = input.value.trim();
+            msg.textContent = 'Guardando...';
+            msg.className = 'small mt-2 text-muted';
+            try {
+              const resp = await fetch('{{ url_for('main.actualizar_propietario_semoviente') }}', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id, sexo, propietario: nuevo })
+              });
+              const data = await resp.json();
+              if (!resp.ok || !data.ok) throw new Error(data.error || 'Error');
+              // Render de nuevo la celda en modo lectura
+              const texto = (nuevo && nuevo.length) ? nuevo : 'N/A';
+              td.innerHTML = `
+                <span class="propietario-text">${texto}</span>
+                <button type="button" class="btn btn-sm btn-outline-secondary ms-2 propietario-edit" title="Editar propietario" data-id="${id}" data-sexo="${sexo}" data-value="${nuevo || ''}">
+                  <i class="bi bi-pencil"></i>
+                </button>
+              `;
+              enableEditable();
+            } catch (e) {
+              msg.textContent = 'No se pudo guardar';
+              msg.className = 'small mt-2 text-danger';
+            }
+          });
+        });
+      });
+    }
+
+    // Conservamos la función anterior por compatibilidad, pero activamos la nueva delegación
+    // enableEditable();
+    installOwnerEditDelegation();
+  })();
+</script>
+{% endblock %}

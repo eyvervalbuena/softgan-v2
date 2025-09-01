@@ -1,0 +1,40 @@
+{# Renderiza solo filas <tr> para la tabla de semovientes #}
+{% for a in rows %}
+{% set sexo_letter = 'M' if a.sexo and a.sexo[:1]|lower == 'm' else ('H' if a.sexo and a.sexo[:1]|lower == 'h' else None) %}
+<tr data-id="{{ a.semoviente_id }}" data-sexo="{{ sexo_letter or '' }}">
+  <td>{{ a.numero }}</td>
+  <td>{{ a.nombre or 'N/A' }}</td>
+  <td>{{ sexo_letter or 'N/A' }}</td>
+  <td>{{ a.raza if a.raza is not none else 'N/A' }}</td>
+  <td>{{ a.fecha_nacimiento or 'N/A' }}</td>
+  <td>{{ a.edad or 'N/A' }}</td>
+  <td>
+    {% set activo_flag = 1 if a.activo in [1, True, '1', 'true', 'True'] else 0 %}
+    {% if activo_flag %}
+      <span class="badge bg-success">Activo</span>
+    {% else %}
+      <span class="badge bg-secondary">Inactivo</span>
+    {% endif %}
+  </td>
+  <td>
+    {% set valor_prop = a.propietario if a.propietario is not none else 'N/A' %}
+    {% if session.get('rol') in ['admin','administrador'] and sexo_letter %}
+      <span class="propietario-text" data-editable="1" tabindex="0" data-value="{{ a.propietario or '' }}">{{ valor_prop }}</span>
+    {% else %}
+      <span class="propietario-text">{{ valor_prop }}</span>
+    {% endif %}
+  </td>
+  <td>{{ a.condicion_corporal if a.condicion_corporal is not none else 'N/A' }}</td>
+  <td>{{ a.origen or 'N/A' }}</td>
+  <td>{{ a.peso_inicial if a.peso_inicial is not none else 'N/A' }}</td>
+  <td>{{ a.peso_actual if a.peso_actual is not none else 'N/A' }}</td>
+  <td>{{ a.destino if a.destino is not none else 'N/A' }}</td>
+  <td>{{ a.estado_reproductivo if a.estado_reproductivo is not none else 'N/A' }}</td>
+  <td>{{ a.fecha_parto if a.fecha_parto is not none else 'N/A' }}</td>
+  <td>{{ a.litros_leche if a.litros_leche is not none else 'N/A' }}</td>
+</tr>
+{% else %}
+<tr>
+  <td colspan="15" class="text-center text-muted">No se encontraron resultados.</td>
+</tr>
+{% endfor %}

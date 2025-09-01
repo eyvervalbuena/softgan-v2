@@ -105,6 +105,153 @@ def registro_carne():
 def registro_leche():
     return render_template('registro_leche.html')
 
+# ---------------------- Producción Leche API ----------------------
+def _to_iso(d):
+    return d.isoformat() if d else None
+
+def _get_hembra_info(hembra_id):
+    """Obtiene hembra por id con campos requeridos por módulo de leche."""
+    with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+        cursor.execute(
+            """
+            SELECT h.id, h.nombre,
+                   COALESCE(h.num_crias,0) AS num_crias,
+                   h.tipo,
+                   h.condicion AS condicion,
+                   COALESCE(h.ordenyos_dia,2) AS ordenyos_dia,
+                   h.ultimo_parto
+            FROM hembras h WHERE h.id=%s
+            """,
+            (hembra_id,),
+        )
+        row = cursor.fetchone()
+    if not row:
+        return None
+    # Normalizaciones
+    row["ultimo_parto"] = _to_iso(row.get("ultimo_parto"))
+    tipo_raw = (row.get("tipo") or "").strip().lower()
+    if tipo_raw not in ("productiva", "seca"):
+        row["tipo"] = "productiva" if row.get("ordenyos_dia", 0) else "seca"
+    else:
+        row["tipo"] = tipo_raw
+    # Condición a float si aplica
+    try:
+        if row.get("condicion") is not None:
+            row["condicion"] = float(row["condicion"])
+    except Exception:
+        pass
+    return row
+
+def _promedios_hembra(hembra_id, ultimo_parto_iso):
+    with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+        cursor.execute(
+            "SELECT AVG(litros) AS avg_sem FROM produccion_leche WHERE hembra_id=%s AND fecha >= (CURDATE() - INTERVAL 6 DAY)",
+            (hembra_id,),
+        )
+        avg_sem = (cursor.fetchone() or {}).get("avg_sem") or 0
+        cursor.execute(
+            "SELECT AVG(litros) AS avg_mes FROM produccion_leche WHERE hembra_id=%s AND fecha >= (CURDATE() - INTERVAL 29 DAY)",
+            (hembra_id,),
+        )
+        avg_mes = (cursor.fetchone() or {}).get("avg_mes") or 0
+        avg_lact = 0
+        if ultimo_parto_iso:
+            cursor.execute(
+                "SELECT AVG(litros) AS avg_lact FROM produccion_leche WHERE hembra_id=%s AND fecha >= %s",
+                (hembra_id, ultimo_parto_iso),
+            )
+            avg_lact = (cursor.fetchone() or {}).get("avg_lact") or 0
+        cursor.execute(
+            "SELECT fecha, numero_ordenyo, litros FROM produccion_leche WHERE hembra_id=%s ORDER BY fecha DESC, numero_ordenyo DESC LIMIT 1",
+            (hembra_id,),
+        )
+        ult = cursor.fetchone()
+    ultimo = None
+    if ult:
+        ultimo = {
+            "fecha": _to_iso(ult.get("fecha")),
+            "numero_ordenyo": ult.get("numero_ordenyo"),
+            "litros": float(ult.get("litros")),
+        }
+    return {"semana": float(avg_sem), "mes": float(avg_mes), "lactancia": float(avg_lact)}, ultimo
+
+@ganaderia_bp.route('/leche/api/hembra/<int:hembra_id>')
+def leche_api_hembra(hembra_id):
+    if 'usuario' not in session:
+        return jsonify({'ok': False, 'error': 'unauthorized'}), 401
+    h = _get_hembra_info(hembra_id)
+    if not h:
+        return jsonify({'ok': False, 'error': 'Hembra no encontrada'}), 404
+    proms, ult = _promedios_hembra(hembra_id, h.get('ultimo_parto'))
+    # contador a secado
+    contador = 0
+    if h.get('ultimo_parto'):
+        try:
+            from datetime import date
+            up = date.fromisoformat(h['ultimo_parto'])
+            dias = (date.today() - up).days
+            contador = max(0, 305 - max(0, dias))
+        except Exception:
+            contador = 0
+    return jsonify({
+        'ok': True,
+        'hembra': {
+            'id': h['id'], 'nombre': h['nombre'], 'num_crias': h.get('num_crias',0),
+            'tipo': h['tipo'], 'condicion': h.get('condicion'), 'ordenyos_dia': h.get('ordenyos_dia',2),
+            'ultimo_parto': h.get('ultimo_parto')
+        },
+        'promedios': proms,
+        'contador_secado_dias': contador,
+        'ultimo_pesaje': ult
+    })
+
+@ganaderia_bp.route('/leche/api/registrar', methods=['POST'])
+def leche_api_registrar():
+    if 'usuario' not in session:
+        return jsonify({'ok': False, 'error': 'unauthorized'}), 401
+    if not request.is_json:
+        return jsonify({'ok': False, 'error': 'Contenido no JSON'}), 400
+    data = request.get_json(silent=True) or {}
+    # Extraer y validar
+    try:
+        hembra_id = int(data.get('hembra_id'))
+    except Exception:
+        return jsonify({'ok': False, 'error': 'hembra_id inválido'}), 400
+    fecha = data.get('fecha')
+    try:
+        numero_ordenyo = int(data.get('numero_ordenyo'))
+    except Exception:
+        return jsonify({'ok': False, 'error': 'numero_ordenyo inválido'}), 400
+    try:
+        litros = float(data.get('litros'))
+    except Exception:
+        return jsonify({'ok': False, 'error': 'litros inválido'}), 400
+    if litros < 0:
+        return jsonify({'ok': False, 'error': 'litros debe ser >= 0'}), 400
+    # Validar hembra y rango de ordeños
+    h = _get_hembra_info(hembra_id)
+    if not h:
+        return jsonify({'ok': False, 'error': 'Hembra no encontrada'}), 404
+    max_o = max(1, int(h.get('ordenyos_dia', 2)))
+    if numero_ordenyo < 1 or numero_ordenyo > max_o:
+        return jsonify({'ok': False, 'error': f'numero_ordenyo fuera de rango (1..{max_o})'}), 400
+    # UPSERT
+    try:
+        with mysql.connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO produccion_leche (hembra_id, fecha, numero_ordenyo, litros)
+                VALUES (%s,%s,%s,%s)
+                ON DUPLICATE KEY UPDATE litros=VALUES(litros), creado_en=CURRENT_TIMESTAMP
+                """,
+                (hembra_id, fecha, numero_ordenyo, litros),
+            )
+            mysql.connection.commit()
+    except Exception:
+        mysql.connection.rollback()
+        return jsonify({'ok': False, 'error': 'Error al guardar'}), 500
+    return jsonify({'ok': True, 'msg': 'Registro guardado'}), 200
+
 @ganaderia_bp.route("/hembras", methods=["GET", "POST"])
 def registro_hembras():
     if "usuario" not in session:
@@ -260,6 +407,12 @@ def buscar_hembra():
     for campo in ['fecha_nacimiento', 'fecha_incorporacion', 'fecha_desincorporacion']:
         if hembra.get(campo):
             hembra[campo] = hembra[campo].isoformat()
+    # Normalizar condicion a string con 1 decimal para facilitar el llenado del <select>
+    try:
+        if hembra.get('condicion') is not None:
+            hembra['condicion'] = f"{float(hembra['condicion']):.1f}"
+    except Exception:
+        pass
     if len(hembras) > 1:
         hembra['multiple'] = True
     return jsonify(hembra)
@@ -275,6 +428,11 @@ def obtener_hembra(hembra_id):
     for campo in ['fecha_nacimiento', 'fecha_incorporacion', 'fecha_desincorporacion']:
         if hembra.get(campo):
             hembra[campo] = hembra[campo].isoformat()
+    try:
+        if hembra.get('condicion') is not None:
+            hembra['condicion'] = f"{float(hembra['condicion']):.1f}"
+    except Exception:
+        pass
     return jsonify(hembra)
 
 @ganaderia_bp.route('/registro_hembras/actualizar', methods=['POST'])
@@ -685,6 +843,115 @@ def registro_machos():
         madres=madres,
         next_numero=next_numero,
     )
+
+# ---------------------- Partos API ----------------------
+@ganaderia_bp.route('/partos/api/hembra')
+def partos_api_hembra():
+    if 'usuario' not in session:
+        return jsonify({'ok': False, 'error': 'unauthorized'}), 401
+    numero = request.args.get('numero')
+    hid = request.args.get('id')
+    hembra = None
+    with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+        if numero:
+            cursor.execute("SELECT id, numero, nombre, fecha_nacimiento FROM hembras WHERE numero=%s", (numero,))
+        elif hid:
+            cursor.execute("SELECT id, numero, nombre, fecha_nacimiento FROM hembras WHERE id=%s", (hid,))
+        else:
+            return jsonify({'ok': False, 'error': 'parámetro requerido (numero o id)'}), 400
+        hembra = cursor.fetchone()
+        if not hembra:
+            return jsonify({'ok': False, 'error': 'Hembra no encontrada'}), 404
+        cursor.execute("SELECT COUNT(*) AS c FROM partos WHERE hembra_id=%s", (hembra['id'],))
+        num_crias = (cursor.fetchone() or {}).get('c', 0)
+        cursor.execute("SELECT fecha FROM partos WHERE hembra_id=%s ORDER BY fecha DESC LIMIT 2", (hembra['id'],))
+        fechas = cursor.fetchall() or []
+        ultimo = fechas[0]['fecha'] if len(fechas) >= 1 else None
+        penultimo = fechas[1]['fecha'] if len(fechas) >= 2 else None
+        cursor.execute("SELECT MIN(fecha) AS first FROM partos WHERE hembra_id=%s", (hembra['id'],))
+        first = (cursor.fetchone() or {}).get('first')
+    primer_parto_meses = 0
+    if hembra.get('fecha_nacimiento') and first:
+        fn = hembra['fecha_nacimiento']
+        primer_parto_meses = (first.year - fn.year) * 12 + (first.month - fn.month)
+        if first.day < fn.day:
+            primer_parto_meses = max(0, primer_parto_meses - 1)
+    intervalo = 0
+    if ultimo and penultimo:
+        intervalo = (ultimo - penultimo).days
+    return jsonify({
+        'ok': True,
+        'hembra': {'id': hembra['id'], 'numero': hembra['numero'], 'nombre': hembra['nombre']},
+        'resumen': {
+            'num_crias': int(num_crias),
+            'primer_parto_edad_meses': int(primer_parto_meses),
+            'ultimo_parto': ultimo.isoformat() if ultimo else None,
+            'penultimo_parto': penultimo.isoformat() if penultimo else None,
+            'intervalo_dias': int(intervalo)
+        }
+    })
+
+@ganaderia_bp.route('/partos/api/registrar', methods=['POST'])
+def partos_api_registrar():
+    if 'usuario' not in session:
+        return jsonify({'ok': False, 'error': 'unauthorized'}), 401
+    if not request.is_json:
+        return jsonify({'ok': False, 'error': 'Contenido no JSON'}), 400
+    data = request.get_json(silent=True) or {}
+    numero = data.get('hembra_numero')
+    hembra_id = data.get('hembra_id')
+    try:
+        numero_parto = int(data.get('numero_parto'))
+    except Exception:
+        return jsonify({'ok': False, 'error': 'numero_parto inválido'}), 400
+    fecha = data.get('fecha')
+    sexo = data.get('sexo_cria')
+    if sexo not in ('Macho','Hembra'):
+        return jsonify({'ok': False, 'error': 'sexo_cria inválido'}), 400
+    numero_cria = data.get('numero_cria')
+    try:
+        peso = float(data.get('peso_nacer')) if data.get('peso_nacer') is not None else None
+    except Exception:
+        return jsonify({'ok': False, 'error': 'peso_nacer inválido'}), 400
+    num_toro = data.get('num_toro')
+    tipo_parto = data.get('tipo_parto')
+    if tipo_parto and tipo_parto not in ('Normal','Asistido','Mortinato'):
+        return jsonify({'ok': False, 'error': 'tipo_parto inválido'}), 400
+
+    with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+        if not hembra_id and numero:
+            cursor.execute("SELECT id FROM hembras WHERE numero=%s", (numero,))
+            row = cursor.fetchone()
+            if not row:
+                return jsonify({'ok': False, 'error': 'Hembra no encontrada'}), 404
+            hembra_id = row['id']
+        elif hembra_id:
+            try:
+                hembra_id = int(hembra_id)
+            except Exception:
+                return jsonify({'ok': False, 'error': 'hembra_id inválido'}), 400
+        else:
+            return jsonify({'ok': False, 'error': 'Indique hembra_numero o hembra_id'}), 400
+        toro_id = None
+        if num_toro:
+            cursor.execute("SELECT id FROM machos WHERE numero=%s", (num_toro,))
+            toro = cursor.fetchone()
+            toro_id = toro['id'] if toro else None
+        try:
+            cursor.execute(
+                """
+                INSERT INTO partos (hembra_id, numero_parto, fecha, sexo_cria, numero_cria, peso_nacer, toro_id, tipo_parto)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+                ON DUPLICATE KEY UPDATE fecha=VALUES(fecha), sexo_cria=VALUES(sexo_cria),
+                    numero_cria=VALUES(numero_cria), peso_nacer=VALUES(peso_nacer), toro_id=VALUES(toro_id), tipo_parto=VALUES(tipo_parto)
+                """,
+                (hembra_id, numero_parto, fecha, sexo, numero_cria, peso, toro_id, tipo_parto)
+            )
+            mysql.connection.commit()
+        except Exception:
+            mysql.connection.rollback()
+            return jsonify({'ok': False, 'error': 'Error al guardar'}), 500
+    return jsonify({'ok': True, 'msg': 'Parto registrado'}), 200
 
 @ganaderia_bp.route('/registro_machos/buscar')
 def buscar_macho():

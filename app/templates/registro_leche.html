@@ -149,4 +149,115 @@
     }
     setInterval(actualizarContador, 86400000);
 </script>
+<script>
+(function(){
+  const $ = (s) => document.querySelector(s);
+  const numHembra = $('#numHembra');
+  const nombre = $('#nombre');
+  const numCrias = $('#numCrias');
+  const productiva = $('#productiva');
+  const seca = $('#seca');
+  const condicion = $('#condicion');
+  const ordenyosDia = document.querySelector('#ordeñosDia') || document.querySelector('#ordenyosDia') || document.querySelector('#orde��osDia');
+  const ultimoParto = $('#ultimoParto');
+  const promedioLactancia = $('#promedioLactancia');
+  const promedioMes = $('#promedioMes');
+  const promedioSemana = $('#promedioSemana');
+  const tiempoRestante = $('#tiempoRestante');
+  const produccionDia = $('#produccionDia');
+  const litrosInput = $('#medicion');
+
+  let numeroOrdenyo = document.getElementById('numeroOrdenyo');
+  if (!numeroOrdenyo) {
+    numeroOrdenyo = document.createElement('select');
+    numeroOrdenyo.id = 'numeroOrdenyo';
+    numeroOrdenyo.className = 'form-select mt-2';
+    if (litrosInput && litrosInput.parentElement) {
+      const wrap = document.createElement('div');
+      wrap.className = 'mt-2';
+      const label = document.createElement('label');
+      label.className = 'form-label';
+      label.textContent = 'Número de ordeño';
+      wrap.appendChild(label);
+      wrap.appendChild(numeroOrdenyo);
+      litrosInput.parentElement.appendChild(wrap);
+    }
+  }
+
+  const toYYYYMMDD = (d)=> d.toISOString().slice(0,10);
+  if (produccionDia) produccionDia.value = toYYYYMMDD(new Date());
+
+  function setOrdenyos(n){
+    const total = Math.max(1, parseInt(n||'2',10));
+    numeroOrdenyo.innerHTML = '';
+    for (let i=1;i<=total;i++){
+      const opt=document.createElement('option');
+      opt.value=String(i); opt.textContent=String(i);
+      numeroOrdenyo.appendChild(opt);
+    }
+  }
+
+  let timer=null;
+  async function fetchHembra(id){
+    if(!id) return;
+    try{
+      const resp = await fetch(`/registro/leche/api/hembra/${id}`);
+      const data = await resp.json();
+      if(!resp.ok || !data.ok) throw new Error(data.error||'No encontrado');
+      const h = data.hembra;
+      if(nombre) nombre.value = h.nombre||'';
+      if(numCrias) numCrias.value = h.num_crias ?? '';
+      if(condicion) condicion.value = (h.condicion ?? '').toString();
+      if(ordenyosDia) ordenyosDia.value = h.ordenyos_dia ?? 2;
+      if(ultimoParto) ultimoParto.value = h.ultimo_parto || '';
+      if(productiva && seca){ (h.tipo==='seca'? seca: productiva).checked = true; }
+      if(promedioLactancia) promedioLactancia.value = (data.promedios.lactancia||0).toFixed(2);
+      if(promedioMes) promedioMes.value = (data.promedios.mes||0).toFixed(2);
+      if(promedioSemana) promedioSemana.value = (data.promedios.semana||0).toFixed(2);
+      if(tiempoRestante) tiempoRestante.textContent = `${data.contador_secado_dias||0} días`;
+      setOrdenyos(h.ordenyos_dia);
+    }catch(e){
+      if(promedioLactancia) promedioLactancia.value = '0.00';
+      if(promedioMes) promedioMes.value = '0.00';
+      if(promedioSemana) promedioSemana.value = '0.00';
+      if(tiempoRestante) tiempoRestante.textContent = '0 días';
+    }
+  }
+  function triggerFetch(id){ clearTimeout(timer); if(!id) return; timer=setTimeout(()=>fetchHembra(id),300); }
+
+  const params = new URLSearchParams(location.search); const preload = params.get('id');
+  if(preload){ if(numHembra) numHembra.value = preload; triggerFetch(preload); }
+
+  if(numHembra){
+    numHembra.addEventListener('input', e=> triggerFetch(e.target.value.trim()));
+    numHembra.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); triggerFetch(numHembra.value.trim()); }});
+    numHembra.addEventListener('blur', ()=> triggerFetch(numHembra.value.trim()));
+  }
+
+  const form = litrosInput ? litrosInput.closest('form') : document.querySelector('form');
+  if(form){
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const id = (numHembra && numHembra.value.trim()) || '';
+      const lit = parseFloat(litrosInput ? litrosInput.value : 'NaN');
+      const fecha = produccionDia ? produccionDia.value : toYYYYMMDD(new Date());
+      const nro = parseInt(numeroOrdenyo ? numeroOrdenyo.value : '1', 10);
+      const ordDia = parseInt(ordenyosDia ? ordenyosDia.value : '2', 10);
+      if(!id){ alert('Debe ingresar ID de la hembra'); return; }
+      if(!(lit>=0)){ alert('Litros debe ser >= 0'); return; }
+      if(!(nro>=1 && nro<=Math.max(1,ordDia))){ alert(`Número de ordeño fuera de rango (1..${ordDia})`); return; }
+      try{
+        const resp = await fetch('/registro/leche/api/registrar',{
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ hembra_id: parseInt(id,10), fecha, numero_ordenyo: nro, litros: lit })
+        });
+        const data = await resp.json();
+        if(!resp.ok || !data.ok) throw new Error(data.error||'Error al guardar');
+        if(litrosInput){ litrosInput.value=''; litrosInput.focus(); }
+        triggerFetch(id);
+      }catch(err){ alert(err.message||'No se pudo guardar'); }
+    });
+  }
+})();
+</script>
 {% endblock %}
